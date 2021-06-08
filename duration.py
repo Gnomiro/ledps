@@ -81,15 +81,14 @@ class Duration():
 
 class Durations():
 
-  def __init__(self, stats, verbosity):
+  def __init__(self, stats_ = stats.Stats(), verbosity = 0):
 
     self.buffs = []
     self.shreds = []
     self.damagingAilments = []
     self.cooldowns = []
 
-
-    self.stats = stats
+    self.stats = stats_
     self.verbosity = verbosity
     pass
 

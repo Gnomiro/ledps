@@ -257,7 +257,7 @@ class ManifestStrike():
     return 0
 
 # Sentinel AxeThrower attack
-class AxeThrower():
+class SentinelAxeThrower():
 
   def __init__(self):
     # print('AxeThrower')
@@ -278,7 +278,7 @@ class AxeThrower():
 
   def attack(self, durations_, stats_ = None, tempStats_ = None):
 
-    onCooldown = durations_.countActive(type = 'cooldown', sparse = False)['sentinelAxeThrower']
+    onCooldown = durations_.countActive(type = 'cooldown', sparse = False)['SentinelAxeThrower']
     # no procc if still on cooldown
     if onCooldown:
       # print("onCooldown")
@@ -304,7 +304,7 @@ class AxeThrower():
         durations_.add(ailment, skillAttributes_ = self.skillAttributes)
 
     # add cooldown duration
-    durations_.add('sentinelAxeThrower')
+    durations_.add('SentinelAxeThrower')
 
     # pass damage, next attack speed as well as possibly modified durations (applied ailments and buffs)
     return 0, 0, durations_

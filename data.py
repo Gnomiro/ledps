@@ -23,7 +23,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'baseDuration' : 4., 'maxStack' : 51,
                                     'tags' : []},
 
-                'sentinelAxeThrower'  : {'element' : 'generic', 'type' : 'cooldown', 'baseDuration' : 1., 'tags' : []}, # get rid of element type and tags? -> must adapt sanity checks
+                'SentinelAxeThrower'  : {'element' : 'generic', 'type' : 'cooldown', 'baseDuration' : 1., 'tags' : []}, # get rid of element type and tags? -> must adapt sanity checks # must be names as skill/procc
               }
 
 supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
@@ -43,15 +43,16 @@ supportedTags  =  [ 'meleeAttackSpeed',
 supportedAttributes  = ['strength', 'dexterity']
 
 # each skill procc must have a corresponding skill class
-supportedProcs = {  'ManifestStrike'  : {'type' : 'skill', 'condition' : None},
-                    'AxeThrower'      : {'type' : 'skill', 'condition' : None}, # cooldown is simulated by 'sentinelAxeThrower' duration; no proc as long as it is active
-                    'Undisputed'      : {'type' : 'buff',  'condition' : 'bleed'} # condition not used yet; hard coded in skill
+# idea use 'condition' for something like 'cooldown', 'damaginAilment' alongside with 'status' : 'expired', 'active'
+supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' : None},
+                    'SentinelAxeThrower'      : {'type' : 'skill', 'condition' : None}, # cooldown is simulated by 'sentinelAxeThrower' duration; no proc as long as it is active
+                    'Undisputed'              : {'type' : 'buff',  'condition' : 'bleed'} # condition not used yet; hard coded in skill
                  }
 supportedProcModifiers = ['onHit']
 
 # get supported ailments from ailment class
 supportedDurations          = durationData.keys()
-supportedDurationModifiers  = ['onHit', 'duration', 'effect']
+supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onAttack', 'onThrowHit', 'duration', 'effect']
 
 # some sanity checks
 # todo: how to make them only once?

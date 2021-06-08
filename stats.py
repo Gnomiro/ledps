@@ -14,7 +14,7 @@ class Stats():
     self.penetration = dict.fromkeys(supportedElementTypes, 0.)
     # attribute
     self.attribute = dict.fromkeys(supportedAttributes, 0.)
-    # calculates ailment dict based on cross product of ailments and ailment modifers
+    # calculates duration dict based on cross product of duration and duration modifers
     self.duration = {d: {dm: 0. for dm in supportedDurationModifiers} for d in supportedDurations}
 
     self.proc = {p: {pm: 0. for pm in supportedProcModifiers} for p in supportedProcs}
@@ -65,7 +65,7 @@ class Stats():
     pass
 
   def axeThrower(self, points = 5):
-    self.proc['AxeThrower']['onHit'] += points * 0.08
+    self.proc['SentinelAxeThrower']['onHit'] += points * 0.08
     pass
 
   # palading tree talents

@@ -21,6 +21,7 @@
 
 # Todo
 * General
+  * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
   * Split onHit into onHit, onMeleeHit, onThrowHit and onSpellHit
   * Specify attack types: melee, spell
@@ -34,6 +35,19 @@
   * Multiplies relevant modifers with monster hit count
     * Done for Rive ignites and Undisputed buffs
     * Missing for AxeThrower and Manifest Strike (multiprocs possible?)
+* Cooldowns
+  * cooldown debuff in duration (with cd)
+  * Caution: Cooldown recovery must be considered at some point; possible in application while using gearStats-Data
+  * isOnCooldown(name) routine in durations alongside other easy access routines like countDamagingAilment(type), countShred(type)
+* Procs
+  * Use 'condition' for something like 'cooldown', 'damagingAilment' alongside with 'status' : 'expired', 'active which tells what the condition is; maybe different naming
+* Stats
+  * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tempStats
+* Environment/Simulator
+  * Global container class managing Character, Stats, Skill, Enemy, etc
+* Skills
+  * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
+
 
 20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
 In addition. Is the shred from poison as well limited by 20 stacks? Or is it possible top have poison shred stack to 20 alongside additional poison stack to further reduce the resistance?
