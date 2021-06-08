@@ -20,7 +20,8 @@
 * Strength scaling more multiplier or just an additional increase?
 
 # Todo
-* Generel
+* General
+  * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
   * Split onHit into onHit, onMeleeHit, onThrowHit and onSpellHit
   * Specify attack types: melee, spell
   * ManifestStrike and AxeThrower procs should be meleeHit resp throwHit
