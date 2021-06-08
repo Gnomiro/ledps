@@ -26,6 +26,14 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'SentinelAxeThrower'  : {'element' : 'generic', 'type' : 'cooldown', 'baseDuration' : 1., 'tags' : []}, # get rid of element type and tags? -> must adapt sanity checks # must be names as skill/procc
               }
 
+# returns durationData object, if type specified only specific type
+# todo: extend to list of types
+def getDurationData(type_ = None):
+  if type_ != None and type_ in supportedDurationTypes:
+    return  {k : durationData[k] for k in durationData if durationData[k]['type'] == type_}
+  else:
+    return durationData
+
 supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
 
 supportedElementTypes = ['generic', 'physical', 'poison', 'fire']
