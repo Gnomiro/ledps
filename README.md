@@ -17,7 +17,16 @@
 # Questions
 * Ailment damage still snapshotting or updated live? Duration and Effect snappshotted? - Did on March 8th 2020
 * Ailments seem to snapshot!
-* Strength scaling more multiplier or just an additional increase?
+* Can Trigger trigger? 
+* Does a TriggerHit procc buffs like Undisputed? Should probably... -> Adapt TriggerSkills
+ -> Buffs as Ailment resp. nonDamagingAilment/buff
+
+# Assumption
+* Attackorder
+  * SkillHits
+  * Skill inflicts Ailments
+  * Skill effects are triggered, i.e., execution from Rive
+  * OnHitTrigger are resolved
 
 # Todo
 * General
@@ -43,10 +52,16 @@
   * Use 'condition' for something like 'cooldown', 'damagingAilment' alongside with 'status' : 'expired', 'active which tells what the condition is; maybe different naming
 * Stats
   * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tempStats
+  * Possibly rename stats.duration and split it into ailments etc?
 * Environment/Simulator
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
+  * maybe make a own buff-Attack class^for things like undisputed (two base classes because buffs can either be applied by melee or spell hit)
+* AilmentApplied?
+  * implement iterator over durations to test if buff/debuff is available, instead of count active
+  * For cooldown, undisputed, ...
+* Rename 'applyAilment' to something like 'applyOnHit'; same for getAilmentChance
 
 
 20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.

@@ -150,7 +150,7 @@ class Stats():
     self.duration['bleed']['onHit'] += 0.3
     # stats
     self.increase['meleeAttackSpeed'] += 0.27
-    self.proc['Undisputed']['onHit'] += 1.0
+    self.duration['undisputed']['onMeleeHit'] += 1.0
     pass
 
   def addChest(self):

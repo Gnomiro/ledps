@@ -1,6 +1,9 @@
 import stats
 import skill
 import character
+import sys
+sys.path.append("playground/")
+import skill_rework as skill2
 
 
 s = stats.Stats()
@@ -74,7 +77,7 @@ s.addIncreasedPhysical(0.05)
 s.addChanceToBleed(0.12)
 s.addIncreasedPhysical(0.14)
 # ornate idol 1
-s.addManifestStrike(0.2) # edited
+s.addManifestStrike(0.1)
 # humble idol 2
 s.addChanceToBleed(0.11)
 # ornate idol 1
@@ -88,7 +91,10 @@ s.addIncreasedPhysical(0.14)
 
 # skill = skill.Default()
 # skill = skill.Rive(cadence = False, flurry = 5, indomitable = False, sever = 0, twistingFangs = 0)
-skill = skill.Rive(cadence = True, flurry = 5, indomitable = False, sever = 3, twistingFangs = 3, execution = True) # indomitable not yet supported
+# skill = skill.Rive(cadence = True, flurry = 5, indomitable = False, sever = 3, twistingFangs = 3, execution = True) # indomitable not yet supported
+
+skill = skill2.Rive()
+skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1)
 
 # warpath's drainingAussault adds global more damage while spinning
 # drainingAussault = 1

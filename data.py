@@ -1,38 +1,41 @@
 import errors
 
 # Ailemnts with element, base damage, duration, stacksize and tags for relevant scaling attributes
-durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'baseDuration' : 4., 'maxStack' : 0,
+durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 0,
                                     'tags' : ['generic', 'physical', 'physicalOverTime', 'overTime']},
                 # poison scaling via poisonShred
-                'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'baseDuration' : 3., 'maxStack' : 0,
+                'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']}, # incomplete
-                'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'baseDuration' : 3., 'maxStack' : 0,
+                'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']}, # incomple
 
-                'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'baseDuration' : 4., 'maxStack' : 20,
+                'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
-                'fireShred'     : { 'element' : 'fire', 'type' : 'shred', 'baseDamage' :  0. , 'baseDuration' : 4., 'maxStack' : 20,
+                'fireShred'     : { 'element' : 'fire', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
-                'poisonBuiltinShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' : 0. , 'baseDuration' : 3., 'maxStack' : 0,
+                'poisonBuiltinShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' : 0. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : []},
-                'poisonShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' :  0. , 'baseDuration' : 4., 'maxStack' : 20,
+                'poisonShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
 
-                'riveExecution' : {'element' : 'physical', 'type' : 'buff', 'increase' : .15, 'more' : .0, 'baseDuration' : 2., 'maxStack' : 0,
+                'riveExecution' : {'element' : 'physical', 'type' : 'buff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
                                     'tags' : []},
-                'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'baseDuration' : 4., 'maxStack' : 51,
+                'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'condition': 'bleed', 'baseDuration' : 4., 'maxStack' : 51,
                                     'tags' : []},
 
                 'SentinelAxeThrower'  : {'element' : 'generic', 'type' : 'cooldown', 'baseDuration' : 1., 'tags' : []}, # get rid of element type and tags? -> must adapt sanity checks # must be names as skill/procc
               }
 
 # returns durationData object, if type specified only specific type
-# todo: extend to list of types
-def getDurationData(type_ = None):
-  if type_ != None and type_ in supportedDurationTypes:
-    return  {k : durationData[k] for k in durationData if durationData[k]['type'] == type_}
-  else:
+def getDurationData(*type_):
+
+  # return all if no type specified
+  if not type_:
     return durationData
+  elif all([t in supportedDurationTypes for t in type_]):
+    return  {k : durationData[k] for k in durationData if durationData[k]['type'] in type_}
+  else:
+    raise errors.InvalidDurationTypeError
 
 supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
 
@@ -52,15 +55,18 @@ supportedAttributes  = ['strength', 'dexterity']
 
 # each skill procc must have a corresponding skill class
 # idea use 'condition' for something like 'cooldown', 'damaginAilment' alongside with 'status' : 'expired', 'active'
+# todo: rename to trigger
 supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' : None},
                     'SentinelAxeThrower'      : {'type' : 'skill', 'condition' : None}, # cooldown is simulated by 'sentinelAxeThrower' duration; no proc as long as it is active
-                    'Undisputed'              : {'type' : 'buff',  'condition' : 'bleed'} # condition not used yet; hard coded in skill
                  }
-supportedProcModifiers = ['onHit']
+supportedProcModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
+
+def getTrigger():
+  return supportedProcs
 
 # get supported ailments from ailment class
 supportedDurations          = durationData.keys()
-supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onAttack', 'onThrowHit', 'duration', 'effect']
+supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onMeleeHit', 'onThrowHit', 'duration', 'effect']
 
 # some sanity checks
 # todo: how to make them only once?
