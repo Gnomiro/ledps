@@ -14,22 +14,22 @@ class Damage():
 
     pass
 
-  def __setitem__(self, key, value):
-    self._element[key] = value
+  def __setitem__(self, key, value_):
+    self._element[key] = value_
 
   def __getitem__(self, key):
     return self._element[key]
 
-  def __iadd__(self, other):
-    for key in other._element.keys():
-      self[key] += other[key]
-      #self.__setitem__(key, self.__getitem__(key) + other.__getitem__(key))
+  def __iadd__(self, other_):
+    for key in self._element.keys():
+      self[key] += other_[key]
+      #self.__setitem__(key, self.__getitem__(key) + other_.__getitem__(key))
     return self
 
-  def __add__(self, other):
+  def __add__(self, other_):
     total = Damage()
-    for key in other._element.keys():
-      total[key] = self[key] + other[key]
+    for key in self._element.keys():
+      total[key] = self[key] + other_[key]
     return total
 
   def __str__(self):
@@ -37,6 +37,12 @@ class Damage():
     for key in self._element.keys():
       info += ('{}: {}, '.format(key, self._element[key]))
     return info[:-2] # remove last comma and space
+
+  def dps(self, time_):
+    dps = Damage()
+    for key in dps._element.keys():
+      dps[key] = self[key] / time_
+    return dps
 
   def total(self):
     d = 0

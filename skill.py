@@ -227,14 +227,14 @@ class Default():
     if self._skillCooldown == 0:
       return 0
     else:
-      return (1 if self._skillName in durations_.countActive(type = 'cooldown') else 0)
+      return durations_.countActiveByNames(self._skillName)[self._skillName]
 
   # applies skill specific cooldown
   # generic implementation; must not be changed by implemented skills
   def applyCooldown(self, durations_):
 
     if self._skillCooldown != 0:
-      durations_.add(self._skillName, duration_ = self._skillCooldown)
+      durations_.add(self._skillName, duration_ = self._skillCooldown, type_ = 'cooldown')
 
     return durations_
 
@@ -400,10 +400,9 @@ class Rive(Melee):
     # execution: add buff per removed ignite stack
     if self._talents['execution'][0] == 1:
       # number of active ignites; currently multiplied by number of enemies assuming equally applied ignite stacks
-      nDamagingAilments = durations_.countActive(type = 'damagingAilment')
-      nIgnites = (nDamagingAilments['ignite'] if 'ignite' in nDamagingAilments else 0) * enemies
+      nIgnites = durations_.countActiveByNames('ignite')['ignite'] * enemies
       # removes all ignite debuffs and adds equal number of riveExecution buffs
-      durations_.damagingAilments[:] = [a for a in durations_.damagingAilments if a.getName() != 'ignite']
+      durations_._durations['damagingAilment'][:] = [a for a in durations_._durations['damagingAilment'] if a.getName() != 'ignite']
       for i in range(nIgnites):
         durations_.add('riveExecution')
 

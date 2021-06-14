@@ -1,6 +1,6 @@
 import duration
 
-import stats
+import stats, damage
 
 import numpy
 
@@ -36,8 +36,8 @@ class Character():
     # todo: attack speed modifications; probably just use buffs at hit-time to determine speed of next hit and assume it constant
 
     # damage calculation (tick) is done before hit application
-    damage = 0
-    ailment_tick_damage = 0
+    dmg = damage.Damage()
+    ailment_tick_damage = damage.Damage()
 
     while t <= endtime:
 
@@ -51,8 +51,8 @@ class Character():
         if self.verbosity >= 1:
           print("t: {}".format(t))
           print('Overall tick damage: {}\n'.format(ailment_tick_damage))
-        damage += ailment_tick_damage
-        ailment_tick_damage = 0
+        dmg += ailment_tick_damage
+        ailment_tick_damage = damage.Damage()
 
       while lastattack <= t:
         lastattack += attacktime
@@ -64,16 +64,16 @@ class Character():
     if self.verbosity >= 1:
       print("t: {}".format(t))
       print('Overall tick damage: {}\n'.format(ailment_tick_damage))
-    damage += ailment_tick_damage
+    dmg += ailment_tick_damage
 
-    return damage
+    return dmg
 
   def singleHit(self):
 
     _, self.durations = self.skill.attack(self.durations, self.stats)
 
-    damage = 0
-    ailment_tick_damage = 0
+    dmg = damage.Damage()
+    ailment_tick_damage = damage.Damage()
 
     t = 0
 
@@ -89,8 +89,8 @@ class Character():
         if self.verbosity >= 1:
           print("t: {}".format(t))
           print('Overall tick damage: {}\n'.format(ailment_tick_damage))
-        damage += ailment_tick_damage
-        ailment_tick_damage = 0
+        dmg += ailment_tick_damage
+        ailment_tick_damage = damage.Damage()
 
       t += frametime
 
@@ -98,7 +98,7 @@ class Character():
     if self.verbosity >= 1:
       print("t: {}".format(t))
       print('Overall tick damage: {}\n'.format(ailment_tick_damage))
-    damage += ailment_tick_damage
+    dmg += ailment_tick_damage
 
-    return damage
+    return dmg
 

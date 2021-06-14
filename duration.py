@@ -1,237 +1,254 @@
-from data import durationData, supportedSkills
-
-import errors, stats
-
 from numpy import isclose, product as prod
-
 from itertools import chain
 
+import data
+import errors
+import stats
+import damage
+
+# duration object; can be any type of supported duration based buff/debuff/cooldown
 class Duration():
 
-  # todo: change interface to allow user speicifed duration as well
-  # ailments and default passed per string but different per attributes, e.g., duration.
-  # More parameters required?
-  def __init__(self, name_, stats_, tempStats_ = None, skillAttributes_ = [], duration_ = None):
-    if duration_ != None:
-      # todo: simple cooldown implementation
-      self.elapsed = 0
-      self.duration = duration_
-      self.name = name_
-      return
-    elif duration_ == None and name_ not in durationData.keys():
-        raise errors.InvalidDurationError
-    else:
-        self.name = name_
+  # create duration object; by default requires duration 'name_' string only;
+  # for damagingAilments gearStats_ as well as tmpStats_ (e.g., buffs) can be passed
+  # as they are snappshotted at application time
+  # 'skillAttributes_' provide the attributes of the applying skill as they scale the damagingAilments as well
+  # skill cooldowns can be passed by specifying 'duration_' and 'type_ = 'cooldown''; otherwise these values are ignored
+  def __init__(self, name_, gearStats_ = stats.Stats(), tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
 
-    # get ailment damage values
-    self.baseDuration = durationData[self.name]['baseDuration']
-    self.duration = self.baseDuration
-    self.duration *= (1. + stats_.duration[self.name]['duration'])
-    self.elapsed = 0
+    if name_ in data.getDurationData().keys():
+      # default duration behaviour; determined by name_; duration_ and type_ are ignored
+      if duration_ != None or type_ != None:
+        print("Warning: duration_ and type_ input are ignored")
+      self._type = data.getDurationData()[name_]['type']
+      self._baseDuration = data.getDurationData()[name_]['baseDuration']
+      self._duration = self._baseDuration
+      self._duration *= (1. + gearStats_.duration[name_]['duration'])
+
+    elif duration_ != None and type_ == 'cooldown' and name_ in data.getSupportedSkills():
+      # duration is a skill-specific cooldown
+      self._type = type_
+      self._baseDuration = duration_
+      self._duration = self._baseDuration
+
+    else:
+      print(name_)
+      # raise error since unsupported parameters are passed
+      raise errors.InvalidDurationError
+
+    # duration name
+    self._name = name_
+
+    # elapsed time
+    self._elapsed = 0
 
     # skip remaining part for non-damaging ailments
-    if durationData[self.name]['type'] != 'damagingAilment':
+    if self.getType() != 'damagingAilment':
       return
 
-    self.baseDamage = durationData[self.name]['baseDamage']
-    self.damage = self.baseDamage
-    self.damage *= (1. + stats_.duration[self.name]['effect'])
-
     # additional scaling attribute provided by applying skill, i.e., strength, dexterity
-    self.skillAttributes = skillAttributes_
+    self._skillAttributes = skillAttributes_
 
-    # attribute scaling is assumed to be always 4%
-    increase = sum([stats_.increase[a] for a in durationData[self.name]['tags']]) \
-                + 0.04 * sum([stats_.attribute[a] for a in self.skillAttributes])
-    more = prod([stats_.more[a] for a in durationData[self.name]['tags']])
+    # scale damage by ailment specific modifiers
+    self._baseDamage = data.getDurationData()[self.getName()]['baseDamage']
+    self._damage = self._baseDamage
+    self._damage *= (1. + gearStats_.duration[self.getName()]['effect'])
 
-    # add temporary stats, e.g., from buffs, if provided
-    if tempStats_ != None:
-      increase += sum([tempStats_.increase[a] for a in durationData[self.name]['tags']])
-      more *= prod([tempStats_.more[a] for a in durationData[self.name]['tags']])
+    # general scaling for ailment damage; attribute scaling is assumed to be always 4%
+    increase = sum([gearStats_.increase[a] for a in data.getDurationData()[self.getName()]['tags']]) \
+                + 0.04 * sum([gearStats_.attribute[a] for a in self._skillAttributes])
+    more = prod([gearStats_.more[a] for a in data.getDurationData()[self.getName()]['tags']])
 
-    # print(increases)
-    # print(more)
+    # include temporary stats, e.g., from buffs, if provided
+    if tmpStats_ != None:
+      increase += sum([tmpStats_.increase[a] for a in data.getDurationData()[self.getName()]['tags']])
+      more *= prod([tmpStats_.more[a] for a in data.getDurationData()[self.getName()]['tags']])
 
-    self.damage *= (1 + increase) * more
+    # final overall damage of damagingAilment
+    self._damage *= (1 + increase) * more
 
     pass
 
+  # return remaining duration
+  # todo: review behaviour for infinite buffs
+  def getRemainingDuration(self):
+    return self._duration - self._elapsed
+
+  # returns duration name
   def getName(self):
-    return self.name
+    return self._name
 
-  def getSkillAttributes(self):
-    return self.skillAttributes
+  # returns duration type
+  def getType(self):
+    return self._type
 
-  def active(self):
-    # return self.elapsed != self.duration
-    return not isclose(self.elapsed, self.duration, rtol=0, atol=1e-2, equal_nan=False)
+  # tells if the duration object has unlimited duration
+  # duration buffs with _duration == -1 are assumed to have unlimited duration
+  def isPermanent(self):
+    return bool(1 if self._duration == -1 else 0)
 
-  def tick(self, timestep):
-    # ailment falls off within 'timestep' -> set timestep size and elapsed timer accordingly
-    # maybe the check should be whether the next tick with same timestep will provide another full tick
-    if self.elapsed + timestep >= self.duration:
-        timestep = self.duration - self.elapsed
-        self.elapsed = self.duration
+  # returns state of duration buff
+  def isActive(self):
+    if self.isPermanent():
+      return True
+    else:
+      return not isclose(self._elapsed, self._duration, rtol = 0, atol = 1e-2, equal_nan = False)
+
+  # processes the next tick of the duration buff considering a stepsize of 'timestep_'
+  def tick(self, timestep_):
+    # check if duration falls of within calculation timestep_
+    # todo: maybe the check should be whether the next tick with same timestep will provide another full tick
+    if not self.isPermanent() and self._elapsed + timestep_ >= self._duration:
+      # ailment falls off within 'timestep' -> set timestep size and elapsed timer accordingly to acquire accurate damage
+        timestep_ = self._duration - self._elapsed
+        self._elapsed = self._duration
     # increase elapsed timer
     else:
-        self.elapsed += timestep
+        self._elapsed += timestep_
 
-    # if cooldown of skill or non-damaging ailment leave here
-    # todo: make this easier to read
-    if self.name in supportedSkills or durationData[self.getName()]['type'] != 'damagingAilment':
-        return 0
+    # if duration is not a damagingAilment return 0 damage object and leave
+    if self._type != 'damagingAilment':
+        return damage.Damage()
 
     # return resulting damage
-    # note: assumes scaling with duration which is could be changed
+    # note: assumes scaling with duration which could be changed
     # it seems that the quotient of
     # (self.baseDamage / self.baseDuration)
     # is uneffected by duration increases and thus duration increases yield more ticks of the same value
-    return (self.damage / self.baseDuration) * timestep
+    return damage.Damage((data.getDurationData()[self.getName()]['element'], self._damage / self._baseDuration * timestep_))
 
+# container class managing all duration objects
 class Durations():
 
-  def __init__(self, stats_ = stats.Stats(), verbosity = 0):
+  # constructor; expecting gearStats for scaling behaviour
+  def __init__(self, gearStats_ = stats.Stats(), verbosity_ = 0):
 
-    self.buffs = []
-    self.shreds = []
-    self.damagingAilments = []
-    self.cooldowns = []
+    # does not work as it points to the same lists in every dict: self._durations = dict.fromkeys(data.getSupportedDurationTypes(), [])
+    self._durations = {key : [] for key in data.getSupportedDurationTypes()}
 
-    self.stats = stats_
-    self.verbosity = verbosity
+    self._gearStats = gearStats_
+    self._verbosity = verbosity_
+
     pass
 
-  def add(self, name_, tempStats_ = None, skillAttributes_ = [], duration_ = None):
+  # add an ailment
+  def add(self, name_, skillAttributes_ = [], duration_ = None, type_ = None):
 
-    if duration_ != None and name_ in supportedSkills:
-      # workaround for skill-specific debuffs
-      self.cooldowns.append(Duration(name_, self.stats, duration_ = duration_))
+    # allocate buffs into temporary stats object if duration-type is of damagingAilment -> snapshotting
+    if name_ in data.getDurationData().keys() and data.getDurationData()[name_]['type'] == 'damagingAilment':
+      tmpStats = stats.Stats().fromBuffs(self)
     else:
-      # ailment application consideres increases/more as well as effects on application
-      durationType = durationData[name_]['type']
+      tmpStats = stats.Stats()
 
-      # store ailment accodingly
-      if durationType == 'shred':
-        self.shreds.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-      elif durationType == 'buff':
-        self.buffs.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-      elif durationType == 'cooldown':
-        self.cooldowns.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-      elif durationType == 'damagingAilment':
+    # create duration object; passing all stats
+    duration = Duration(name_, gearStats_ = self._gearStats, tmpStats_ = tmpStats, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
 
-        # add buffs up together for in stat container increase/more/etc
-        # todo should possible only be calculated once per tick instead per add-call -> move to tick?
-        buffStats = stats.Stats(self.buffs)
+    # replace oldest duration if it is not a cooldown and has a maxStack size otherwise just add it
+    if duration.getType() != 'cooldown' and data.getDurationData()[duration.getName()]['maxStack'] != 0 and self.countActiveByNames(duration.getName())[duration.getName()] >= data.getDurationData()[duration.getName()]['maxStack']:
+      if self._verbosity >= 2:
+        print('Limit of {} reached; replace oldest'.format(duration.getName()))
 
-        self.damagingAilments.append(Duration(name_, self.stats, tempStats_ = buffStats, skillAttributes_ = skillAttributes_))
-        if name_ == 'poison':
-          self.shreds.append(Duration('poisonBuiltinShred', self.stats, skillAttributes_ = skillAttributes_))
-
-  def getActive(self, type = None):
-    # return active iterators for ailments of specific type, similar to but more efficient than [a for a in self.durations if a.active()]
-    if type != None:
-        # workaround for skill cooldowns as they are not in durationData anymore
-        return filter(lambda a: a.active() and ((type == 'cooldown' and a.getName() in supportedSkills) or durationData[a.getName()]['type'] == type), self.getByType(type))
+      # get idx of oldest duration buff of requested type to replace it
+      _, idx = min(((d.getRemainingDuration(), idx) if d.getName() == duration.getName() else (float('inf'), idx)) for (idx, d) in enumerate(self._durations[duration.getType()]))
+      self._durations[duration.getType()][idx] = duration
+      return
     else:
-        return filter(lambda a: a.active(), self.getByType(type))
+      # add new duration
+      self._durations[duration.getType()].append(duration)
 
-  def getAll(self):
-    return self.getByType()
+    # poison applies a build in poison shred as well which has not stack limitation
+    if duration.getType() == 'damagingAilment' and duration.getName() == 'poison':
+      self._durations['shred'].append(Duration('poisonBuiltinShred', self._gearStats, skillAttributes_ = skillAttributes_))
 
-  def getByType(self, type = None):
-    if type == None:
-      return chain(self.shreds, self.damagingAilments, self.buffs, self.cooldowns)
-    elif type == 'shred':
-      return self.shreds
-    elif type == 'buff':
-      return self.buffs
-    elif type == 'damagingAilment':
-      return self.damagingAilments
-    elif type == 'cooldown':
-      return self.cooldowns
+    pass
+
+  # todo: addMultiple for better ressource management when applying more than one of the same duration
 
   def removeInactive(self):
-    # remove expired ailments, .e.g, only keep active ones
+    # remove expired durations in each list, .i.e, only keep active ones
     # slicing does not involve reallocation as stated here: https://stackoverflow.com/a/1208792
-    self.buffs[:] = [b for b in self.buffs if b.active()]
-    self.shreds[:] = [s for s in self.shreds if s.active()]
-    self.damagingAilments[:] = [a for a in self.damagingAilments if a.active()]
+    for key in self._durations.keys():
+      self._durations[key][:] = [d for d in self._durations[key] if d.isActive()]
     pass
 
-  def countActive(self, type = None, sparse = True):
+  # get durations specified by type-list
+  def getByTypes(self, *type_):
+    if not type_:
+      return chain.from_iterable(self._durations.values())
+    elif all([t in data.getSupportedDurationTypes() for t in type_]):
+      return chain.from_iterable([self._durations[t] for t in type_])
+    else:
+      raise errors.InvalidDurationError
+
+  # get active durations specified by type-list
+  def getActiveByTypes(self, *type_):
+    # return active iterators for ailments of specific type, similar to but more efficient than [a for a in self.durations if a.active()]
+    return filter(lambda a: a.isActive(), self.getByTypes(*type_))
+
+  # count active durations specified by type-list
+  def countActiveByTypes(self, *type_):
     active = {}
-    for a in self.getActive(type):
+    for a in self.getActiveByTypes(*type_):
       active[a.getName()] = active.get(a.getName(), 0) + 1
     return active
 
-  def tick(self, timestep, boss = False):
+  # get durations specified by name-list
+  def getByNames(self, *name_):
+    if not name_:
+      return chain.from_iterable(self._durations.values())
+    elif all([n in data.getSupportedDurations() for n in name_]):
+      return [d for d in chain.from_iterable(self._durations.values()) if d.getName() in name_]
+    else:
+      raise errors.InvalidDurationError
 
-    # for damage calculation non-damaging ailments (currently shreds only) must be count first
-    # and maxStacks must be considered
-    # poison currently just applies poisonShred for 3s as well (todo: check if there is a source of 4s poisonShred)
-    # Q&A
-    # 1) Are ailments over limit still applied but inactive until others are expired?
-    # gameguide -> it replaces the oldest one. Means can just be added; deleting them would be to much overhead
+  # get active durations specified by name-list
+  def getActiveByNames(self, *name_):
+    # return active iterators for ailments of specific type, similar to but more efficient than [a for a in self.durations if a.active()]
+    return filter(lambda a: a.isActive(), self.getByNames(*name_))
 
-    if self.verbosity >= 2:
+  # count active durations specified by name-list
+  def countActiveByNames(self, *name_):
+    # dict always contains requested counts even when they are 0
+    active = dict.fromkeys(name_, 0)
+    for a in self.getActiveByNames(*name_):
+      active[a.getName()] = active.get(a.getName(), 0) + 1
+    return active
+
+  # count all active durations
+  def countActive(self):
+    return self.countActiveByTypes()
+
+  # get all durations
+  def getAll(self):
+    return self.getByTypes()
+
+  # process next tick for all durations; calculating damage
+  def tick(self, timestep_ = 0.1, boss_ = False):
+
+    if self._verbosity >= 2:
         print(self.countActive())
 
-    # get active shred counts
-    shreds = self.countActive("shred")
-    # print(shreds)
+    # create empty damage object
+    tick_dmg = damage.Damage()
 
-    damage = 0
-    tick_damage = 0
+    # loop over all duration objects
+    for d in self.getAll():
+      # process duration object, receive damage and accumulate it
+      tick_dmg += d.tick(timestep_)
 
-    for a in self.getAll():
-      # damage = basedamage (scaled by ailment effect/duration) * (sum(increases) + sum(attribute increases) * prod(more)
-      #          * others
-      # everything besides others is already considered when ailments are applied ant hus snappshotted
+    # get penetration from gearStats_ and normalize it to 1. to multiply damage values later
+    penetration = {k: (self._gearStats.penetration[k] + 1.) for k in self._gearStats.penetration}
+    # print(penetration)
+    # count active shreds and add them to penetration from gear
+    shreds = self.countActiveByTypes('shred')
+    for key in shreds:
+      penetration[data.getDurationData()[key]['element']] += shreds[key] * 0.05 * (0.4 if boss_ else 1.)
+    # print(penetration)
+    # scale damage by penetration
+    tick_dmg.multiplyEachElementSeperately(penetration)
 
-      # process ailment
-      damage = a.tick(timestep)
-
-      # skip following calculations if it is a akill cooldown or non-damaging ailment
-      # todo: make this easier to read
-      if a.getName() in supportedSkills or durationData[a.getName()]['type'] != 'damagingAilment':
-        continue
-
-      # element type of current damaging ailment
-      element = durationData[a.getName()]['element']
-      # get active shreds associated with element type 'element'
-      relevantShreds = list(filter(lambda a: durationData[a]['element'] == element, shreds))
-
-      # shred
-      shred = 0.
-
-      # add elemental shred shred, limited by maxStack
-      # relevantShreds mostly have only one entry; for poison there are two shreds!
-      # built in poison shred does not have a stack limit and goes along poisonShred
-      for i in relevantShreds:
-          # limit shred if necessary
-          shred += (min(shreds[i], durationData[i]['maxStack']) if durationData[i]['maxStack'] != 0 else shreds[i])
-          # print(shreds[i])
-          # print(durationData[i]['maxStack'])
-      # active_stacks
-      # print(relevantShreds) # must cast relevantShreds to list when receiving applying filter
-      # print(shred)
-      # self.stats.penetration[element]
-
-      # penetration as sum of shred an gear affixes
-      # 1 shred stack reduces resist by 5%
-      # shred effect is reduced by 60% for bosses
-      penetration = shred * 0.05 * (0.4 if boss else 1.) + self.stats.penetration[element]
-
-      # scale damage with penetration; add enemey conditions as well for resistances and maybe block
-      damage *= (1. + penetration)
-
-
-      tick_damage += damage
-      # print('{} dealt {} damage over {} seconds'.format(a.getName(), damage, timestep))
-
-    # print(tick_damage)
-    # removes inactive ailments
+    # removes inactive duration objects
     self.removeInactive()
 
-    return tick_damage
+    # return damage of durations during timestep
+    return tick_dmg

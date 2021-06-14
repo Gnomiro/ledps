@@ -6,12 +6,12 @@ import errors
 durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 0,
                                     'tags' : ['generic', 'physical', 'physicalOverTime', 'overTime']},
                 'doom'          : { 'element' : 'void', 'type' : 'damagingAilment', 'baseDamage' :  400. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 4,
-                                    'tags' : ['generic', 'void', 'voidOverTime', 'overTime']}, # todo: incomplete, no inc melee damage taken buff; limit not accounted for -> oldest should be removed
+                                    'tags' : ['generic', 'void', 'voidOverTime', 'overTime']},
                 # poison scaling via poisonShred
                 'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
-                                    'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']}, # incomplete
+                                    'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']},
                 'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
-                                    'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']}, # incomplete
+                                    'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']},
 
                 'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},

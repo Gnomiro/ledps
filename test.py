@@ -1,7 +1,8 @@
 import stats
 import skill
 import character
-import sys
+import damage
+# import sys
 # sys.path.append("playground/")
 
 
@@ -99,15 +100,15 @@ skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution
 repeats = 10
 endtime = 60
 boss = True
-overallDamage = 0
+overallDamage = damage.Damage()
 for i in range(repeats):
   c = character.Character(s, skill, verbosity = 0.)
   # boss = True reduces shred effect
   damage = c.combat(endtime = endtime, boss = boss)
-  print("Damage: {}, DPS: {}".format(damage, damage / endtime))
+  print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
   overallDamage += damage
 
-print("Average Damage: {}, Average DPS: {}".format(overallDamage / repeats, overallDamage / endtime / repeats))
+print("Average Damage: {}, Average DPS: {}".format(overallDamage.total() / repeats, overallDamage.total() / endtime / repeats))
 
 # damage = c.singleHit()
 # print("Damage: {}, DPS: {}".format(damage, damage / t))

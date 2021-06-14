@@ -2,7 +2,7 @@ from data import supportedTags, supportedAttributes, supportedDurations, support
 
 class Stats():
 
-  def __init__(self, buffs_ = None):
+  def __init__(self):
     # todo: make getter for more/increase/... which combine relevant increases for skills/ailments
     # quest: keep scaling coefficients as list or single values? Can values be updated on the fly?
     # empty charcter sheet
@@ -19,31 +19,25 @@ class Stats():
 
     self.proc = {p: {pm: 0. for pm in supportedProcModifiers} for p in supportedProcs}
 
-    # buffs proivide which must be accumulated into stat object
-    if buffs_ != None:
-
-      # count active buffs
-      buffCount = dict()
-      for buff in [b.name for b in buffs_]:
-        if buff in buffCount:
-          buffCount[buff] += 1
-        else:
-          buffCount[buff] = 1
-      # print(buffCount)
-
-      # apply specific increases and more multipliers per stack into corresponding stat-slot
-      # consider maxStack if provided by buff
-      # assuming that same more multipliers are still additive
-      for bkey in buffCount.keys():
-        # print(bkey)
-        # print(buffCount[bkey])
-        self.increase[durationData[bkey]['element']] += durationData[bkey]['increase'] * (buffCount[bkey] if durationData[bkey]['maxStack'] == 0 else min(buffCount[bkey], durationData[bkey]['maxStack']))
-        self.more[durationData[bkey]['element']] *= (1. + durationData[bkey]['more'] * (buffCount[bkey] if durationData[bkey]['maxStack'] == 0 else min(buffCount[bkey], durationData[bkey]['maxStack'])))
-      pass
-
-    # print(self)
-
     pass
+
+  # create stat object based on active buffs in duration-container
+  def fromBuffs(self, durations_):
+    self.__init__()
+
+    # count number of active buffs
+    buffCount = durations_.countActiveByTypes('buff')
+
+    # apply specific increases and more multipliers per stack into corresponding stat-slot
+    # assuming that same more multipliers are still additive
+    for bkey in buffCount.keys():
+      # print(bkey)
+      # print(buffCount[bkey])
+      self.increase[durationData[bkey]['element']] += durationData[bkey]['increase'] * buffCount[bkey]
+      self.more[durationData[bkey]['element']] *= (1. + durationData[bkey]['more'] * buffCount[bkey])
+    pass
+
+    return self
 
   def __str__(self):
     return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.duration)
