@@ -16,6 +16,12 @@ class InvalidElementError(Exception):
     super().__init__(self.message)
     pass
 
+class InvalidAttributeError(Exception):
+  def __init__(self, message='Provided attribute is not supported'):
+    self.message = message
+    super().__init__(self.message)
+    pass    
+
 class InvalidTagError(Exception):
   def __init__(self, message='Provided tag is not supported'):
     self.message = message

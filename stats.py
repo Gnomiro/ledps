@@ -21,6 +21,7 @@ class Stats():
     # attribute
     self.attribute = dict.fromkeys(supportedAttributes, 0.)
     # calculates duration dict based on cross product of duration and duration modifers
+    # todo: rename later to durationModifiers
     self.duration = {d: {dm: 0. for dm in supportedDurationModifiers} for d in supportedDurations}
 
     self.proc = {p: {pm: 0. for pm in supportedProcModifiers} for p in supportedProcs}
@@ -48,17 +49,100 @@ class Stats():
   def __str__(self):
     return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.duration)
 
+  def getIncrease(self, name_):
+    if name_ not in data.getSupportedTags():
+      raise errors.InvalidTagError
+    return self.increase.get(name_, 0.)
+
+  def getMore(self, name_):
+    if name_ not in data.getSupportedTags():
+      raise errors.InvalidTagError
+    return self.more.get(name_, 1.)
+
+  def getPenetration(self, name_):
+    if name_ not in data.getSupportedElementTypes():
+      raise errors.InvalidElementError
+    return self.penetration.get(name_, 0.)
+
+    pass
+  def getAttribute(self, name_):
+    if name_ not in data.getSupportedAttributes():
+      raise errors.InvalidAttributeError
+    return self.attribute.get(name_, 0.)
+
+  def getDurationModifier(self, name_):
+    if name_ not in data.getSupportedDurations():
+      raise errors.InvalidDurationError
+    return self.duration.get(name_, 0.)
+
+  def addIncrease(self, name_, value_):
+    # if name_ not in data.getSupportedTags():
+    #   raise errors.InvalidTagError
+    # self.increase[name_] = self.increase.get(name_, 0.) + value_
+    self.increase[name_] = self.getIncrease(name_) + value_
+
+  def addMore(self, name_, value_):
+    if value_ <= 1.:
+      print('Warning: More modifiers should usually be greater than 1.')
+    # if name_ not in data.getSupportedTags():
+    #   raise errors.InvalidTagError
+    # self.more[name_] = self.more.get(name_, 1.) * value_
+    self.more[name_] = self.getMore(name_) * value_
+
+  def addPenetration(self, name_, value_):
+    # if name_ not in data.getSupportedElementTypes():
+    #   raise errors.InvalidElementError
+    # self.penetration[name_] = self.penetration.get(name_, 0.) + value_
+    self.penetration[name_] = self.getPenetration(name_) + value_
+
+    pass
+  def addAttribute(self, name_, value_):
+    # if name_ not in data.getSupportedAttributes():
+    #   raise errors.InvalidAttributeError
+    # self.attribute[name_] = self.attribute.get(name_, 0.) + value_
+    self.attribute[name_] = self.getAttribute(name_) + value_
+
+  def addDurationModifier(self, name_, value_):
+    # if name_ not in data.getSupportedDurations():
+    #   raise errors.InvalidDurationError
+    # self.duration[name_] = self.duration.get(name_, 0.) + value_
+    self.duration[name_] = self.getDurationModifier(name_) + value_
+
+  def setIncrease(self, name_, value_):
+    if name_ not in data.getSupportedTags():
+      raise errors.InvalidTagError
+    self.increase[name_] = value_
+
+  def setMore(self, name_, value_):
+    if name_ not in data.getSupportedTags():
+      raise errors.InvalidTagError
+    if value_ <= 1.:
+      print('Warning: More modifiers should usually be greater than 1.')
+    self.more[name_] = value_
+
+  def setPenetration(self, name_, value_):
+    if name_ not in data.getSupportedElementTypes():
+      raise errors.InvalidElementError
+    self.penetration[name_] = value_
+
+    pass
+  def setAttribute(self, name_, value_):
+    if name_ not in data.getSupportedAttributes():
+      raise errors.InvalidAttributeError
+    self.attribute[name_] = value_
+
+  def setDurationModifier(self, name_, value_):
+    if name_ not in data.getSupportedDurations():
+      raise errors.InvalidDurationError
+    self.duration[name_] = value_
+
   # sums up all relevant increases as requested by 'tags_' list
   def getIncreaseByTagList(self, tags_):
-    if not all([t in data.getSupportedTags() for t in tags_]):
-      raise errors.InvalidTagError
-    return sum([self.increase[t] for t in tags_])
+    return sum([self.getIncrease(t) for t in tags_])
 
   # sums up all relevant increases as requested by 'tags_' list
   def getMoreByTagList(self, tags_):
-    if not all([t in data.getSupportedTags() for t in tags_]):
-      raise errors.InvalidTagError
-    return prod([(self.more[t]) for t in tags_])
+    return prod([(self.getMore(t)) for t in tags_])
 
   # class function
   def paladin(self):
