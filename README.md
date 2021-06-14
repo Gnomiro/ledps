@@ -36,11 +36,6 @@
 * General
   * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
-  * Split onHit into onHit, onMeleeHit, onThrowHit and onSpellHit
-  * Specify attack types: melee, spell
-  * ManifestStrike and AxeThrower procs should be meleeHit resp throwHit
-  * Rive indomitable is spellHit
-  * Instead of stats = None try generic stats = Stats() to have less if/else
   * Allow addition from two Stats-objects
   * Make more multiplier consistent: getter/setter/adder to ensure multiplication
   * Manage skill provided global modifers: Currently, i.e. for warpath, workaround in test.py
@@ -49,23 +44,17 @@
     * Done for Rive ignites and Undisputed buffs
     * Missing for AxeThrower and Manifest Strike (multiprocs possible?)
 * Cooldowns
-  * cooldown debuff in duration (with cd)
-  * Caution: Cooldown recovery must be considered at some point; possible in application while using gearStats-Data
-  * isOnCooldown(name) routine in durations alongside other easy access routines like countDamagingAilment(type), countShred(type)
-* Procs
-  * Use 'condition' for something like 'cooldown', 'damagingAilment' alongside with 'status' : 'expired', 'active which tells what the condition is; maybe different naming
+  * Cooldown recovery must be considered at some point; possible in application while using gearStats-Data
 * Stats
   * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tempStats
-  * Possibly rename stats.duration and split it into ailments etc?
 * Environment/Simulator
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
-  * maybe make a own buff-Attack class^for things like undisputed (two base classes because buffs can either be applied by melee or spell hit)
 * AilmentApplied?
   * implement iterator over durations to test if buff/debuff is available, instead of count active
   * For cooldown, undisputed, ...
-* DamaginAilments
+* DamagingAilments
   * Account for limit on damaging ailments as well; remove oldest ones if limit is bypassed
   * maybe iterate over list from right to left and ignore them after limit?
 

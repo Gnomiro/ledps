@@ -23,13 +23,15 @@
 # ToDos
 * Sparsify onHit- and trigger-Loops
   * Stats should only keep '!=0' information and provide them to skill
+* Manifest Strike:
+  * Scales with strength? Currently not accounted for
 * Warpath:
   * Talents
   * Reduce onHit chance for ailments only, i.e., shred and ailments. currently for all onHit non-trigger effects
 * Default attack routine:
   * Change order of duration and stats later to match class implementations
   * Make duration and stats a requirement?
-* Skill provided global buffs like drainingAssault from warpath
+* Skill provided global buffs like drainingAssault from warpath -> \_globalSkillStats or buff?
   * Probably set a channeld-buff on attack which is overriden by similar skills?
 * Default getAttacktime:
   * tempStats: Add stats per global add from Character/Environment or just pass it always?

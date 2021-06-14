@@ -63,7 +63,7 @@ class Default():
       # do I need both?
       # _localSkillStats should have properties for stats effecting skill damage only
       self._localSkillStats = [stats.Stats() for i in range(self._nAttacks)]
-      # _globalSkillStats should have properties for stats effecting all damage; must be returned
+      # _globalSkillStats should have properties for stats effecting all damage; todo: must be returned or applied as buff
       self._globalSkillStats = stats.Stats()
       self.prepareSkill()
       # initial loop position
@@ -200,7 +200,7 @@ class Default():
 
     damage = 0
 
-    for trigger in data.getTrigger():
+    for trigger in data.getSupportedTrigger():
       chance = self.getTriggerChance(trigger, stats_)
 
       if chance == 0:
@@ -341,9 +341,11 @@ class Throw(Default):
 
     return chance
 
+
 #########################################################################################################
 # Class Skill implementations
 #########################################################################################################
+
 
 # Rive
 class Rive(Melee):
@@ -425,9 +427,11 @@ class Warpath(Melee):
     # todo: only for ailments, i.e., currently shred and ailments
     return super().getOnHitChance(ailment_, stats_) * 0.6
 
+
 #########################################################################################################
 # Trigger skills
 #########################################################################################################
+
 
 # trigger calls overrides trigger chance as it cannot procc anything else? or only not itself again?
 # but it can still apply ailments
@@ -455,7 +459,7 @@ class ManifestStrike(Trigger, Melee):
     return damage
 
 # SentinelAxeThrower trigger
-class SentinelAxeThrower(Trigger, Melee):
+class SentinelAxeThrower(Trigger, Throw):
   def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength', 'dexterity']):
     super().__init__(attacktimes_, pattern_, attributes_)
 

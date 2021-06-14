@@ -91,9 +91,9 @@ s.addIncreasedPhysical(0.14)
 skill = skill.Rive()
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
 
-# warpath's drainingAussault adds global more damage while spinning
-# drainingAussault = 5
-# s.addMoreGeneric(1 + 0.15 * drainingAussault)
+# warpath's drainingAssault adds global more damage while spinning
+# drainingAssault = 5
+# s.addMoreGeneric(1 + 0.15 * drainingAssault)
 # skill = skill.Warpath()
 
 repeats = 10
