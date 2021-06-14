@@ -436,11 +436,12 @@ class Warpath(Melee):
 class Trigger():
   def getTriggerChance(self, trigger_, stats_):
     return 0
+  pass
 
 # Manifest Strike trigger
 class ManifestStrike(Trigger, Melee):
   # todo: attribute scaling?
-  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = []):
+  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength', 'attunement']):
     super().__init__(attacktimes_, pattern_, attributes_)
 
     self._skillName = "ManifestStrike"

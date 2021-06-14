@@ -58,9 +58,10 @@ supportedTags  =  [ 'meleeAttackSpeed',
                     'void', 'voidOverTime'
                   ]
 
-supportedAttributes  = ['strength', 'dexterity']
+def getSupportedTags():
+  return supportedTags
 
-
+supportedAttributes  = ['strength', 'dexterity', 'attunement']
 
 # todo: workaround to generate available skill and trigger from file
 # do this after wrapping data into class
