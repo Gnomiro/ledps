@@ -41,6 +41,7 @@ supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
 
 supportedElementTypes = ['generic', 'physical', 'poison', 'fire']
 
+supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike', 'SentinelAxeThrower']
 
 
 # available attributes providing scaling

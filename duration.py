@@ -1,4 +1,4 @@
-from data import durationData
+from data import durationData, supportedSkills
 
 import errors, stats
 
@@ -8,8 +8,16 @@ from itertools import chain
 
 class Duration():
 
-  def __init__(self, name_, stats_, tempStats_ = None, skillAttributes_ = []):
-    if name_ not in durationData.keys():
+  # todo: change interface to allow user speicifed duration as well
+  # ailments and default passed per string but different per attributes, e.g., duration.
+  # More parameters required?
+  def __init__(self, name_, stats_, tempStats_ = None, skillAttributes_ = [], duration_ = None):
+    if duration_ != None:
+      # todo: simple cooldown implementation
+      self.elapsed = 0
+      self.duration = duration_
+      self.name = name_
+    elif duration_ == None and name_ not in durationData.keys():
         raise errors.InvalidDurationError
     else:
         self.name = name_
@@ -92,29 +100,31 @@ class Durations():
     self.verbosity = verbosity
     pass
 
-  def add(self, name_, tempStats_ = None, skillAttributes_ = []):
+  def add(self, name_, tempStats_ = None, skillAttributes_ = [], duration_ = None):
 
-    # ailment application consideres increases/more as well as effects on application
-    durationType = durationData[name_]['type']
+    if duration_ != None and name_ in supportedSkills:
+      # workaround for skill-specific debuffs
+      self.cooldowns.append(Duration(name_, self.stats, duration_ = duration_))
+    else:
+      # ailment application consideres increases/more as well as effects on application
+      durationType = durationData[name_]['type']
 
-    # store ailment accodingly
-    if durationType == 'shred':
-      self.shreds.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-    elif durationType == 'buff':
-      self.buffs.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-    elif durationType == 'cooldown':
-      self.cooldowns.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
-    elif durationType == 'damagingAilment':
-    # todo: consider buffs here and pass them as additional increase/more modifiers
-    # they seem to be snapshotted on application
+      # store ailment accodingly
+      if durationType == 'shred':
+        self.shreds.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
+      elif durationType == 'buff':
+        self.buffs.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
+      elif durationType == 'cooldown':
+        self.cooldowns.append(Duration(name_, self.stats, skillAttributes_ = skillAttributes_))
+      elif durationType == 'damagingAilment':
 
-      # add buffs up together for in stat container increase/more/etc
-      # todo should possible only be calculated once per tick instead per add-call -> move to tick?
-      buffStats = stats.Stats(self.buffs)
+        # add buffs up together for in stat container increase/more/etc
+        # todo should possible only be calculated once per tick instead per add-call -> move to tick?
+        buffStats = stats.Stats(self.buffs)
 
-      self.damagingAilments.append(Duration(name_, self.stats, tempStats_ = buffStats, skillAttributes_ = skillAttributes_))
-      if name_ == 'poison':
-        self.shreds.append(Duration('poisonBuiltinShred', self.stats, skillAttributes_ = skillAttributes_))
+        self.damagingAilments.append(Duration(name_, self.stats, tempStats_ = buffStats, skillAttributes_ = skillAttributes_))
+        if name_ == 'poison':
+          self.shreds.append(Duration('poisonBuiltinShred', self.stats, skillAttributes_ = skillAttributes_))
 
   def getActive(self, type = None):
     # return active iterators for ailments of specific type, similar to but more efficient than [a for a in self.durations if a.active()]
@@ -147,14 +157,10 @@ class Durations():
     pass
 
   def countActive(self, type = None, sparse = True):
-    # todo: keys only for durationData corresponding to type to reduce overhead
-    active = dict.fromkeys(durationData.keys(), 0)
+    active = {}
     for a in self.getActive(type):
-            active[a.getName()] += 1
-    if sparse:
-      return {x:y for x,y in active.items() if y != 0}
-    else:
-      return active
+      active[a.getName()] = active.get(a.getName(), 0) + 1
+    return active
 
   def tick(self, timestep, boss = False):
 

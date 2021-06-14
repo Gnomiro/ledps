@@ -38,6 +38,9 @@ class Default():
     # skill scaling attribute
     self._attributes = attributes_
 
+    # attack specific cooldown in seconds
+    self._skillCooldown = 0
+
     # dict of skill specific talents as tuple with information about current and max points, i.e., (cadence, 0, 1) for inactive cadence for Rive
     self._talents = {}
 
@@ -99,20 +102,30 @@ class Default():
 
     self.prepare()
 
-    _damage = 0
+    # executes skill only if not on cooldown
+    if not self.onCooldown(durations_):
 
-    _skillDamage = self.skillHit(stats_, durations_)
+      _damage = 0
 
-    _durations = self.skillEffect(stats_, durations_)
+      _skillDamage = self.skillHit(stats_, durations_)
 
-    _durations = self.applyOnHit(stats_, _durations)
+      _durations = self.skillEffect(stats_, durations_)
 
-    _triggerDamage, _durations = self.onHitTrigger(stats_, _durations)
+      _durations = self.applyOnHit(stats_, _durations)
 
-    # prepare next attack
-    self._n = next(self._patternCycle)
+      _triggerDamage, _durations = self.onHitTrigger(stats_, _durations)
 
-    return _damage, self.getAttacktime(stats_), _durations # return everything which has to be passed to character: damage, (new) durations, (next attack time,)
+      # prepare next attack
+      self._n = next(self._patternCycle)
+
+      _durations = self.applyCooldown(_durations)
+
+      # return everything which has to be passed to character: damage, (new) durations, (next attack time,)
+      return _damage, self.getAttacktime(stats_), _durations
+
+    else:
+      # print(self._skillName + " is still on cooldown")
+      return 0, self.getAttacktime(stats_), durations_
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
@@ -122,7 +135,6 @@ class Default():
     # print("defaultSkillHit")
 
     return _damage
-
 
   # calculates on hit chance for 'ailment_'
   # generic implementation; should only rarely be changed by implemented skills
@@ -146,7 +158,7 @@ class Default():
       if chance == 0:
         continue
 
-      # when a conidtion os provided test if the requirement is full-filled, i.e., if a buff/debuff is applied 
+      # when a conidtion os provided test if the requirement is full-filled, i.e., if a buff/debuff is applied
       if ailmentInfo['condition'] != None and ailmentInfo['condition'] not in durations_.countActive():
         continue
 
@@ -184,7 +196,6 @@ class Default():
 
     return chance
 
-
   # triggers trigger effects
   # generic implementation; must not be changed by implemented skills
   def onHitTrigger(self, stats_, durations_):
@@ -214,9 +225,26 @@ class Default():
 
     return _damage, durations_
 
+  # tests if skill is on cooldown
+  # generic implementation; must not be changed by implemented skills
+  def onCooldown(self, durations_):
+    if self._skillCooldown == 0:
+      return 0
+    else:
+      return (1 if self._skillName in durations_.countActive(type = 'cooldown') else 0)
+
+  # applies skill specific cooldown
+  # generic implementation; must not be changed by implemented skills
+  def applyCooldown(self, durations_):
+
+    if self._skillCooldown != 0:
+      durations_.add(self._skillName, duration_ = self._skillCooldown)
+
+    return durations_
+
   # returns attacktime of next attack
   # generic implementation; must not be changed by implemented skills
-  # todo: add stats per global add from Character/Environment or just pass it alwyas?
+  # todo: add stats per global add from Character/Environment or just pass it always?
   def getAttacktime(self, stats_ = stats.Stats()): # , stats_ = None, tempStats_ = None):
     self.prepare()
     return self._attacktimes[self._n] / (1 + stats_.increase['meleeAttackSpeed'] + self._localSkillStats[self._n].increase['meleeAttackSpeed']) / (stats_.more['meleeAttackSpeed'] * self._localSkillStats[self._n].more['meleeAttackSpeed'])
@@ -418,12 +446,7 @@ class SentinelAxeThrower(Trigger, Melee):
       super().__init__(attacktimes_, pattern_, attributes_)
 
       self._skillName = "SentinelAxeThrower"
-
-  def prepareSkill(self):
-      # tracks if skill has hit for ailment application
-      # could I hide _hasHit here?
-      # self._hasHit = False
-      pass
+      self._skillCooldown = 1
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
@@ -431,24 +454,5 @@ class SentinelAxeThrower(Trigger, Melee):
     _damage = 0
 
     # print("sentinelAxeThrowerSkillHit")
-    onCooldown = (1 if 'SentinelAxeThrower' in durations_.countActive(type = 'cooldown') else 0)
-    if onCooldown == 0:
-      self._hasHit = True
-    else:
-      self._hasHit = False
 
     return _damage
-
-  def skillEffect(self, stats_, durations_):
-    # print("sentinelAxeThrowerSkillEffect")
-    # skill has hit -> activate new cooldown
-    if self._hasHit == True:
-      durations_.add(self._skillName)
-    return durations_
-
-  # can only apply ailments if it has hit otherwise ailment chance is 0
-  def getOnHitChance(self, ailment_, stats_):
-    if self._hasHit:
-      return super().getOnHitChance(ailment_, stats_)
-    else: 
-      return 0
