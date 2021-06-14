@@ -42,8 +42,35 @@ class Stats():
 
     return self
 
+  # add other_ to self; operator +=
+  def __iadd__(self, other_):
+    for name, value in other_.increase.items():
+      self.addIncrease(name, value)
+    for name, value in other_.more.items():
+      self.addMore(name, value)
+    for name, value in other_.penetration.items():
+      self.addPenetration(name, value)
+    for name, value in other_.attribute.items():
+      self.addAttribute(name, value)
+    for name in other_.durationModifier.keys():
+      for modifier, value in other_.durationModifier[name].items():
+        self.addDurationModifier(name, modifier, value)
+    for name in other_.triggerModifier.keys():
+      for modifier, value in other_.triggerModifier[name].items():
+        self.addTriggerModifier(name, modifier, value)
+    return self
+
+  # add two stats opjects and return new one containing both information
+  def __add__(self, other_):
+    total = Stats()
+
+    total += self
+    total += other_
+
+    return total
+
   def __str__(self):
-    return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.durationModifier)
+    return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\ndurationModifier:\n' + str(self.durationModifier) + '\ntriggerModifier:\n' + str(self.triggerModifier)
 
   def getIncrease(self, name_):
     if name_ not in data.getSupportedTags():
