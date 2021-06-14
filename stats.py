@@ -70,7 +70,8 @@ class Stats():
 
   # palading tree talents
   def penance(self, points = 10):
-    self.duration['bleed']['onHit'] += points * 0.2
+    self.duration['bleed']['onMeleeHit'] += points * 0.2
+    self.duration['bleed']['onThrowHit'] += points * 0.2
     pass
 
   def conviction(self, points = 8):
@@ -181,11 +182,12 @@ class Stats():
     pass
 
   def addBoots(self):
+    self.duration['doom']['onHit'] += 0.25
     self.increase['overTime'] += 1.17
     pass
 
   def addRelic(self):
-    self.duration['bleed']['onHit'] += 0.46
+    self.duration['bleed']['onHit'] += 0.25
     self.duration['bleed']['duration'] += 0.48
     pass
 
@@ -196,7 +198,7 @@ class Stats():
 
   # generic add functions
   def addManifestStrike(self, value):
-    self.proc['ManifestStrike']['onHit'] += value
+    self.proc['ManifestStrike']['onMeleeHit'] += value
     pass
 
   def addChanceToBleed(self, value):

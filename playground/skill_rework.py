@@ -379,6 +379,8 @@ class Rive(Melee):
     if self._talents['cadence'][0] == 1:
       self._pattern = [0,1,0,1,2]
 
+    self._localSkillStats[0].proc['RiveIndomitable']['onMeleeHit'] += 1. * self._talents['indomitable'][0]
+
     pass
 
   # skill specific hit which should be overriden by skill-Implementations
@@ -409,6 +411,11 @@ class Rive(Melee):
 
 # Warpath
 class Warpath(Melee):
+  def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = ['strength']):
+      super().__init__(attacktimes_, pattern_, attributes_)
+
+      self._skillName = "Warpath"
+
   # warpath overloads ailmentChance as it is reduced by 40%
   def getOnHitChance(self, ailment_, stats_):
     # todo: only for ailments, i.e., currently shred and ailments
@@ -426,6 +433,7 @@ class Trigger():
 
 # Manifest Strike trigger
 class ManifestStrike(Trigger, Melee):
+  # todo: attribute scaling?
   def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = []):
       super().__init__(attacktimes_, pattern_, attributes_)
 
@@ -440,9 +448,9 @@ class ManifestStrike(Trigger, Melee):
 
     return _damage
 
-# SentinelAxeThrower procc
+# SentinelAxeThrower trigger
 class SentinelAxeThrower(Trigger, Melee):
-  def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = []):
+  def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = ['strength', 'dexterity']):
       super().__init__(attacktimes_, pattern_, attributes_)
 
       self._skillName = "SentinelAxeThrower"
@@ -456,3 +464,19 @@ class SentinelAxeThrower(Trigger, Melee):
     # print("sentinelAxeThrowerSkillHit")
 
     return _damage
+
+# Rive Indomitable trigger
+class RiveIndomitable(Trigger, Spell):
+  def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = ['strength']):
+      super().__init__(attacktimes_, pattern_, attributes_)
+
+      self._skillName = "RiveIndomitable"
+
+  # skill specific hit which should be overriden by skill-Implementations
+  def skillHit(self, stats_, durations_):
+
+    _damage = 0
+
+    # print("riveIndomitableSkillHit")
+
+    return _damage    

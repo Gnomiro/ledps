@@ -94,7 +94,7 @@ s.addIncreasedPhysical(0.14)
 # skill = skill.Rive(cadence = True, flurry = 5, indomitable = False, sever = 3, twistingFangs = 3, execution = True) # indomitable not yet supported
 
 skill = skill2.Rive()
-skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1)
+skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
 
 # warpath's drainingAussault adds global more damage while spinning
 # drainingAussault = 1

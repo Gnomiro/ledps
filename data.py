@@ -3,11 +3,13 @@ import errors
 # Ailemnts with element, base damage, duration, stacksize and tags for relevant scaling attributes
 durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 0,
                                     'tags' : ['generic', 'physical', 'physicalOverTime', 'overTime']},
+                'doom'          : { 'element' : 'void', 'type' : 'damagingAilment', 'baseDamage' :  400. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 4,
+                                    'tags' : ['generic', 'void', 'voidOverTime', 'overTime']}, # todo: incomplete, no inc melee damage taken buff; limit not accounted for -> oldest should be removed
                 # poison scaling via poisonShred
                 'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']}, # incomplete
                 'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
-                                    'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']}, # incomple
+                                    'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']}, # incomplete
 
                 'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
@@ -21,9 +23,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'riveExecution' : {'element' : 'physical', 'type' : 'buff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
                                     'tags' : []},
                 'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'condition': 'bleed', 'baseDuration' : 4., 'maxStack' : 51,
-                                    'tags' : []},
-
-                'SentinelAxeThrower'  : {'element' : 'generic', 'type' : 'cooldown', 'baseDuration' : 1., 'tags' : []}, # get rid of element type and tags? -> must adapt sanity checks # must be names as skill/procc
+                                    'tags' : []}
               }
 
 # returns durationData object, if type specified only specific type
@@ -39,26 +39,27 @@ def getDurationData(*type_):
 
 supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
 
-supportedElementTypes = ['generic', 'physical', 'poison', 'fire']
-
-supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike', 'SentinelAxeThrower']
-
+supportedElementTypes = ['generic', 'physical', 'poison', 'fire', 'void']
 
 # available attributes providing scaling
 supportedTags  =  [ 'meleeAttackSpeed',
                     'generic', 'overTime',
                     'physical', 'physicalOverTime',
                     'fire', 'fireOverTime',
-                    'poison', 'poisonOverTime'
+                    'poison', 'poisonOverTime',
+                    'void', 'voidOverTime'
                   ]
 
 supportedAttributes  = ['strength', 'dexterity']
 
+# todo: generate this list automagically from skill.py?!
+supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike', 'SentinelAxeThrower', 'RiveIndomitable']
 # each skill procc must have a corresponding skill class
-# idea use 'condition' for something like 'cooldown', 'damaginAilment' alongside with 'status' : 'expired', 'active'
 # todo: rename to trigger
+# todo: remove donition again?
 supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' : None},
-                    'SentinelAxeThrower'      : {'type' : 'skill', 'condition' : None}, # cooldown is simulated by 'sentinelAxeThrower' duration; no proc as long as it is active
+                    'SentinelAxeThrower'      : {'type' : 'skill', 'condition' : None},
+                    'RiveIndomitable'         : {'type' : 'skill', 'condition' : None},
                  }
 supportedProcModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
 

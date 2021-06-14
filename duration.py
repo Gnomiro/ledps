@@ -17,6 +17,7 @@ class Duration():
       self.elapsed = 0
       self.duration = duration_
       self.name = name_
+      return
     elif duration_ == None and name_ not in durationData.keys():
         raise errors.InvalidDurationError
     else:
@@ -76,8 +77,9 @@ class Duration():
     else:
         self.elapsed += timestep
 
-    # if non-damaging ailment leave here
-    if durationData[self.getName()]['type'] != 'damagingAilment':
+    # if cooldown of skill or non-damaging ailment leave here
+    # todo: make this easier to read
+    if self.name in supportedSkills or durationData[self.getName()]['type'] != 'damagingAilment':
         return 0
 
     # return resulting damage
@@ -129,7 +131,8 @@ class Durations():
   def getActive(self, type = None):
     # return active iterators for ailments of specific type, similar to but more efficient than [a for a in self.durations if a.active()]
     if type != None:
-        return filter(lambda a: a.active() and durationData[a.getName()]['type'] == type, self.getByType(type))
+        # workaround for skill cooldowns as they are not in durationData anymore
+        return filter(lambda a: a.active() and ((type == 'cooldown' and a.getName() in supportedSkills) or durationData[a.getName()]['type'] == type), self.getByType(type))
     else:
         return filter(lambda a: a.active(), self.getByType(type))
 
@@ -189,8 +192,9 @@ class Durations():
       # process ailment
       damage = a.tick(timestep)
 
-      # skip following calculations if it is a non-damaging ailment
-      if durationData[a.getName()]['type'] != 'damagingAilment':
+      # skip following calculations if it is a akill cooldown or non-damaging ailment
+      # todo: make this easier to read
+      if a.getName() in supportedSkills or durationData[a.getName()]['type'] != 'damagingAilment':
         continue
 
       # element type of current damaging ailment

@@ -61,7 +61,9 @@
 * AilmentApplied?
   * implement iterator over durations to test if buff/debuff is available, instead of count active
   * For cooldown, undisputed, ...
-* Rename 'applyAilment' to something like 'applyOnHit'; same for getAilmentChance
+* DamaginAilments
+  * Account for limit on damaging ailments as well; remove oldest ones if limit is bypassed
+  * maybe iterate over list from right to left and ignore them after limit?
 
 
 20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
