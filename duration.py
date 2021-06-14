@@ -6,6 +6,10 @@ import errors
 import stats
 import damage
 
+#########################################################################################################
+# Generic duration class
+#########################################################################################################
+
 # duration object; can be any type of supported duration based buff/debuff/cooldown
 class Duration():
 
@@ -54,18 +58,18 @@ class Duration():
     self._damage = self._baseDamage
     self._damage *= (1. + gearStats_.duration[self.getName()]['effect'])
 
-    # general scaling for ailment damage; attribute scaling is assumed to be always 4%
-    increase = sum([gearStats_.increase[a] for a in data.getDurationData()[self.getName()]['tags']]) \
-                + 0.04 * sum([gearStats_.attribute[a] for a in self._skillAttributes])
-    more = prod([gearStats_.more[a] for a in data.getDurationData()[self.getName()]['tags']])
+    #print(data.getDurationData()[self.getName()]['tags'])
 
-    # include temporary stats, e.g., from buffs, if provided
-    if tmpStats_ != None:
-      increase += sum([tmpStats_.increase[a] for a in data.getDurationData()[self.getName()]['tags']])
-      more *= prod([tmpStats_.more[a] for a in data.getDurationData()[self.getName()]['tags']])
+    # get sum of relevant increase modifiers
+    increase = gearStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags']) + tmpStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags'])
+    # general attribute-scaling for damagingAilment; assumed to be always 4%; todo: check if sometimes different
+    increase += 0.04 * sum([gearStats_.attribute[a] for a in self._skillAttributes])
+
+    # get product of relevant more modifiers
+    more = gearStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags']) * tmpStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags'])
 
     # final overall damage of damagingAilment
-    self._damage *= (1 + increase) * more
+    self._damage *= (1. + increase) * more
 
     pass
 
@@ -116,6 +120,10 @@ class Duration():
     # (self.baseDamage / self.baseDuration)
     # is uneffected by duration increases and thus duration increases yield more ticks of the same value
     return damage.Damage((data.getDurationData()[self.getName()]['element'], self._damage / self._baseDuration * timestep_))
+
+#########################################################################################################
+# Container for duration class objects seperating them by type
+#########################################################################################################
 
 # container class managing all duration objects
 class Durations():

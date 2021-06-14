@@ -1,5 +1,11 @@
 from data import supportedTags, supportedAttributes, supportedDurations, supportedDurationModifiers, supportedElementTypes, durationData, supportedProcs, supportedProcModifiers
 
+from numpy import product as prod
+
+import data
+
+import errors
+
 class Stats():
 
   def __init__(self):
@@ -41,6 +47,18 @@ class Stats():
 
   def __str__(self):
     return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.duration)
+
+  # sums up all relevant increases as requested by 'tags_' list
+  def getIncreaseByTagList(self, tags_):
+    if not all([t in data.getSupportedTags() for t in tags_]):
+      raise errors.InvalidTagError
+    return sum([self.increase[t] for t in tags_])
+
+  # sums up all relevant increases as requested by 'tags_' list
+  def getMoreByTagList(self, tags_):
+    if not all([t in data.getSupportedTags() for t in tags_]):
+      raise errors.InvalidTagError
+    return prod([(self.more[t]) for t in tags_])
 
   # class function
   def paladin(self):
