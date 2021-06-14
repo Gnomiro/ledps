@@ -23,8 +23,8 @@
 # ToDos
 * Sparsify onHit- and trigger-Loops
   * Stats should only keep '!=0' information and provide them to skill
-* Manifest Strike:
-  * Scales with strength? Currently not accounted for
+* Skilltags
+  * provide \_tags in skill to enable easier collection of relevant damage modifiers alongside reworked stats
 * Warpath:
   * Talents
   * Reduce onHit chance for ailments only, i.e., shred and ailments. currently for all onHit non-trigger effects

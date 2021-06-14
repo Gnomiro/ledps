@@ -33,9 +33,6 @@
     active[a.getName()] = active.get(a.getName(), 0) + 1
 
 # Todo
-* Damage
-  * Damage should be its own class seperated by elements
-  * makes shred effect more general
 * General
   * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
@@ -54,20 +51,16 @@
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
-* AilmentApplied?
-  * implement iterator over durations to test if buff/debuff is available, instead of count active
-  * For cooldown, undisputed, ...
-* DamagingAilments
-  * Account for limit on damaging ailments as well; remove oldest ones if limit is bypassed
-  * maybe iterate over list from right to left and ignore them after limit?
 
-
-20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
+[20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
 In addition. Is the shred from poison as well limited by 20 stacks? Or is it possible top have poison shred stack to 20 alongside additional poison stack to further reduce the resistance?
 [20:41] Mike W: built in shred only; not limited
 
 [21:20] Mike W: poison shred is limited to 20.
 the resistance drop from poison itself isn't limited
 
-03:50] Hishoukitai: the 40% reduced ailment chance on hit with Sentinel's Warpath, is that a flat 40%? for example if i have 200% ignite does it drop it to 160% or is it 40% of that 200%, dropping it to 120%?
+[03:50] Hishoukitai: the 40% reduced ailment chance on hit with Sentinel's Warpath, is that a flat 40%? for example if i have 200% ignite does it drop it to 160% or is it 40% of that 200%, dropping it to 120%?
 [04:13] Trasochi: It's multiplicative so if you have 200% chance it drops to 120%.
+
+[09:20] Oeller: Since Manifest Strike has no tooltip: What are the scaling tags? Any Attributes?
+[20:45] Mike W: Physical, Melee, Strength and Attunement.

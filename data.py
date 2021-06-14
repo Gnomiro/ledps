@@ -63,6 +63,9 @@ def getSupportedTags():
 
 supportedAttributes  = ['strength', 'dexterity', 'attunement']
 
+def getSupportedAttributes():
+  return supportedAttributes
+
 # todo: workaround to generate available skill and trigger from file
 # do this after wrapping data into class
 # supportedSkills = []
@@ -99,9 +102,6 @@ supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike
 def getSupportedSkills():
   return supportedSkills
 
-def getSupportedDurations():
-  return chain(durationData.keys(), getSupportedSkills())
-
 # each skill procc must have a corresponding skill class
 # todo: rename to trigger
 # todo: remove donition again?
@@ -111,12 +111,23 @@ supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' :
                  }
 supportedProcModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
 
-def getSupportedTrigger():
+
+def getSupportedTriggers():
   return supportedProcs
+
+def getSupportedTriggerModifiers():
+  return supportedProcModifiers
 
 # get supported ailments from ailment class
 supportedDurations          = durationData.keys()
+
+def getSupportedDurations():
+  return chain(supportedDurations, getSupportedSkills())
+
 supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onMeleeHit', 'onThrowHit', 'duration', 'effect']
+
+def getSupportedDurationModifiers():
+  return supportedDurationModifiers
 
 # some sanity checks
 # todo: how to make them only once?

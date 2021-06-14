@@ -27,7 +27,7 @@ s.holyAura(callToArms = 4, fanaticism = 4, active = False)
 s.sigilsOfHope(tetragram = True, empoweringSigils = 3)
 
 # physical shred from blessing
-s.addPhysicalShred(.45)
+s.addDurationModifier('physicalShred', 'onHit', .45)
 
 s.addHelmet()
 s.addAmulet()
@@ -65,27 +65,27 @@ s.addRelic()
 # large idol
 s.addIdol()
 # small idol 1
-s.addIncreasedOverTime(0.1)
+s.addIncrease('overTime', 0.1)
 # # small idol 2
-s.addIncreasedOverTime(0.08)
-s.addIncreasedPhysical(0.08)
+s.addIncrease('overTime', 0.08)
+s.addIncrease('physical', 0.08)
 # # small idol 3
-s.addIncreasedOverTime(0.08)
-s.addIncreasedPhysical(0.05)
+s.addIncrease('overTime', 0.08)
+s.addIncrease('physical', 0.05)
 
 # humble idol 1
-s.addChanceToBleed(0.12)
-s.addIncreasedPhysical(0.14)
+s.addDurationModifier('bleed', 'onHit', 0.12)
+s.addIncrease('physical', 0.14)
 # ornate idol 1
-s.addManifestStrike(0.1)
+s.addTriggerModifier('ManifestStrike', 'onMeleeHit', 0.1)
 # humble idol 2
-s.addChanceToBleed(0.11)
+s.addDurationModifier('bleed', 'onHit', 0.11)
 # ornate idol 1
-s.addChanceToBleed(0.36)
-s.addChanceToBleed(0.20)
+s.addDurationModifier('bleed', 'onHit', 0.36)
+s.addDurationModifier('bleed', 'onHit', 0.20)
 # humble idol 3
-s.addChanceToBleed(0.13)
-s.addIncreasedPhysical(0.14)
+s.addDurationModifier('bleed', 'onHit', 0.13)
+s.addIncrease('physical', 0.14)
 
 # print(s)
 
@@ -102,7 +102,7 @@ endtime = 60
 boss = True
 overallDamage = damage.Damage()
 for i in range(repeats):
-  c = character.Character(s, skill, verbosity = 0.)
+  c = character.Character(s, skill, verbosity = 0)
   # boss = True reduces shred effect
   damage = c.combat(endtime = endtime, boss = boss)
   print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))

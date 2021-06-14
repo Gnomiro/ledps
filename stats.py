@@ -70,48 +70,51 @@ class Stats():
       raise errors.InvalidAttributeError
     return self.attribute.get(name_, 0.)
 
-  def getDurationModifier(self, name_):
+  def getDurationModifier(self, name_, modifier_):
     if name_ not in data.getSupportedDurations():
       raise errors.InvalidDurationError
-    return self.duration.get(name_, 0.)
+    if modifier_ not in data.getSupportedDurationModifiers():
+      raise errors.InvalidDurationModifierError
+    return self.duration.get(name_, 0.).get(modifier_, 0.)
+
+  def getTriggerModifier(self, name_, modifier_):
+    if name_ not in data.getSupportedTriggers():
+      raise errors.InvalidTriggerError
+    if modifier_ not in data.getSupportedTriggerModifiers():
+      raise errors.InvalidTriggerModifierError
+    return self.proc.get(name_, 0.).get(modifier_, 0.)
 
   def addIncrease(self, name_, value_):
-    # if name_ not in data.getSupportedTags():
-    #   raise errors.InvalidTagError
-    # self.increase[name_] = self.increase.get(name_, 0.) + value_
     self.increase[name_] = self.getIncrease(name_) + value_
+    pass
 
   def addMore(self, name_, value_):
     if value_ <= 1.:
       print('Warning: More modifiers should usually be greater than 1.')
-    # if name_ not in data.getSupportedTags():
-    #   raise errors.InvalidTagError
-    # self.more[name_] = self.more.get(name_, 1.) * value_
     self.more[name_] = self.getMore(name_) * value_
+    pass
 
   def addPenetration(self, name_, value_):
-    # if name_ not in data.getSupportedElementTypes():
-    #   raise errors.InvalidElementError
-    # self.penetration[name_] = self.penetration.get(name_, 0.) + value_
     self.penetration[name_] = self.getPenetration(name_) + value_
-
     pass
-  def addAttribute(self, name_, value_):
-    # if name_ not in data.getSupportedAttributes():
-    #   raise errors.InvalidAttributeError
-    # self.attribute[name_] = self.attribute.get(name_, 0.) + value_
-    self.attribute[name_] = self.getAttribute(name_) + value_
 
-  def addDurationModifier(self, name_, value_):
-    # if name_ not in data.getSupportedDurations():
-    #   raise errors.InvalidDurationError
-    # self.duration[name_] = self.duration.get(name_, 0.) + value_
-    self.duration[name_] = self.getDurationModifier(name_) + value_
+  def addAttribute(self, name_, value_):
+    self.attribute[name_] = self.getAttribute(name_) + value_
+    pass
+
+  def addDurationModifier(self, name_, modifier_, value_):
+    self.duration[name_][modifier_] = self.getDurationModifier(name_, modifier_) + value_
+    pass
+
+  def addTriggerModifier(self, name_, modifier_, value_):
+    self.proc[name_][modifier_] = self.getTriggerModifier(name_, modifier_) + value_
+    pass
 
   def setIncrease(self, name_, value_):
     if name_ not in data.getSupportedTags():
       raise errors.InvalidTagError
     self.increase[name_] = value_
+    pass
 
   def setMore(self, name_, value_):
     if name_ not in data.getSupportedTags():
@@ -119,22 +122,36 @@ class Stats():
     if value_ <= 1.:
       print('Warning: More modifiers should usually be greater than 1.')
     self.more[name_] = value_
+    pass
 
   def setPenetration(self, name_, value_):
     if name_ not in data.getSupportedElementTypes():
       raise errors.InvalidElementError
     self.penetration[name_] = value_
+    pass
 
     pass
   def setAttribute(self, name_, value_):
     if name_ not in data.getSupportedAttributes():
       raise errors.InvalidAttributeError
     self.attribute[name_] = value_
+    pass
 
   def setDurationModifier(self, name_, value_):
     if name_ not in data.getSupportedDurations():
       raise errors.InvalidDurationError
-    self.duration[name_] = value_
+    if modifier_ not in data.getSupportedDurationModifiers():
+      raise errors.InvalidDurationModifierError
+    self.duration[name_][modifier_] = value_
+    pass
+
+  def setTriggerModifier(self, name_, value_):
+    if name_ not in data.getSupportedTriggers():
+      raise errors.InvalidTriggerError
+    if modifier_ not in data.getSupportedTriggerModifiers():
+      raise errors.InvalidTriggerModifierError
+    self.proc[name_][modifier_] = value_
+    pass
 
   # sums up all relevant increases as requested by 'tags_' list
   def getIncreaseByTagList(self, tags_):
@@ -146,18 +163,18 @@ class Stats():
 
   # class function
   def paladin(self):
-    self.increase['physical'] += 1.
-    self.increase['fire'] += 1.
-    self.attribute['strength'] += 2
+    self.addIncrease('physical', 1.)
+    self.addIncrease('fire', 1.)
+    self.addAttribute('strength', 2)
     pass
 
   # sentinel tree talents
   def juggernaut(self, points = 8):
-    self.attribute['strength'] += points
+    self.addAttribute('strength', points)
     pass
 
   def blademaster(self, points = 5):
-    self.increase['meleeAttackSpeed'] += 0.06 * points
+    self.addIncrease('meleeAttackSpeed', 0.06 * points)
     pass
 
   def axeThrower(self, points = 5):
@@ -166,34 +183,34 @@ class Stats():
 
   # palading tree talents
   def penance(self, points = 10):
-    self.duration['bleed']['onMeleeHit'] += points * 0.2
-    self.duration['bleed']['onThrowHit'] += points * 0.2
+    self.addDurationModifier('bleed', 'onMeleeHit', points * 0.2)
+    self.addDurationModifier('bleed', 'onThrowHit', points * 0.2)
     pass
 
   def conviction(self, points = 8):
-    self.increase['physical'] += .04 * points
-    self.penetration['physical'] += .04 * points
-    self.increase['fire'] += .02 * points
-    self.penetration['fire'] += .02 * points
+    self.addIncrease('physical', .04 * points)
+    self.addPenetration('physical', .04 * points)
+    self.addIncrease('fire', .02 * points)
+    self.addPenetration('fire', .02 * points)
     pass
 
   def redemption(self, points = 7, recentlyHit = False):
-    self.duration['bleed']['effect'] += 0.07 * points
+    self.addDurationModifier('bleed', 'effect', 0.07 * points)
     if recentlyHit:
-      self.increase['generic'] += 0.07 * points
+      self.addIncrease('generic', 0.07 * points)
     pass
 
   def reverenceOfDuality(self, points = 12):
-    self.increase['generic'] += 0.02 * points
+    self.addIncrease('generic', 0.02 * points)
     pass
 
   # paladin skills with talents
   # manage active part later as buff
   def holyAura(self, callToArms = 0, fanaticism = 0, active = False):
     factor = (2. if active else 1.) # effects doubled if aura active
-    self.increase['generic'] += 0.3 * factor
-    self.increase['physical'] += 0.1 * callToArms * factor
-    self.increase['meleeAttackSpeed'] += 0.04 * fanaticism * factor
+    self.addIncrease('generic', 0.3 * factor)
+    self.addIncrease('physical', 0.1 * callToArms * factor)
+    self.addIncrease('meleeAttackSpeed', 0.04 * fanaticism * factor)
     pass
 
   def sigilsOfHope(self, tetragram = False, empoweringSigils = 5, numberOfSigils = None):
@@ -203,140 +220,91 @@ class Stats():
         numberOfSigils = 4
       else:
         numberOfSigils = 3
-    self.increase['generic'] += 0.06 * empoweringSigils * numberOfSigils
+    self.addIncrease('generic', 0.06 * empoweringSigils * numberOfSigils)
     pass
 
   # gear add functions
   def addHelmet(self):
-    self.increase['physical'] += 0.36
-    self.duration['bleed']['effect'] += 0.34
-    self.duration['bleed']['duration'] += 0.18
+    self.addIncrease('physical', 0.36)
+    self.addDurationModifier('bleed', 'effect', 0.34)
+    self.addDurationModifier('bleed', 'duration', 0.18)
     pass
 
   def addAmulet(self):
-    self.increase['physical'] += 0.99
-    self.penetration['physical'] += 0.05
+    self.addIncrease('physical', 0.99)
+    self.addPenetration('physical', 0.05)
     pass
 
   def addSword(self):
     print("Sword")
     # implcits
-    self.more['meleeAttackSpeed'] *= 1.24
-    self.increase['overTime'] += 0.48
+    self.addMore('meleeAttackSpeed', 1.24)
+    self.addIncrease('overTime', 0.48)
     # stats
-    self.increase['meleeAttackSpeed'] += 0.22
-    self.increase['physical'] += 1.03
-    self.duration['bleed']['onHit'] += 0.49
+    self.addIncrease('meleeAttackSpeed', 0.22)
+    self.addIncrease('physical', 1.03)
+    self.addDurationModifier('bleed', 'onHit', 0.49)
     pass
 
   def addAxe(self):
     print("Axe")
     # implicits
-    self.more['meleeAttackSpeed'] *= 1.05
-    self.duration['bleed']['onHit'] += 0.3
+    self.addMore('meleeAttackSpeed', 1.05)
+    self.addDurationModifier('bleed', 'onHit', 0.3)
     # stats
-    self.increase['meleeAttackSpeed'] += 0.22
-    self.increase['physical'] += 1.03
-    self.duration['bleed']['onHit'] += 0.49
+    self.addIncrease('meleeAttackSpeed', 0.22)
+    self.addIncrease('physical', 1.03)
+    self.addDurationModifier('bleed', 'onHit', 0.49)
     pass
 
   def addUndisputed(self):
     print("Undisputed")
     # implicits
-    self.more['meleeAttackSpeed'] *= 1.05
-    self.duration['bleed']['onHit'] += 0.3
+    self.addMore('meleeAttackSpeed', 1.05)
+    self.addDurationModifier('bleed', 'onHit', 0.3)
     # stats
-    self.increase['meleeAttackSpeed'] += 0.27
-    self.duration['undisputed']['onMeleeHit'] += 1.0
+    self.addIncrease('meleeAttackSpeed', 0.27)
+    self.addDurationModifier('undisputed', 'onMeleeHit', 1.0)
     pass
 
   def addChest(self):
-    self.increase['physical'] += 0.58
-    self.duration['bleed']['effect'] += 0.67
-    self.duration['bleed']['duration'] += 0.29
+    self.addIncrease('physical', 0.58)
+    self.addDurationModifier('bleed', 'effect', 0.67)
+    self.addDurationModifier('bleed', 'duration', 0.29)
     pass
 
   def addShield(self):
       pass
 
   def addRing1(self):
-    self.increase['physical'] += 0.53
-    self.increase['overTime'] += 0.33
+    self.addIncrease('physical', 0.53)
+    self.addIncrease('overTime', 0.33)
     pass
 
   def addBelt(self):
-    self.increase['physical'] += 0.56
+    self.addIncrease('physical', 0.56)
     pass
 
   def addRing2(self):
-    self.increase['physical'] += 0.51
-    self.increase['overTime'] += 0.19
+    self.addIncrease('physical', 0.51)
+    self.addIncrease('overTime', 0.19)
     pass
 
   def addGloves(self):
-    self.increase['meleeAttackSpeed'] += 0.39
+    self.addIncrease('meleeAttackSpeed', 0.39)
     pass
 
   def addBoots(self):
-    self.duration['doom']['onHit'] += 0.25
-    self.increase['overTime'] += 1.17
+    self.addDurationModifier('doom', 'onHit', 0.25)
+    self.addIncrease('overTime', 1.17)
     pass
 
   def addRelic(self):
-    self.duration['bleed']['onHit'] += 0.25
-    self.duration['bleed']['duration'] += 0.48
+    self.addDurationModifier('bleed', 'onHit', 0.25)
+    self.addDurationModifier('bleed', 'duration', 0.48)
     pass
 
   def addIdol(self):
-    self.duration['bleed']['duration'] += 0.2
-    self.increase['physicalOverTime'] += 0.52
-    pass
-
-  # generic add functions
-  def addManifestStrike(self, value):
-    self.proc['ManifestStrike']['onMeleeHit'] += value
-    pass
-
-  def addChanceToBleed(self, value):
-    self.duration['bleed']['onHit'] += value
-    pass
-
-  def addChanceToIgnite(self, value):
-    self.duration['ignite']['onHit'] += value
-    pass
-
-  def addChanceToPoison(self, value):
-    self.duration['poison']['onHit'] += value
-    pass
-
-  def addChanceToPoisonShred(self, value):
-    self.duration['poisonShred']['onHit'] += value
-    pass
-
-  def addStrength(self, value):
-    self.attribute['strength'] += value
-    pass
-
-  def addPhysicalShred(self, value):
-    self.duration['physicalShred']['onHit'] += value
-    pass
-
-  def addIncreasedOverTime(self, value):
-    self.increase['overTime'] += value
-    pass
-
-  def addIncreasedPhysical(self, value):
-    self.increase['physical'] += value
-    pass
-
-  def addMoreOverTime(self, value):
-    self.more['overTime'] *= value
-    pass
-
-  def addMorePhysical(self, value):
-    self.more['physical'] *= value
-    pass
-
-  def addMoreGeneric(self, value):
-    self.more['generic'] *= value
+    self.addDurationModifier('bleed', 'duration', 0.2)
+    self.addIncrease('physicalOverTime', 0.52)
     pass

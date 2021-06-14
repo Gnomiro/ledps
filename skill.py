@@ -199,7 +199,7 @@ class Default():
 
     damage = 0
 
-    for trigger in data.getSupportedTrigger():
+    for trigger in data.getSupportedTriggers():
       chance = self.getTriggerChance(trigger, stats_)
 
       if chance == 0:
