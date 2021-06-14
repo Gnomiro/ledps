@@ -21,6 +21,8 @@
 * todo
 
 # ToDos
+* Sparsify onHit- and trigger-Loops
+  * Stats should only keep '!=0' information and provide them to skill
 * Warpath:
   * Talents
   * Reduce onHit chance for ailments only, i.e., shred and ailments. currently for all onHit non-trigger effects

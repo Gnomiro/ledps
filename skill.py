@@ -106,23 +106,21 @@ class Default():
     # executes skill only if not on cooldown
     if not self.onCooldown(durations_):
 
-      _damage = 0
+      skillDamage = self.skillHit(stats_, durations_)
 
-      _skillDamage = self.skillHit(stats_, durations_)
+      durations = self.skillEffect(stats_, durations_)
 
-      _durations = self.skillEffect(stats_, durations_)
+      durations = self.applyOnHit(stats_, durations)
 
-      _durations = self.applyOnHit(stats_, _durations)
-
-      _triggerDamage, _durations = self.onHitTrigger(stats_, _durations)
+      triggerDamage, durations = self.onHitTrigger(stats_, durations)
 
       # prepare next attack
       self._n = next(self._patternCycle)
 
-      _durations = self.applyCooldown(_durations)
+      durations = self.applyCooldown(durations)
 
       # return everything which has to be passed to character: damage, (new) durations, (next attack time,)
-      return _damage, self.getAttacktime(stats_), _durations
+      return (skillDamage + triggerDamage), self.getAttacktime(stats_), durations
 
     else:
       # print(self._skillName + " is still on cooldown")
@@ -131,11 +129,11 @@ class Default():
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     # print("defaultSkillHit")
 
-    return _damage
+    return damage
 
   # calculates on hit chance for 'ailment_'
   # generic implementation; should only rarely be changed by implemented skills
@@ -152,7 +150,7 @@ class Default():
   # generic implementation; must not be changed by implemented skills
   def applyOnHit(self, stats_, durations_):
 
-    # get all damagingAilments and shreds
+    # get all damagingAilments, shreds and buffs
     for ailment, ailmentInfo in data.getDurationData('damagingAilment', 'shred', 'buff').items():
       chance = self.getOnHitChance(ailment, stats_)
 
@@ -162,7 +160,6 @@ class Default():
       # when a conidtion os provided test if the requirement is full-filled, i.e., if a buff/debuff is applied
       if ailmentInfo['condition'] != None and ailmentInfo['condition'] not in durations_.countActive():
         continue
-
 
       # guaranteed applications
       applications = floor(chance)
@@ -201,7 +198,7 @@ class Default():
   # generic implementation; must not be changed by implemented skills
   def onHitTrigger(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     for trigger in data.getTrigger():
       chance = self.getTriggerChance(trigger, stats_)
@@ -220,11 +217,10 @@ class Default():
       for i in range(applications):
         # triggers skill; eval(proc) calls constructor of relevant attack
         # return damage, irrelevant attacktime (beacuse trigger are instant), and modified durations_
-        damage, _, durations_ = eval(trigger)().attack(durations_, stats_)
-        _damage += damage
-        # _, attacktime, durations_ = ManifestStrike().attack(durations_, stats_)
+        triggerDamage, _, durations_ = eval(trigger)().attack(durations_, stats_)
+        damage += triggerDamage
 
-    return _damage, durations_
+    return damage, durations_
 
   # tests if skill is on cooldown
   # generic implementation; must not be changed by implemented skills
@@ -390,11 +386,11 @@ class Rive(Melee):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     # print("riveSkillHit")
 
-    return _damage
+    return damage
 
   # skill specific proc stuff
   def skillEffect(self, stats_, durations_):
@@ -416,11 +412,13 @@ class Rive(Melee):
 class Warpath(Melee):
   # warpath has doubled attack time; multiplicative order does not matter
   def __init__(self, attacktimes_ = [0.68182 / 2.], pattern_ = None, attributes_ = ['strength']):
-      super().__init__(attacktimes_, pattern_, attributes_)
+    super().__init__(attacktimes_, pattern_, attributes_)
 
-      self._skillName = "Warpath"
-      # available and supported talents
-      # self._talents = {'temporalCascade' : [0,5], 'drainingAssault' : [0,5]}
+    self._skillName = "Warpath"
+    # available and supported talents
+    # self._talents = {'temporalCascade' : [0,5], 'drainingAssault' : [0,5]}
+
+    pass
 
   # warpath overloads ailmentChance as it is reduced by 40%
   def getOnHitChance(self, ailment_, stats_):
@@ -441,48 +439,52 @@ class Trigger():
 class ManifestStrike(Trigger, Melee):
   # todo: attribute scaling?
   def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = []):
-      super().__init__(attacktimes_, pattern_, attributes_)
+    super().__init__(attacktimes_, pattern_, attributes_)
 
-      self._skillName = "ManifestStrike"
+    self._skillName = "ManifestStrike"
+
+    pass
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     # print("manifestStrikeSkillHit")
 
-    return _damage
+    return damage
 
 # SentinelAxeThrower trigger
 class SentinelAxeThrower(Trigger, Melee):
   def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength', 'dexterity']):
-      super().__init__(attacktimes_, pattern_, attributes_)
+    super().__init__(attacktimes_, pattern_, attributes_)
 
-      self._skillName = "SentinelAxeThrower"
-      self._skillCooldown = 1
+    self._skillName = "SentinelAxeThrower"
+    self._skillCooldown = 1
+
+    pass
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     # print("sentinelAxeThrowerSkillHit")
 
-    return _damage
+    return damage
 
 # Rive Indomitable trigger
 class RiveIndomitable(Trigger, Spell):
   def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength']):
-      super().__init__(attacktimes_, pattern_, attributes_)
+    super().__init__(attacktimes_, pattern_, attributes_)
 
-      self._skillName = "RiveIndomitable"
+    self._skillName = "RiveIndomitable"
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    _damage = 0
+    damage = 0
 
     # print("riveIndomitableSkillHit")
 
-    return _damage
+    return damage

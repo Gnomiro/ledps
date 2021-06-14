@@ -5,10 +5,6 @@
 * Armour does not reduce dot damage -> Shred irrelevant
 * Resistance does -> Resistance Shred is good!
 
-# Bleed
-* Bleed Duration: 4 seconds
-* Bleed dmage: 53 over 4 seconds
-
 # Attack rate
 * "Attack rate does multiply the base attack speed. Think of a 1.2 attack rate weapon as having a "20% more melee attack speed" mod."
 * "Every ability has its own speed"
@@ -21,8 +17,14 @@
 * Does a TriggerHit procc buffs like Undisputed? Should probably... -> Adapt TriggerSkills
  -> Buffs as Ailment resp. nonDamagingAilment/buff
 
-# Assumption
-* .
+# General
+* Naming style: 'camilleCase'
+* Class intern variables with leading '\_': '\_variableName'
+* Input variables with trailing '\_': 'variableName\_'
+* Temporary variables have no '\_'
+* Variables/objects start with lowercase letter
+* Classes start with uppercase letter
+* Function definitions should end either with return or pass
 
 # Notes
 * Best way for counting occurences:
