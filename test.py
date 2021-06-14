@@ -87,7 +87,7 @@ s.addDurationModifier('bleed', 'onHit', 0.20)
 s.addDurationModifier('bleed', 'onHit', 0.13)
 s.addIncrease('physical', 0.14)
 
-# print(s)
+print(s)
 
 skill = skill.Rive()
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
@@ -99,10 +99,11 @@ skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution
 
 repeats = 10
 endtime = 60
-boss = True
+boss = False
+print('Boss: {}'.format(boss))
 overallDamage = damage.Damage()
 for i in range(repeats):
-  c = character.Character(s, skill, verbosity = 0)
+  c = character.Character(s, skill, verbosity = 1)
   # boss = True reduces shred effect
   damage = c.combat(endtime = endtime, boss = boss)
   print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))

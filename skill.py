@@ -134,14 +134,14 @@ class Default():
 
     return damage
 
-  # calculates on hit chance for 'ailment_'
+  # calculates on hit chance for 'name_'
   # generic implementation; should only rarely be changed by implemented skills
-  def getOnHitChance(self, ailment_, stats_):
+  def getOnHitChance(self, name_, stats_):
 
-    # print("defaultAilmentChance")
-    # ailment chance on hit only
-    chance = stats_.duration[ailment_]['onHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onHit']
+    # print("defaultOnHitChance")
+    # onHit chance for all generic hits only
+    chance = stats_.getDurationModifier(name_, 'onHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit')
 
     return chance
 
@@ -150,14 +150,14 @@ class Default():
   def applyOnHit(self, stats_, durations_):
 
     # get all damagingAilments, shreds and buffs
-    for ailment, ailmentInfo in data.getDurationData('damagingAilment', 'shred', 'buff').items():
-      chance = self.getOnHitChance(ailment, stats_)
+    for name, info in data.getDurationData('damagingAilment', 'shred', 'buff').items():
+      chance = self.getOnHitChance(name, stats_)
 
       if chance == 0:
         continue
 
-      # when a conidtion os provided test if the requirement is full-filled, i.e., if a buff/debuff is applied
-      if ailmentInfo['condition'] != None and ailmentInfo['condition'] not in durations_.countActive():
+      # when a condition is provided test if the requirement is full-filled, i.e., if a buff/debuff is applied
+      if info['condition'] != None and info['condition'] not in durations_.countActive():
         continue
 
       # guaranteed applications
@@ -165,13 +165,13 @@ class Default():
 
       # if hit chance not equal onHit chance roll if additional applications happen
       if applications != chance and random.random() <= chance - applications:
-        # print('{} added by chance'.format(ailment))
+        # print('{} added by chance'.format(name))
         applications += 1
       # one bleed for each application
       for i in range(applications):
-        durations_.add(ailment, skillAttributes_ = self._attributes)
+        durations_.add(name, skillAttributes_ = self._attributes)
 
-      # print('Ailment: {}, chance: {}'.format(ailment, chance))
+      # print('Duration: {}, chance: {}'.format(name, chance))
 
     return durations_
 
@@ -188,8 +188,8 @@ class Default():
 
     # print("defaultTriggerChance")
     # trigger chance on hit only
-    chance = stats_.proc[trigger_]['onHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onHit']
+    chance = stats_.getTriggerModifier(trigger_, 'onHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit')
 
     return chance
 
@@ -242,7 +242,7 @@ class Default():
   # generic implementation; must not be changed by implemented skills
   def getAttacktime(self, stats_ = stats.Stats()):
     self.prepare()
-    return self._attacktimes[self._n] / (1 + stats_.increase['meleeAttackSpeed'] + self._localSkillStats[self._n].increase['meleeAttackSpeed']) / (stats_.more['meleeAttackSpeed'] * self._localSkillStats[self._n].more['meleeAttackSpeed'])
+    return self._attacktimes[self._n] / (1. + stats_.getIncrease('meleeAttackSpeed') + self._localSkillStats[self._n].getIncrease('meleeAttackSpeed')) / (stats_.getMore('meleeAttackSpeed') * self._localSkillStats[self._n].getMore('meleeAttackSpeed'))
 
 # generic melee attack class
 class Melee(Default):
@@ -254,25 +254,25 @@ class Melee(Default):
 
     pass
 
-  def getOnHitChance(self, ailment_, stats_):
+  def getOnHitChance(self, name_, stats_):
 
-    # print("meleeAilmentChance")
-    # ailment chance on hit and melee hit
-    chance = stats_.duration[ailment_]['onHit'] \
-            + stats_.duration[ailment_]['onMeleeHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onMeleeHit']
+    # print("meleeOnHitChance")
+    # onHit chance for generic hit and melee hit
+    chance = stats_.getDurationModifier(name_,'onHit') \
+            + stats_.getDurationModifier(name_,'onMeleeHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_,'onHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_,'onMeleeHit')
 
     return chance
 
   def getTriggerChance(self, trigger_, stats_):
 
     # print("meleeTriggerChance")
-    # ailment chance on hit and melee hit
-    chance = stats_.proc[trigger_]['onHit'] \
-            + stats_.proc[trigger_]['onMeleeHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onMeleeHit']
+    # onHit chance for generic hit and melee hit
+    chance = stats_.getTriggerModifier(trigger_, 'onHit') \
+            + stats_.getTriggerModifier(trigger_, 'onMeleeHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onMeleeHit')
 
     return chance
 
@@ -286,25 +286,25 @@ class Spell(Default):
 
     pass
 
-  def getOnHitChance(self, ailment_, stats_):
+  def getOnHitChance(self, name_, stats_):
 
-    # print("spellAilmentChance")
-    # ailment chance on hit and spell hit
-    chance = stats_.duration[ailment_]['onHit'] \
-            + stats_.duration[ailment_]['onSpellHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onSpellHit']
+    # print("spellOnHitChance")
+    # onHit chance generic hit and spell hit
+    chance = stats_.getDurationModifier(name_, 'onHit') \
+            + stats_.getDurationModifier(name_, 'onSpellHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_, 'onSpellHit')
 
     return chance
 
   def getTriggerChance(self, trigger_, stats_):
 
     # print("spellTriggerChance")
-    # ailment chance on hit and spell hit
-    chance = stats_.proc[trigger_]['onHit'] \
-            + stats_.proc[trigger_]['onSpellHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onSpellHit']
+    # onHit chance for generic hit and spell hit
+    chance = stats_.getTriggerModifier(trigger_, 'onHit') \
+            + stats_.getTriggerModifier(trigger_, 'onSpellHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onSpellHit')
 
     return chance
 
@@ -318,25 +318,25 @@ class Throw(Default):
 
     pass
 
-  def getOnHitChance(self, ailment_, stats_):
+  def getOnHitChance(self, name_, stats_):
 
-    # print("throwAilmentChance")
-    # ailment chance on hit and throw hit
-    chance = stats_.duration[ailment_]['onHit'] \
-            + stats_.duration[ailment_]['onThrowHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onHit'] \
-            + self._localSkillStats[self._n].duration[ailment_]['onThrowHit']
+    # print("throwOnHitChance")
+    # onHit chance for generic hit and throw hit
+    chance = stats_.getDurationModifier(name_, 'onHit') \
+            + stats_.getDurationModifier(name_, 'onThrowHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit') \
+            + self._localSkillStats[self._n].getDurationModifier(name_, 'onThrowHit')
 
     return chance
 
   def getTriggerChance(self, trigger_, stats_):
 
     # print("throwTriggerChance")
-    # ailment chance on hit and throw hit
-    chance = stats_.proc[trigger_]['onHit'] \
-            + stats_.proc[trigger_]['onThrowHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onHit'] \
-            + self._localSkillStats[self._n].proc[trigger_]['onThrowHit']
+    # onHit chance for generic hit and throw hit
+    chance = stats_.getTriggerModifier(trigger_, 'onHit') \
+            + stats_.getTriggerModifier(trigger_, 'onThrowHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
+            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onThrowHit')
 
     return chance
 
@@ -367,20 +367,20 @@ class Rive(Melee):
     self._localSkillStats = [stats.Stats() for i in range(self._nAttacks)]
 
     # flurry: increased melee attack for first and second hit
-    self._localSkillStats[0].increase['meleeAttackSpeed'] += 0.08 * self._talents['flurry'][0]
-    self._localSkillStats[1].increase['meleeAttackSpeed'] += 0.08 * self._talents['flurry'][0]
+    self._localSkillStats[0].addIncrease('meleeAttackSpeed', 0.08 * self._talents['flurry'][0])
+    self._localSkillStats[1].addIncrease('meleeAttackSpeed', 0.08 * self._talents['flurry'][0])
 
     # sever: ignite chance for first hit
-    self._localSkillStats[0].duration['ignite']['onHit'] += 0.5 * self._talents['sever'][0]
+    self._localSkillStats[0].addDurationModifier('ignite', 'onHit', 0.5 * self._talents['sever'][0])
 
     # twistingFangs: ignite chance for second hit
-    self._localSkillStats[1].duration['ignite']['onHit'] += 0.5 * self._talents['twistingFangs'][0]
+    self._localSkillStats[1].addDurationModifier('ignite', 'onHit', 0.5 * self._talents['twistingFangs'][0])
 
     # cadence: changes pattern to [0,1,0,1,2] instead of [0,1,2]
     if self._talents['cadence'][0] == 1:
       self._pattern = [0,1,0,1,2]
 
-    self._localSkillStats[0].proc['RiveIndomitable']['onMeleeHit'] += 1. * self._talents['indomitable'][0]
+    self._localSkillStats[0].addTriggerModifier('RiveIndomitable', 'onMeleeHit', 1. * self._talents['indomitable'][0])
 
     pass
 
@@ -420,10 +420,10 @@ class Warpath(Melee):
 
     pass
 
-  # warpath overloads ailmentChance as it is reduced by 40%
-  def getOnHitChance(self, ailment_, stats_):
+  # warpath overloads OnHitChance as it is reduced by 40%
+  def getOnHitChance(self, name_, stats_):
     # todo: only for ailments, i.e., currently shred and ailments
-    return super().getOnHitChance(ailment_, stats_) * 0.6
+    return super().getOnHitChance(name_, stats_) * 0.6
 
 
 #########################################################################################################
@@ -432,7 +432,7 @@ class Warpath(Melee):
 
 
 # trigger calls overrides trigger chance as it cannot procc anything else? or only not itself again?
-# but it can still apply ailments
+# but it can still apply onHitEffects
 class Trigger():
   def getTriggerChance(self, trigger_, stats_):
     return 0

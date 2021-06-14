@@ -27,7 +27,7 @@ class Duration():
       self._type = data.getDurationData()[name_]['type']
       self._baseDuration = data.getDurationData()[name_]['baseDuration']
       self._duration = self._baseDuration
-      self._duration *= (1. + gearStats_.duration[name_]['duration'])
+      self._duration *= (1. + gearStats_.getDurationModifier(name_, 'duration'))
 
     elif duration_ != None and type_ == 'cooldown' and name_ in data.getSupportedSkills():
       # duration is a skill-specific cooldown
@@ -56,14 +56,14 @@ class Duration():
     # scale damage by ailment specific modifiers
     self._baseDamage = data.getDurationData()[self.getName()]['baseDamage']
     self._damage = self._baseDamage
-    self._damage *= (1. + gearStats_.duration[self.getName()]['effect'])
+    self._damage *= (1. + gearStats_.getDurationModifier(self.getName(), 'effect'))
 
     #print(data.getDurationData()[self.getName()]['tags'])
 
     # get sum of relevant increase modifiers
     increase = gearStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags']) + tmpStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags'])
     # general attribute-scaling for damagingAilment; assumed to be always 4%; todo: check if sometimes different
-    increase += 0.04 * sum([gearStats_.attribute[a] for a in self._skillAttributes])
+    increase += 0.04 * sum([gearStats_.getAttribute(a) for a in self._skillAttributes])
 
     # get product of relevant more modifiers
     more = gearStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags']) * tmpStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags'])

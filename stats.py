@@ -8,23 +8,21 @@ import errors
 
 class Stats():
 
+  # initialize empty stat sheet
   def __init__(self):
-    # todo: make getter for more/increase/... which combine relevant increases for skills/ailments
-    # quest: keep scaling coefficients as list or single values? Can values be updated on the fly?
-    # empty charcter sheet
-    # increase modifiers
-    self.increase = dict.fromkeys(supportedTags, 0.)
-    # more modifiers
-    self.more = dict.fromkeys(supportedTags, 1.)
-    # penetration
-    self.penetration = dict.fromkeys(supportedElementTypes, 0.)
-    # attribute
-    self.attribute = dict.fromkeys(supportedAttributes, 0.)
-    # calculates duration dict based on cross product of duration and duration modifers
-    # todo: rename later to durationModifiers
-    self.duration = {d: {dm: 0. for dm in supportedDurationModifiers} for d in supportedDurations}
 
-    self.proc = {p: {pm: 0. for pm in supportedProcModifiers} for p in supportedProcs}
+    # increase modifiers
+    self.increase = {}
+    # more modifiers
+    self.more = {}
+    # penetration
+    self.penetration = {}
+    # attribute
+    self.attribute = {}
+    # durationModifiers
+    self.durationModifier = {}
+    # triggerModifiers
+    self.triggerModifier = {}
 
     pass
 
@@ -36,18 +34,16 @@ class Stats():
     buffCount = durations_.countActiveByTypes('buff')
 
     # apply specific increases and more multipliers per stack into corresponding stat-slot
-    # assuming that same more multipliers are still additive
-    for bkey in buffCount.keys():
-      # print(bkey)
-      # print(buffCount[bkey])
-      self.increase[durationData[bkey]['element']] += durationData[bkey]['increase'] * buffCount[bkey]
-      self.more[durationData[bkey]['element']] *= (1. + durationData[bkey]['more'] * buffCount[bkey])
+    for name, stacks in buffCount.items():
+      self.addIncrease(data.getDurationData()[name]['element'], data.getDurationData()[name]['increase'] * stacks)
+      # assuming that same more multipliers are still additive
+      self.addMore(data.getDurationData()[name]['element'], (1. + data.getDurationData()[name]['more'] * stacks))
     pass
 
     return self
 
   def __str__(self):
-    return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.duration)
+    return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\nailments:\n' + str(self.durationModifier)
 
   def getIncrease(self, name_):
     if name_ not in data.getSupportedTags():
@@ -75,21 +71,21 @@ class Stats():
       raise errors.InvalidDurationError
     if modifier_ not in data.getSupportedDurationModifiers():
       raise errors.InvalidDurationModifierError
-    return self.duration.get(name_, 0.).get(modifier_, 0.)
+    return (self.durationModifier.get(name_, 0.) if name_ not in self.durationModifier.keys() else self.durationModifier.get(name_).get(modifier_, 0.))
 
   def getTriggerModifier(self, name_, modifier_):
     if name_ not in data.getSupportedTriggers():
       raise errors.InvalidTriggerError
     if modifier_ not in data.getSupportedTriggerModifiers():
       raise errors.InvalidTriggerModifierError
-    return self.proc.get(name_, 0.).get(modifier_, 0.)
+    return (self.triggerModifier.get(name_, 0.) if name_ not in self.triggerModifier.keys() else self.triggerModifier.get(name_).get(modifier_, 0.))
 
   def addIncrease(self, name_, value_):
     self.increase[name_] = self.getIncrease(name_) + value_
     pass
 
   def addMore(self, name_, value_):
-    if value_ <= 1.:
+    if value_ < 1.:
       print('Warning: More modifiers should usually be greater than 1.')
     self.more[name_] = self.getMore(name_) * value_
     pass
@@ -103,11 +99,15 @@ class Stats():
     pass
 
   def addDurationModifier(self, name_, modifier_, value_):
-    self.duration[name_][modifier_] = self.getDurationModifier(name_, modifier_) + value_
+    if name_ not in self.durationModifier.keys():
+      self.durationModifier[name_] = {}
+    self.durationModifier[name_][modifier_] = self.getDurationModifier(name_, modifier_) + value_
     pass
 
   def addTriggerModifier(self, name_, modifier_, value_):
-    self.proc[name_][modifier_] = self.getTriggerModifier(name_, modifier_) + value_
+    if name_ not in self.triggerModifier.keys():
+      self.triggerModifier[name_] = {}
+    self.triggerModifier[name_][modifier_] = self.getTriggerModifier(name_, modifier_) + value_
     pass
 
   def setIncrease(self, name_, value_):
@@ -142,7 +142,9 @@ class Stats():
       raise errors.InvalidDurationError
     if modifier_ not in data.getSupportedDurationModifiers():
       raise errors.InvalidDurationModifierError
-    self.duration[name_][modifier_] = value_
+    if name_ not in self.durationModifier.keys():
+      self.durationModifier[name_] = {}
+    self.durationModifier[name_][modifier_] = value_
     pass
 
   def setTriggerModifier(self, name_, value_):
@@ -150,7 +152,9 @@ class Stats():
       raise errors.InvalidTriggerError
     if modifier_ not in data.getSupportedTriggerModifiers():
       raise errors.InvalidTriggerModifierError
-    self.proc[name_][modifier_] = value_
+    if name_ not in self.triggerModifier.keys():
+      self.triggerModifier[name_] = {}
+    self.triggerModifier[name_][modifier_] = value_
     pass
 
   # sums up all relevant increases as requested by 'tags_' list
@@ -178,7 +182,7 @@ class Stats():
     pass
 
   def axeThrower(self, points = 5):
-    self.proc['SentinelAxeThrower']['onHit'] += points * 0.08
+    self.addTriggerModifier('SentinelAxeThrower', 'onHit', points * 0.08)
     pass
 
   # palading tree talents
@@ -189,8 +193,8 @@ class Stats():
 
   def conviction(self, points = 8):
     self.addIncrease('physical', .04 * points)
-    self.addPenetration('physical', .04 * points)
-    self.addIncrease('fire', .02 * points)
+    self.addPenetration('physical', .02 * points)
+    self.addIncrease('fire', .04 * points)
     self.addPenetration('fire', .02 * points)
     pass
 
