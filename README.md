@@ -33,11 +33,13 @@
     active[a.getName()] = active.get(a.getName(), 0) + 1
 
 # Todo
+* Damage
+  * Damage should be its own class seperated by elements
+  * makes shred effect more general
 * General
   * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
   * Allow addition from two Stats-objects
-  * Make more multiplier consistent: getter/setter/adder to ensure multiplication
   * Manage skill provided global modifers: Currently, i.e. for warpath, workaround in test.py
 * Multitarget, currently global 'enemies' in skill.py
   * Multiplies relevant modifers with monster hit count
@@ -47,6 +49,7 @@
   * Cooldown recovery must be considered at some point; possible in application while using gearStats-Data
 * Stats
   * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tempStats
+  * Add getter/setter/adder to ensure multiplication/addition and enable the possibility of reducing stats-storage requirement by tracking only != 0 (resp 1) values
 * Environment/Simulator
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills

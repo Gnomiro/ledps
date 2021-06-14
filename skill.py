@@ -94,8 +94,7 @@ class Default():
         print('Warning: Talent with name "{}" is not available for "{}". Skipped.'.format(key,self._skillName))
         continue
       print('{}: {}'.format(key, self._talents[key][0]))
-      pass
-    self._prepared = False
+      self._prepared = False
     pass
 
   # empty duration container if no durations are passed, but regularly this should always be provided

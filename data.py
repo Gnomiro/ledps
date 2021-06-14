@@ -1,3 +1,5 @@
+from itertools import chain
+
 import errors
 
 # Ailemnts with element, base damage, duration, stacksize and tags for relevant scaling attributes
@@ -23,7 +25,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'riveExecution' : {'element' : 'physical', 'type' : 'buff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
                                     'tags' : []},
                 'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'condition': 'bleed', 'baseDuration' : 4., 'maxStack' : 51,
-                                    'tags' : []}
+                                    'tags' : []},
               }
 
 # returns durationData object, if type specified only specific type
@@ -39,7 +41,13 @@ def getDurationData(*type_):
 
 supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
 
+def getSupportedDurationTypes():
+  return supportedDurationTypes
+
 supportedElementTypes = ['generic', 'physical', 'poison', 'fire', 'void']
+
+def getSupportedElementTypes():
+  return supportedElementTypes
 
 # available attributes providing scaling
 supportedTags  =  [ 'meleeAttackSpeed',
@@ -52,8 +60,47 @@ supportedTags  =  [ 'meleeAttackSpeed',
 
 supportedAttributes  = ['strength', 'dexterity']
 
-# todo: generate this list automagically from skill.py?!
+
+
+# todo: workaround to generate available skill and trigger from file
+# do this after wrapping data into class
+# supportedSkills = []
+# supportedTriggers = []
+
+# from typing import Iterable
+# #from collections import Iterable                            # < py38
+
+# def flatten(items):
+#   """Yield items from any nested iterable; see Reference."""
+#   for x in items:
+#     if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+#       for sub_x in flatten(x):
+#         yield sub_x
+#     else:
+#       yield x
+
+# import inspect, importlib
+# for name, cls in inspect.getmembers(importlib.import_module("skill"), inspect.isclass):
+#   if cls.__module__ == 'skill' and name != 'Trigger':
+#     print(name)
+#     trigger = False
+#     for i in list(flatten(inspect.getclasstree(inspect.getmro(cls)))):
+#       if isinstance(i(), skill.Trigger):
+#         trigger = True
+#     if trigger:
+#       supportedTriggers.append(name)
+#     supportedSkills.append(name)
+
+# supportedProcs = supportedTriggers
+
 supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike', 'SentinelAxeThrower', 'RiveIndomitable']
+
+def getSupportedSkills():
+  return supportedSkills
+
+def getSupportedDurations():
+  return chain(durationData.keys(), getSupportedSkills())
+
 # each skill procc must have a corresponding skill class
 # todo: rename to trigger
 # todo: remove donition again?
@@ -63,7 +110,7 @@ supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' :
                  }
 supportedProcModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
 
-def getTrigger():
+def getSupportedTrigger():
   return supportedProcs
 
 # get supported ailments from ailment class
