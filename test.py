@@ -87,15 +87,15 @@ s.addDurationModifier('bleed', 'onHit', 0.20)
 s.addDurationModifier('bleed', 'onHit', 0.13)
 s.addIncrease('physical', 0.14)
 
-print(s)
-
 skill = skill.Rive()
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
 
 # warpath's drainingAssault adds global more damage while spinning
 # drainingAssault = 5
-# s.addMoreGeneric(1 + 0.15 * drainingAssault)
+# s.addMore('generic', 1 + 0.15 * drainingAssault)
 # skill = skill.Warpath()
+
+print(s)
 
 repeats = 10
 endtime = 60

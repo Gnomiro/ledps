@@ -350,7 +350,7 @@ class Throw(Default):
 # Rive
 class Rive(Melee):
 
-  def __init__(self, attacktimes_ = [0.68182, 0.68182, 0.68182], pattern_ = [0, 1, 2], attributes_ = ['strength']):
+  def __init__(self, attacktimes_ = [0.68182 * 0.75, 0.68182 * 0.75, 0.68182 * 0.93], pattern_ = [0, 1, 2], attributes_ = ['strength']):
     super().__init__(attacktimes_, pattern_, attributes_)
 
     # skillname

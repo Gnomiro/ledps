@@ -56,8 +56,7 @@
 In addition. Is the shred from poison as well limited by 20 stacks? Or is it possible top have poison shred stack to 20 alongside additional poison stack to further reduce the resistance?
 [20:41] Mike W: built in shred only; not limited
 
-[21:20] Mike W: poison shred is limited to 20.
-the resistance drop from poison itself isn't limited
+[21:20] Mike W: poison shred is limited to 20. the resistance drop from poison itself isn't limited
 
 [03:50] Hishoukitai: the 40% reduced ailment chance on hit with Sentinel's Warpath, is that a flat 40%? for example if i have 200% ignite does it drop it to 160% or is it 40% of that 200%, dropping it to 120%?
 [04:13] Trasochi: It's multiplicative so if you have 200% chance it drops to 120%.
@@ -67,3 +66,6 @@ the resistance drop from poison itself isn't limited
 
 [21:12] sir.hrsT: hello quick question : how is the interaction between Rive nodes "Execution" and "Savagery" for the third hit. Does the third Hit gets the dmg amp from hitting an ignited target and THAN consumes the ingnite to boost phys dmg or does it consume the ignite and doesnt get any boost from "Savagery"?
 [21:24] Mike W: The bonus damage from hitting an ignited target gets calculated first then it consumes the ignite.
+
+[01:13] Oeller: Is the Attackspeed of all Rive attacks 0.68182? Only info I found about attack speed in this thread. Posted by Trasochi in 2019...
+[01:15] Trasochi: The first two parts of Rive's combo are 25% faster than a basic attack and the last is 7% faster.

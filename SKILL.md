@@ -8,7 +8,7 @@
 * Supported attack types: Default, Melee, Spell, Throw, Trigger
 * Attack types provide a general interface
 * Implemented skills:
-  * Rive (partially talents)
+  * Rive (partially talents, no Laceration)
   * Warpath (no talents yet)
 * Implemented trigger skills:
   * Manifest Strike
