@@ -13,7 +13,7 @@
 # Questions
 * Ailment damage still snapshotting or updated live? Duration and Effect snappshotted? - Did on March 8th 2020
 * Ailments seem to snapshot!
-* Can Trigger trigger? 
+* Can Trigger trigger?
 * Does a TriggerHit procc buffs like Undisputed? Should probably... -> Adapt TriggerSkills
  -> Buffs as Ailment resp. nonDamagingAilment/buff
 
@@ -45,11 +45,11 @@
 * Cooldowns
   * Cooldown recovery must be considered at some point; possible in application while using gearStats-Data
 * Stats
-  * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tempStats
-  * Add getter/setter/adder to ensure multiplication/addition and enable the possibility of reducing stats-storage requirement by tracking only != 0 (resp 1) values
+  * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tmpStats
 * Environment/Simulator
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills
+  * pass gearStats on init and add skillStats?
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
 
 [20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
@@ -64,3 +64,6 @@ the resistance drop from poison itself isn't limited
 
 [09:20] Oeller: Since Manifest Strike has no tooltip: What are the scaling tags? Any Attributes?
 [20:45] Mike W: Physical, Melee, Strength and Attunement.
+
+[21:12] sir.hrsT: hello quick question : how is the interaction between Rive nodes "Execution" and "Savagery" for the third hit. Does the third Hit gets the dmg amp from hitting an ignited target and THAN consumes the ingnite to boost phys dmg or does it consume the ignite and doesnt get any boost from "Savagery"?
+[21:24] Mike W: The bonus damage from hitting an ignited target gets calculated first then it consumes the ignite.

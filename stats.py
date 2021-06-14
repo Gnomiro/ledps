@@ -12,17 +12,17 @@ class Stats():
   def __init__(self):
 
     # increase modifiers
-    self.increase = {}
+    self._increase = {}
     # more modifiers
-    self.more = {}
+    self._more = {}
     # penetration
-    self.penetration = {}
+    self._penetration = {}
     # attribute
-    self.attribute = {}
+    self._attribute = {}
     # durationModifiers
-    self.durationModifier = {}
+    self._durationModifier = {}
     # triggerModifiers
-    self.triggerModifier = {}
+    self._triggerModifier = {}
 
     pass
 
@@ -44,19 +44,19 @@ class Stats():
 
   # add other_ to self; operator +=
   def __iadd__(self, other_):
-    for name, value in other_.increase.items():
+    for name, value in other_._increase.items():
       self.addIncrease(name, value)
-    for name, value in other_.more.items():
+    for name, value in other_._more.items():
       self.addMore(name, value)
-    for name, value in other_.penetration.items():
+    for name, value in other_._penetration.items():
       self.addPenetration(name, value)
-    for name, value in other_.attribute.items():
+    for name, value in other_._attribute.items():
       self.addAttribute(name, value)
-    for name in other_.durationModifier.keys():
-      for modifier, value in other_.durationModifier[name].items():
+    for name in other_._durationModifier.keys():
+      for modifier, value in other_._durationModifier[name].items():
         self.addDurationModifier(name, modifier, value)
-    for name in other_.triggerModifier.keys():
-      for modifier, value in other_.triggerModifier[name].items():
+    for name in other_._triggerModifier.keys():
+      for modifier, value in other_._triggerModifier[name].items():
         self.addTriggerModifier(name, modifier, value)
     return self
 
@@ -70,77 +70,83 @@ class Stats():
     return total
 
   def __str__(self):
-    return 'increases:\n' + str(self.increase) + '\nmore:\n' + str(self.more) + '\npenetration:\n' + str(self.penetration) + '\nattribute:\n' + str(self.attribute) + '\ndurationModifier:\n' + str(self.durationModifier) + '\ntriggerModifier:\n' + str(self.triggerModifier)
+    return 'increases:\n' + str(self._increase) + '\nmore:\n' + str(self._more) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\ndurationModifier:\n' + str(self._durationModifier) + '\ntriggerModifier:\n' + str(self._triggerModifier)
+
+  def getPenetrations(self):
+    return self._penetration
+
+  def getDurationModifiers(self):
+    return self._durationModifier
 
   def getIncrease(self, name_):
     if name_ not in data.getSupportedTags():
       raise errors.InvalidTagError
-    return self.increase.get(name_, 0.)
+    return self._increase.get(name_, 0.)
 
   def getMore(self, name_):
     if name_ not in data.getSupportedTags():
       raise errors.InvalidTagError
-    return self.more.get(name_, 1.)
+    return self._more.get(name_, 1.)
 
   def getPenetration(self, name_):
     if name_ not in data.getSupportedElementTypes():
       raise errors.InvalidElementError
-    return self.penetration.get(name_, 0.)
+    return self._penetration.get(name_, 0.)
 
     pass
   def getAttribute(self, name_):
     if name_ not in data.getSupportedAttributes():
       raise errors.InvalidAttributeError
-    return self.attribute.get(name_, 0.)
+    return self._attribute.get(name_, 0.)
 
   def getDurationModifier(self, name_, modifier_):
     if name_ not in data.getSupportedDurations():
       raise errors.InvalidDurationError
     if modifier_ not in data.getSupportedDurationModifiers():
       raise errors.InvalidDurationModifierError
-    return (self.durationModifier.get(name_, 0.) if name_ not in self.durationModifier.keys() else self.durationModifier.get(name_).get(modifier_, 0.))
+    return (self._durationModifier.get(name_, 0.) if name_ not in self._durationModifier.keys() else self._durationModifier.get(name_).get(modifier_, 0.))
 
   def getTriggerModifier(self, name_, modifier_):
     if name_ not in data.getSupportedTriggers():
       raise errors.InvalidTriggerError
     if modifier_ not in data.getSupportedTriggerModifiers():
       raise errors.InvalidTriggerModifierError
-    return (self.triggerModifier.get(name_, 0.) if name_ not in self.triggerModifier.keys() else self.triggerModifier.get(name_).get(modifier_, 0.))
+    return (self._triggerModifier.get(name_, 0.) if name_ not in self._triggerModifier.keys() else self._triggerModifier.get(name_).get(modifier_, 0.))
 
   def addIncrease(self, name_, value_):
-    self.increase[name_] = self.getIncrease(name_) + value_
+    self._increase[name_] = self.getIncrease(name_) + value_
     pass
 
   def addMore(self, name_, value_):
     if value_ < 1.:
       print('Warning: More modifiers should usually be greater than 1.')
-    self.more[name_] = self.getMore(name_) * value_
+    self._more[name_] = self.getMore(name_) * value_
     pass
 
   def addPenetration(self, name_, value_):
-    self.penetration[name_] = self.getPenetration(name_) + value_
+    self._penetration[name_] = self.getPenetration(name_) + value_
     pass
 
   def addAttribute(self, name_, value_):
-    self.attribute[name_] = self.getAttribute(name_) + value_
+    self._attribute[name_] = self.getAttribute(name_) + value_
     pass
 
   def addDurationModifier(self, name_, modifier_, value_):
-    if name_ not in self.durationModifier.keys():
-      self.durationModifier[name_] = {}
-    self.durationModifier[name_][modifier_] = self.getDurationModifier(name_, modifier_) + value_
+    if name_ not in self._durationModifier.keys():
+      self._durationModifier[name_] = {}
+    self._durationModifier[name_][modifier_] = self.getDurationModifier(name_, modifier_) + value_
     pass
 
   def addTriggerModifier(self, name_, modifier_, value_):
-    if name_ not in self.triggerModifier.keys():
-      self.triggerModifier[name_] = {}
-    self.triggerModifier[name_][modifier_] = self.getTriggerModifier(name_, modifier_) + value_
+    if name_ not in self._triggerModifier.keys():
+      self._triggerModifier[name_] = {}
+    self._triggerModifier[name_][modifier_] = self.getTriggerModifier(name_, modifier_) + value_
     pass
 
   def setIncrease(self, name_, value_):
     if name_ not in data.getSupportedTags():
       raise errors.InvalidTagError
-    self.increase[name_] = value_
+    self._increase[name_] = value_
     pass
 
   def setMore(self, name_, value_):
@@ -148,20 +154,20 @@ class Stats():
       raise errors.InvalidTagError
     if value_ <= 1.:
       print('Warning: More modifiers should usually be greater than 1.')
-    self.more[name_] = value_
+    self._more[name_] = value_
     pass
 
   def setPenetration(self, name_, value_):
     if name_ not in data.getSupportedElementTypes():
       raise errors.InvalidElementError
-    self.penetration[name_] = value_
+    self._penetration[name_] = value_
     pass
 
     pass
   def setAttribute(self, name_, value_):
     if name_ not in data.getSupportedAttributes():
       raise errors.InvalidAttributeError
-    self.attribute[name_] = value_
+    self._attribute[name_] = value_
     pass
 
   def setDurationModifier(self, name_, value_):
@@ -169,9 +175,9 @@ class Stats():
       raise errors.InvalidDurationError
     if modifier_ not in data.getSupportedDurationModifiers():
       raise errors.InvalidDurationModifierError
-    if name_ not in self.durationModifier.keys():
-      self.durationModifier[name_] = {}
-    self.durationModifier[name_][modifier_] = value_
+    if name_ not in self._durationModifier.keys():
+      self._durationModifier[name_] = {}
+    self._durationModifier[name_][modifier_] = value_
     pass
 
   def setTriggerModifier(self, name_, value_):
@@ -179,9 +185,9 @@ class Stats():
       raise errors.InvalidTriggerError
     if modifier_ not in data.getSupportedTriggerModifiers():
       raise errors.InvalidTriggerModifierError
-    if name_ not in self.triggerModifier.keys():
-      self.triggerModifier[name_] = {}
-    self.triggerModifier[name_][modifier_] = value_
+    if name_ not in self._triggerModifier.keys():
+      self._triggerModifier[name_] = {}
+    self._triggerModifier[name_][modifier_] = value_
     pass
 
   # sums up all relevant increases as requested by 'tags_' list

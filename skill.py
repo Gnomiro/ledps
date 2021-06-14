@@ -156,8 +156,9 @@ class Default():
       if chance == 0:
         continue
 
-      # when a condition is provided test if the requirement is full-filled, i.e., if a buff/debuff is applied
-      if info['condition'] != None and info['condition'] not in durations_.countActive():
+      # when a condition is provided test if the requirement is full-filled, i.e., if a buff/debuff is applied more than once
+      condition = data.getDurationData()[name]['condition']
+      if condition != None and durations_.countActiveByNames(condition)[condition] == 0:
         continue
 
       # guaranteed applications

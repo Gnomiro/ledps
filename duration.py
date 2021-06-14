@@ -14,11 +14,11 @@ import damage
 class Duration():
 
   # create duration object; by default requires duration 'name_' string only;
-  # for damagingAilments gearStats_ as well as tmpStats_ (e.g., buffs) can be passed
+  # for damagingAilments tmpStats_ (e.g., gearStats + buffs) can be passed
   # as they are snappshotted at application time
   # 'skillAttributes_' provide the attributes of the applying skill as they scale the damagingAilments as well
   # skill cooldowns can be passed by specifying 'duration_' and 'type_ = 'cooldown''; otherwise these values are ignored
-  def __init__(self, name_, gearStats_ = stats.Stats(), tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
+  def __init__(self, name_, tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
 
     if name_ in data.getDurationData().keys():
       # default duration behaviour; determined by name_; duration_ and type_ are ignored
@@ -27,7 +27,7 @@ class Duration():
       self._type = data.getDurationData()[name_]['type']
       self._baseDuration = data.getDurationData()[name_]['baseDuration']
       self._duration = self._baseDuration
-      self._duration *= (1. + gearStats_.getDurationModifier(name_, 'duration'))
+      self._duration *= (1. + tmpStats_.getDurationModifier(name_, 'duration'))
 
     elif duration_ != None and type_ == 'cooldown' and name_ in data.getSupportedSkills():
       # duration is a skill-specific cooldown
@@ -56,17 +56,17 @@ class Duration():
     # scale damage by ailment specific modifiers
     self._baseDamage = data.getDurationData()[self.getName()]['baseDamage']
     self._damage = self._baseDamage
-    self._damage *= (1. + gearStats_.getDurationModifier(self.getName(), 'effect'))
+    self._damage *= (1. + tmpStats_.getDurationModifier(self.getName(), 'effect'))
 
     #print(data.getDurationData()[self.getName()]['tags'])
 
     # get sum of relevant increase modifiers
-    increase = gearStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags']) + tmpStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags'])
+    increase = tmpStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags'])
     # general attribute-scaling for damagingAilment; assumed to be always 4%; todo: check if sometimes different
-    increase += 0.04 * sum([gearStats_.getAttribute(a) for a in self._skillAttributes])
+    increase += 0.04 * sum([tmpStats_.getAttribute(a) for a in self._skillAttributes])
 
     # get product of relevant more modifiers
-    more = gearStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags']) * tmpStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags'])
+    more = tmpStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags'])
 
     # final overall damage of damagingAilment
     self._damage *= (1. + increase) * more
@@ -143,13 +143,16 @@ class Durations():
   def add(self, name_, skillAttributes_ = [], duration_ = None, type_ = None):
 
     # allocate buffs into temporary stats object if duration-type is of damagingAilment -> snapshotting
+    # add gearStats as well
     if name_ in data.getDurationData().keys() and data.getDurationData()[name_]['type'] == 'damagingAilment':
       tmpStats = stats.Stats().fromBuffs(self)
+      # add gear stats to temporary stats; not necessary if not a adamaing ailment
+      tmpStats += self._gearStats
     else:
       tmpStats = stats.Stats()
 
     # create duration object; passing all stats
-    duration = Duration(name_, gearStats_ = self._gearStats, tmpStats_ = tmpStats, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
+    duration = Duration(name_, tmpStats_ = tmpStats, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
 
     # replace oldest duration if it is not a cooldown and has a maxStack size otherwise just add it
     if duration.getType() != 'cooldown' and data.getDurationData()[duration.getName()]['maxStack'] != 0 and self.countActiveByNames(duration.getName())[duration.getName()] >= data.getDurationData()[duration.getName()]['maxStack']:
@@ -166,7 +169,7 @@ class Durations():
 
     # poison applies a build in poison shred as well which has not stack limitation
     if duration.getType() == 'damagingAilment' and duration.getName() == 'poison':
-      self._durations['shred'].append(Duration('poisonBuiltinShred', self._gearStats, skillAttributes_ = skillAttributes_))
+      self._durations['shred'].append(Duration('poisonBuiltinShred', skillAttributes_ = skillAttributes_))
 
     pass
 
@@ -245,12 +248,12 @@ class Durations():
       tick_dmg += d.tick(timestep_)
 
     # get penetration from gearStats_ and normalize it to 1. to multiply damage values later
-    penetration = {k: (self._gearStats.penetration[k] + 1.) for k in self._gearStats.penetration}
+    penetration = {element: (self._gearStats.getPenetration(element) + 1.) for element in self._gearStats.getPenetrations().keys()}
     # print(penetration)
     # count active shreds and add them to penetration from gear
     shreds = self.countActiveByTypes('shred')
     for key in shreds:
-      penetration[data.getDurationData()[key]['element']] += shreds[key] * 0.05 * (0.4 if boss_ else 1.)
+      penetration[data.getDurationData()[key]['element']] = penetration.get(data.getDurationData()[key]['element'], 1.0) + shreds[key] * 0.05 * (0.4 if boss_ else 1.)
     # print(penetration)
     # scale damage by penetration
     tick_dmg.multiplyEachElementSeperately(penetration)

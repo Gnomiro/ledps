@@ -103,7 +103,7 @@ boss = False
 print('Boss: {}'.format(boss))
 overallDamage = damage.Damage()
 for i in range(repeats):
-  c = character.Character(s, skill, verbosity = 1)
+  c = character.Character(s, skill, verbosity = 0)
   # boss = True reduces shred effect
   damage = c.combat(endtime = endtime, boss = boss)
   print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
