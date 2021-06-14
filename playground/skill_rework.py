@@ -411,10 +411,13 @@ class Rive(Melee):
 
 # Warpath
 class Warpath(Melee):
-  def __init__(self, attacktimes_ = [0], pattern_ = [0], attributes_ = ['strength']):
+  # warpath has doubled attack time; multiplicative order does not matter
+  def __init__(self, attacktimes_ = [0.68182 / 2.], pattern_ = [0], attributes_ = ['strength']):
       super().__init__(attacktimes_, pattern_, attributes_)
 
       self._skillName = "Warpath"
+      # available and supported talents
+      # self._talents = {'temporalCascade' : [0,5], 'drainingAssault' : [0,5]}
 
   # warpath overloads ailmentChance as it is reduced by 40%
   def getOnHitChance(self, ailment_, stats_):

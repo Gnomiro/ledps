@@ -22,11 +22,13 @@
  -> Buffs as Ailment resp. nonDamagingAilment/buff
 
 # Assumption
-* Attackorder
-  * SkillHits
-  * Skill inflicts Ailments
-  * Skill effects are triggered, i.e., execution from Rive
-  * OnHitTrigger are resolved
+* .
+
+# Notes
+* Best way for counting occurences:
+  active = {}
+  for a in self.getActive(type):
+    active[a.getName()] = active.get(a.getName(), 0) + 1
 
 # Todo
 * General

@@ -2,8 +2,7 @@ import stats
 import skill
 import character
 import sys
-sys.path.append("playground/")
-import skill_rework as skill2
+# sys.path.append("playground/")
 
 
 s = stats.Stats()
@@ -89,17 +88,13 @@ s.addIncreasedPhysical(0.14)
 
 # print(s)
 
-# skill = skill.Default()
-# skill = skill.Rive(cadence = False, flurry = 5, indomitable = False, sever = 0, twistingFangs = 0)
-# skill = skill.Rive(cadence = True, flurry = 5, indomitable = False, sever = 3, twistingFangs = 3, execution = True) # indomitable not yet supported
-
-skill = skill2.Rive()
+skill = skill.Rive()
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
 
 # warpath's drainingAussault adds global more damage while spinning
-# drainingAussault = 1
+# drainingAussault = 5
 # s.addMoreGeneric(1 + 0.15 * drainingAussault)
-# skill = skill.Warpath(warForge = 0, moltenPath = 0) # warForge and moltenPath are hits only; drainingAussault currently not apllied by skill
+# skill = skill.Warpath()
 
 repeats = 10
 endtime = 60
