@@ -22,14 +22,14 @@ class Damage():
 
   def __iadd__(self, other_):
     for key in self._element.keys():
-      self[key] += other_[key]
+      self._element[key] += other_._element[key]
       #self.__setitem__(key, self.__getitem__(key) + other_.__getitem__(key))
     return self
 
   def __add__(self, other_):
     total = Damage()
     for key in self._element.keys():
-      total[key] = self[key] + other_[key]
+      total[key] = self._element[key] + other_._element[key]
     return total
 
   def __str__(self):
@@ -41,13 +41,13 @@ class Damage():
   def dps(self, time_):
     dps = Damage()
     for key in dps._element.keys():
-      dps[key] = self[key] / time_
+      dps[key] = self._element[key] / time_
     return dps
 
   def total(self):
     d = 0
     for key in self._element.keys():
-      d += self[key]
+      d += self._element[key]
     return d
 
   def multiplyEachElementSeperately(self, factor_):

@@ -96,7 +96,7 @@ class Duration():
     if self.isPermanent():
       return True
     else:
-      return not isclose(self._elapsed, self._duration, rtol = 0, atol = 1e-2, equal_nan = False)
+      return self._elapsed < self._duration # not isclose(self._elapsed, self._duration, rtol = 0, atol = 1e-2, equal_nan = False)
 
   # processes the next tick of the duration buff considering a stepsize of 'timestep_'
   def tick(self, timestep_):

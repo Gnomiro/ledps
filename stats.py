@@ -281,22 +281,22 @@ class Stats():
     print("Sword")
     # implcits
     self.addMore('meleeAttackSpeed', 1.24)
-    self.addIncrease('overTime', 0.48)
+    self.addIncrease('overTime', 0.43)
     # stats
     self.addIncrease('meleeAttackSpeed', 0.22)
-    self.addIncrease('physical', 1.03)
-    self.addDurationModifier('bleed', 'onHit', 0.49)
+    self.addIncrease('physical', 0.68)
+    self.addDurationModifier('bleed', 'onHit', 1.05)
     pass
 
   def addAxe(self):
     print("Axe")
-    # implicits
+    # implcits
     self.addMore('meleeAttackSpeed', 1.05)
     self.addDurationModifier('bleed', 'onHit', 0.3)
     # stats
     self.addIncrease('meleeAttackSpeed', 0.22)
-    self.addIncrease('physical', 1.03)
-    self.addDurationModifier('bleed', 'onHit', 0.49)
+    self.addIncrease('physical', 0.68)
+    self.addDurationModifier('bleed', 'onHit', 1.05)
     pass
 
   def addUndisputed(self):
