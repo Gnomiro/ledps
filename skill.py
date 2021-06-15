@@ -200,8 +200,8 @@ class Default():
 
     damage = 0
 
-    for trigger in data.getSupportedTriggers():
-      chance = self.getTriggerChance(trigger, stats_)
+    for trigger, info in data.getSupportedTriggerData().items():
+      chance = self.getTriggerChance(trigger, stats_) * info['onHitEffectiveness']
 
       if chance == 0:
         continue
@@ -215,10 +215,13 @@ class Default():
       if applications != chance and random.random() <= chance - applications:
         applications += 1
       for i in range(applications):
+        # print('{} chance: {}, info: {}'.format(trigger, chance, data.getSupportedTriggers()[trigger]))
         # triggers skill; eval(proc) calls constructor of relevant attack
         # return damage, irrelevant attacktime (beacuse trigger are instant), and modified durations_
-        triggerDamage, _, durations_ = eval(trigger)().attack(durations_, stats_)
-        damage += triggerDamage
+        # info['onTriggerExecutions'] tells how many projectiles/executions happen which can hit the same target
+        for _ in range(info['onTriggerExecutions']):
+          triggerDamage, _, durations_ = eval(trigger)().attack(durations_, stats_)
+          damage += triggerDamage
 
     return damage, durations_
 
@@ -490,5 +493,21 @@ class RiveIndomitable(Trigger, Spell):
     damage = 0
 
     # print("riveIndomitableSkillHit")
+
+    return damage
+
+# Divine Bolt trigger
+class DivineBolt(Trigger, Spell):
+  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['attunement']):
+    super().__init__(attacktimes_, pattern_, attributes_)
+
+    self._skillName = "DivineBolt"
+
+  # skill specific hit which should be overriden by skill-Implementations
+  def skillHit(self, stats_, durations_):
+
+    damage = 0
+
+    # print("riveDivineBoltSkillHit")
 
     return damage

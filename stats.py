@@ -1,5 +1,3 @@
-from data import supportedTags, supportedAttributes, supportedDurations, supportedDurationModifiers, supportedElementTypes, durationData, supportedProcs, supportedProcModifiers
-
 from numpy import product as prod
 
 import data
@@ -31,7 +29,7 @@ class Stats():
     self.__init__()
 
     # count number of active buffs
-    buffCount = durations_.countActiveByTypes('buff')
+    buffCount = durations_.countActiveByTypes('buff', 'skillProvidedBuff')
 
     # apply specific increases and more multipliers per stack into corresponding stat-slot
     for name, stacks in buffCount.items():
@@ -231,6 +229,13 @@ class Stats():
     self.addPenetration('fire', .02 * points)
     pass
 
+  def divineBolt(self, points = 1):
+    self.addTriggerModifier('DivineBolt', 'onMeleeHit', 0.2)
+
+  def sharedDivinity(self, points = 5):
+    data.supportedTriggerData['DivineBolt']['onTriggerExecutions'] += 1 * points
+    data.supportedTriggerData['DivineBolt']['onHitEffectiveness'] *= (1. - 0.1 * points)
+
   def redemption(self, points = 7, recentlyHit = False):
     self.addDurationModifier('bleed', 'effect', 0.07 * points)
     if recentlyHit:
@@ -269,7 +274,7 @@ class Stats():
 
   def addAmulet(self):
     self.addIncrease('physical', 0.99)
-    self.addPenetration('physical', 0.05)
+    self.addPenetration('physical', 0.06)
     pass
 
   def addSword(self):

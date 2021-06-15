@@ -29,7 +29,7 @@ class Duration():
       self._duration = self._baseDuration
       self._duration *= (1. + tmpStats_.getDurationModifier(name_, 'duration'))
 
-    elif duration_ != None and type_ == 'cooldown' and name_ in data.getSupportedSkills():
+    elif duration_ != None and type_ == 'cooldown' and name_ in chain(data.getSupportedSkills(), data.getSupportedTriggers()):
       # duration is a skill-specific cooldown
       self._type = type_
       self._baseDuration = duration_

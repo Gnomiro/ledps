@@ -22,9 +22,14 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'poisonShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
 
-                'riveExecution' : {'element' : 'physical', 'type' : 'buff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
-                                    'tags' : []},
+                # type: buff
+                # general buffs applied by all hits; applied by default attack skills
                 'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'condition': 'bleed', 'baseDuration' : 4., 'maxStack' : 51,
+                                    'tags' : []},
+
+                # type: skillProvidedBuff
+                # buffs provided by skills; to be applied in skill implementation(mostly skillEffect)
+                'riveExecution' : {'element' : 'physical', 'type' : 'skillProvidedBuff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
                                     'tags' : []},
               }
 
@@ -39,10 +44,15 @@ def getDurationData(*type_):
   else:
     raise errors.InvalidDurationTypeError
 
-supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'cooldown']
+supportedDurationTypes = ['shred', 'damagingAilment', 'buff', 'skillProvidedBuff', 'cooldown']
 
 def getSupportedDurationTypes():
   return supportedDurationTypes
+
+supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onMeleeHit', 'onThrowHit', 'duration', 'effect']
+
+def getSupportedDurationModifiers():
+  return supportedDurationModifiers
 
 supportedElementTypes = ['generic', 'physical', 'poison', 'fire', 'void']
 
@@ -66,68 +76,35 @@ supportedAttributes  = ['strength', 'dexterity', 'attunement']
 def getSupportedAttributes():
   return supportedAttributes
 
-# todo: workaround to generate available skill and trigger from file
-# do this after wrapping data into class
-# supportedSkills = []
-# supportedTriggers = []
-
-# from typing import Iterable
-# #from collections import Iterable                            # < py38
-
-# def flatten(items):
-#   """Yield items from any nested iterable; see Reference."""
-#   for x in items:
-#     if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
-#       for sub_x in flatten(x):
-#         yield sub_x
-#     else:
-#       yield x
-
-# import inspect, importlib
-# for name, cls in inspect.getmembers(importlib.import_module("skill"), inspect.isclass):
-#   if cls.__module__ == 'skill' and name != 'Trigger':
-#     print(name)
-#     trigger = False
-#     for i in list(flatten(inspect.getclasstree(inspect.getmro(cls)))):
-#       if isinstance(i(), skill.Trigger):
-#         trigger = True
-#     if trigger:
-#       supportedTriggers.append(name)
-#     supportedSkills.append(name)
-
-# supportedProcs = supportedTriggers
-
-supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'ManifestStrike', 'SentinelAxeThrower', 'RiveIndomitable']
+supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive']
 
 def getSupportedSkills():
   return supportedSkills
 
-# each skill procc must have a corresponding skill class
-# todo: rename to trigger
-# todo: remove donition again?
-supportedProcs = {  'ManifestStrike'          : {'type' : 'skill', 'condition' : None},
-                    'SentinelAxeThrower'      : {'type' : 'skill', 'condition' : None},
-                    'RiveIndomitable'         : {'type' : 'skill', 'condition' : None},
-                 }
-supportedProcModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
+# each skill procc must have a corresponding skill class provided in skills.py
+# 'onTriggerExecutions' tells how many projectiles/attacks are casted on trigger and can hit the same enemy
+# possible further information: 'type', 'condition'
+supportedTriggerData = {  'ManifestStrike'          : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                          'SentinelAxeThrower'      : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                          'RiveIndomitable'         : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                          'DivineBolt'              : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                       }
 
+def getSupportedTriggerData():
+  return supportedTriggerData
 
 def getSupportedTriggers():
-  return supportedProcs
+  return supportedTriggerData.keys()
+
+# gear specific modifiers for Triggers
+supportedTriggerModifiers = ['onHit', 'onMeleeHit', 'onSpellHit', 'onThrowHit']
 
 def getSupportedTriggerModifiers():
-  return supportedProcModifiers
+  return supportedTriggerModifiers
 
-# get supported ailments from ailment class
-supportedDurations          = durationData.keys()
-
+# durations can be either applied by duration type objects or skills/triggers (cooldowns)
 def getSupportedDurations():
-  return chain(supportedDurations, getSupportedSkills())
-
-supportedDurationModifiers  = ['onHit', 'onSpellHit', 'onMeleeHit', 'onThrowHit', 'duration', 'effect']
-
-def getSupportedDurationModifiers():
-  return supportedDurationModifiers
+  return chain(durationData.keys(), getSupportedSkills(), getSupportedTriggers())
 
 # some sanity checks
 # todo: how to make them only once?

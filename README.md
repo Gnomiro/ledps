@@ -34,6 +34,7 @@
 
 # Todo
 * General
+  * Move shred/penetration damage multiplication to outer loop in Character/Simulation; must only be applied once
   * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
   * Allow addition from two Stats-objects
