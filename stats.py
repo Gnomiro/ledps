@@ -274,7 +274,7 @@ class Stats():
 
   def addAmulet(self):
     self.addIncrease('physical', 0.99)
-    self.addPenetration('physical', 0.06)
+    self.addPenetration('physical', 0.08)
     pass
 
   def addSword(self):
@@ -328,8 +328,8 @@ class Stats():
     pass
 
   def addRing2(self):
-    self.addIncrease('physical', 0.51)
-    self.addIncrease('overTime', 0.19)
+    self.addIncrease('physical', 0.59)
+    self.addAttribute('strength', 2)
     pass
 
   def addGloves(self):

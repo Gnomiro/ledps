@@ -31,6 +31,10 @@ s.sigilsOfHope(tetragram = True, empoweringSigils = 3)
 
 # physical shred from blessing
 s.addDurationModifier('physicalShred', 'onHit', .45)
+# ignite blessing from black sun; alternative leech rate or life on block
+s.addDurationModifier('ignite', 'onHit', 0.89) 
+# bleed from reigh of dragons; alternative all resistance
+s.addDurationModifier('bleed', 'onHit', 0.87) 
 
 s.addHelmet()
 s.addAmulet()
@@ -73,12 +77,10 @@ s.addIncrease('overTime', 0.1)
 s.addIncrease('overTime', 0.08)
 s.addIncrease('physical', 0.08)
 # # small idol 3
-s.addIncrease('overTime', 0.08)
-s.addIncrease('physical', 0.05)
+s.addIncrease('overTime', 0.05)
 
 # humble idol 1
 s.addDurationModifier('bleed', 'onHit', 0.12)
-s.addIncrease('physical', 0.14)
 # ornate idol 1
 s.addTriggerModifier('ManifestStrike', 'onMeleeHit', 0.1)
 # humble idol 2
@@ -87,8 +89,7 @@ s.addDurationModifier('bleed', 'onHit', 0.11)
 s.addDurationModifier('bleed', 'onHit', 0.36)
 s.addDurationModifier('bleed', 'onHit', 0.20)
 # humble idol 3
-s.addDurationModifier('bleed', 'onHit', 0.13)
-s.addIncrease('physical', 0.14)
+s.addDurationModifier('bleed', 'onHit', 0.12)
 
 skill = skill.Rive()
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
