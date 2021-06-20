@@ -14,8 +14,6 @@
 * Ailment damage still snapshotting or updated live? Duration and Effect snappshotted? - Did on March 8th 2020
 * Ailments seem to snapshot!
 * Can Trigger trigger?
-* Does a TriggerHit procc buffs like Undisputed? Should probably... -> Adapt TriggerSkills
- -> Buffs as Ailment resp. nonDamagingAilment/buff
 
 # General
 * Naming style: 'camilleCase'
@@ -33,9 +31,12 @@
     active[a.getName()] = active.get(a.getName(), 0) + 1
 
 # Todo
+* Trigger
+  * character holds Attack-Skills
+  * combat simulator tries to trigger from character skill and otherwise falls-back to default (try, catch with eval)
+   -> could replace divine bolt implementation; possibly not in this case as divine bolt cannot be used otherwie
 * General
   * Move shred/penetration damage multiplication to outer loop in Character/Simulation; must only be applied once
-  * rename procs to trigger
   * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
   * Allow addition from two Stats-objects
   * Manage skill provided global modifers: Currently, i.e. for warpath, workaround in test.py

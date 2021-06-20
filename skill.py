@@ -156,10 +156,17 @@ class Default():
       if chance == 0:
         continue
 
-      # when a condition is provided test if the requirement is full-filled, i.e., if a buff/debuff is applied more than once
-      condition = data.getDurationData()[name]['condition']
-      if condition != None and durations_.countActiveByNames(condition)[condition] == 0:
-        continue
+      # when a condition is provided test if the requirement is fullfilled, i.e., if a buff/debuff is applied more than once
+      # for ct, c in data.getDurationData()[name]['condition'].items():
+      #   print(ct)
+      #   print(c)
+      #   print(self.evaluateCondition(durations_, ct, c))
+      #    #and durations_.countActiveByNames(condition)[condition] == 0
+      #   continue
+
+      if not all([self.evaluateCondition(durations_, ct, c) for ct, c in data.getDurationData()[name]['condition'].items()]):
+        print('Warning: Conditions not met!')
+        return durations_
 
       # guaranteed applications
       applications = floor(chance)
@@ -175,6 +182,15 @@ class Default():
       # print('Duration: {}, chance: {}'.format(name, chance))
 
     return durations_
+
+
+  def evaluateCondition(self, durations_, conditionType_, condition_):
+    if conditionType_ == 'isActive':
+      return durations_.countActiveByNames(condition_)[condition_] != 0
+    else:
+      print('Warning: Condition-type not yet supported!')
+      return False
+    pass
 
   # skill specific proc stuff which should be overriden by skill-Implementations
   def skillEffect(self, stats_, durations_):

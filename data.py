@@ -3,34 +3,67 @@ from itertools import chain
 import errors
 
 # Ailemnts with element, base damage, duration, stacksize and tags for relevant scaling attributes
-durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 0,
+durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAilment', 'baseDamage' :  53. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 0,
                                     'tags' : ['generic', 'physical', 'physicalOverTime', 'overTime']},
-                'doom'          : { 'element' : 'void', 'type' : 'damagingAilment', 'baseDamage' :  400. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 4,
+                'doom'          : { 'element' : 'void', 'type' : 'damagingAilment', 'baseDamage' :  400. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 4,
                                     'tags' : ['generic', 'void', 'voidOverTime', 'overTime']},
                 # poison scaling via poisonShred
-                'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
+                'poison'        : { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  20. , 'condition': {}, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']},
-                'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
+                'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': {}, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']},
 
-                'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
+                'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
-                'fireShred'     : { 'element' : 'fire', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
+                'fireShred'     : { 'element' : 'fire', 'type' : 'shred', 'baseDamage' :  0. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
-                'poisonBuiltinShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' : 0. , 'condition': None, 'baseDuration' : 3., 'maxStack' : 0,
+                'poisonBuiltinShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' : 0. , 'condition': {}, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : []},
-                'poisonShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' :  0. , 'condition': None, 'baseDuration' : 4., 'maxStack' : 20,
-                                    'tags' : []},
-
-                # type: buff
-                # general buffs applied by all hits; applied by default attack skills
-                'undisputed'    : {'element' : 'physical', 'type' : 'buff', 'increase' : .05, 'more' : .0, 'condition': 'bleed', 'baseDuration' : 4., 'maxStack' : 51,
+                'poisonShred'   : { 'element' : 'poison', 'type' : 'shred', 'baseDamage' :  0. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
 
-                # type: skillProvidedBuff
-                # buffs provided by skills; to be applied in skill implementation(mostly skillEffect)
-                'riveExecution' : {'element' : 'physical', 'type' : 'skillProvidedBuff', 'increase' : .15, 'more' : .0, 'condition': None, 'baseDuration' : 2., 'maxStack' : 0,
-                                    'tags' : []},
+  # type: buff
+  # general buffs applied by all hits; applied by default attack skills
+  # Undisputed Axe buff
+  'undisputed'        : {'type' : 'buff',
+                         'effect' : {'increase' : {'physical' : 0.05}},
+                         'condition': {'isActive' : 'bleed'},
+                         'baseDuration' : 4., 'maxStack' : 51},
+
+
+  # Primalist Aspect of the Shark buff
+  # default limited to one stack
+  'aspectOfTheShark' : {'type' : 'buff',
+                        'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50}}, # todo: check value
+                        'condition': {},
+                        'baseDuration' : 3., 'maxStack' : 1},
+
+  # Primalist Aspect of the Boar buff
+  # on getHit or 4% onHit per Talent (up to 20%)
+  # todo: scale with talents, currently maximum stats
+  'aspectOfTheBoar'  : {'type' : 'buff',
+                        'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50},
+                                   'durationModifier' : {'bleed' : {'onHit' : 0.4, 'effect' : 1.2} }
+                                   },
+                        'condition': {},
+                        'baseDuration' : 3., 'maxStack' : 1},
+
+  # Primalist Aspect of the Viper buff
+  # 3% onHit per Talent (up to 30%)
+  # todo: talents for poison effectiveness/duration
+  'aspectOfTheViper'  : {'type' : 'buff',
+                        'effect' : {'increase' : {'overTime' : 1.},
+                                   'durationModifier' : {'poison' : {'duration' : 1.} }
+                                   },
+                        'condition': {},
+                        'baseDuration' : 3., 'maxStack' : 1},
+
+  # type: skillProvidedBuff
+  # buffs provided by skills; to be applied in skill implementation(mostly skillEffect)
+  'riveExecution'     : {'type' : 'skillProvidedBuff',
+                         'effect' : {'increase' : {'physical' : 0.15}},
+                         'condition': {},
+                         'baseDuration' : 2., 'maxStack' : 0},
               }
 
 # returns durationData object, if type specified only specific type
@@ -61,7 +94,7 @@ def getSupportedElementTypes():
 
 # available attributes providing scaling
 supportedTags  =  [ 'meleeAttackSpeed',
-                    'generic', 'overTime',
+                    'generic', 'melee', 'overTime',
                     'physical', 'physicalOverTime',
                     'fire', 'fireOverTime',
                     'poison', 'poisonOverTime',
@@ -110,9 +143,9 @@ def getSupportedDurations():
 # todo: how to make them only once?
 
 # check duration elements
-for d in durationData:
-  if durationData[d]['element'] not in supportedElementTypes:
-    raise errors.InvalidElementError
+# for d in durationData:
+#   if durationData[d]['element'] not in supportedElementTypes:
+#     raise errors.InvalidElementError
 
 # check duration types
 for d in durationData:
@@ -120,7 +153,7 @@ for d in durationData:
     raise errors.InvalidDurationTypeError
 
 # check duration types
-for d in durationData:
-    for dd in durationData[d]['tags']:
-      if dd not in supportedTags:
-        raise errors.InvalidTagError
+# for d in durationData:
+#     for dd in durationData[d]['tags']:
+#       if dd not in supportedTags:
+#         raise errors.InvalidTagError

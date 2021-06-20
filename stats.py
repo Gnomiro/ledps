@@ -33,9 +33,24 @@ class Stats():
 
     # apply specific increases and more multipliers per stack into corresponding stat-slot
     for name, stacks in buffCount.items():
-      self.addIncrease(data.getDurationData()[name]['element'], data.getDurationData()[name]['increase'] * stacks)
-      # assuming that same more multipliers are still additive
-      self.addMore(data.getDurationData()[name]['element'], (1. + data.getDurationData()[name]['more'] * stacks))
+
+      # get buff data and iterate over provided stat-types (increase, more, duration, ...) and associated buffs-types (physical, attackSpeed, ...)
+      for statType, buffTypes in data.getDurationData()[name]['effect'].items():
+
+        # print(statType)
+        # iterate over buffTypes to get individual stat-buffs and values
+        for buffType, value in buffTypes.items():
+          # print(buffType)
+          # print(value)
+
+          # todo: probably change loop style to have if/else-statement at outer loop
+          # todo: add support for more types
+          if statType == 'increase':
+            self.addIncrease(buffType, value * stacks)
+          elif statType == 'more':
+            self.addMore(buffType, value * stacks)
+          else:
+            print('Warning: Allocation of buff-type not supported yet')
     pass
 
     return self

@@ -32,9 +32,9 @@ s.sigilsOfHope(tetragram = True, empoweringSigils = 3)
 # physical shred from blessing
 s.addDurationModifier('physicalShred', 'onHit', .45)
 # ignite blessing from black sun; alternative leech rate or life on block
-s.addDurationModifier('ignite', 'onHit', 0.89) 
+s.addDurationModifier('ignite', 'onHit', 0.89)
 # bleed from reigh of dragons; alternative all resistance
-s.addDurationModifier('bleed', 'onHit', 0.87) 
+s.addDurationModifier('bleed', 'onHit', 0.87)
 
 s.addHelmet()
 s.addAmulet()
@@ -53,8 +53,8 @@ s.addBoots()
 s.addRelic()
 
 # todo:
-# melee skills with modifiers 
-# -> buffs especially for something like rive execution; scale linear with number of target instead of 
+# melee skills with modifiers
+# -> buffs especially for something like rive execution; scale linear with number of target instead of
 # simulating multiple targets
 # buffs <-> ailments like 'shred' with different type like 'buff' and 'element' for increases, maybe 'generic'
 # should be treated like an 'element' for this purpose
