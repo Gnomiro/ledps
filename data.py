@@ -13,6 +13,12 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                 'ignite'        : { 'element' : 'fire', 'type' : 'damagingAilment', 'baseDamage' :  33. , 'condition': {}, 'baseDuration' : 3., 'maxStack' : 0,
                                     'tags' : ['generic', 'fire', 'fireOverTime', 'overTime']},
 
+                # other damaging ailments
+                'plague': { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  90. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 1,
+                                    'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']},
+                'blindingPoison': { 'element' : 'poison', 'type' : 'damagingAilment', 'baseDamage' :  30. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 1,
+                                    'tags' : ['generic', 'poison', 'poisonOverTime', 'overTime']},
+
                 'physicalShred' : { 'element' : 'physical', 'type' : 'shred', 'baseDamage' :  0. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 20,
                                     'tags' : []},
                 'fireShred'     : { 'element' : 'fire', 'type' : 'shred', 'baseDamage' :  0. , 'condition': {}, 'baseDuration' : 4., 'maxStack' : 20,
@@ -43,11 +49,11 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
   # on getHit or 4% onHit per Talent (up to 20%)
   # todo: scale with talents, currently maximum stats
   'aspectOfTheBoar'  : {'type' : 'buff',
-                        'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50},
+                        'effect' : {'increase' : {'physical' : 0.4},
                                     'duration'  : {'bleed' : {'onHit' : 0.4, 'effect' : 1.2} }
                                    },
                         'condition': {},
-                        'baseDuration' : 3., 'maxStack' : 1},
+                        'baseDuration' : 1., 'maxStack' : 1},
 
   # Primalist Aspect of the Viper buff
   # 3% onHit per Talent (up to 30%)
@@ -77,6 +83,13 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                                                  },
                                       'condition': {},
                                       'baseDuration' : 4., 'maxStack' : 1},
+
+  # Primalist Serpent Strike buffs; default set to 0; modifyied in Skill implementation
+  'serpentStrikeOnHit'             : {'type' : 'skillProvidedBuff',
+                                      'effect' : {'increase' : {'poison' : 0., 'overTime' : 0.},
+                                                 },
+                                      'condition': {},
+                                      'baseDuration' : 4., 'maxStack' : 0},
 
               }
 
@@ -123,7 +136,7 @@ supportedAttributes  = ['strength', 'dexterity', 'attunement']
 def getSupportedAttributes():
   return supportedAttributes
 
-supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive']
+supportedSkills = ['Default', 'Melee', 'Spell', 'Throw', 'Rive', 'Swipe', 'SerpentStrike']
 
 def getSupportedSkills():
   return supportedSkills
@@ -135,6 +148,7 @@ supportedTriggerData = {  'ManifestStrike'          : {'onHitEffectiveness' : 1.
                           'SentinelAxeThrower'      : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                           'RiveIndomitable'         : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                           'DivineBolt'              : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                          # 'SerpentStrikePoisonSpit' : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                        }
 
 def getSupportedTriggerData():
