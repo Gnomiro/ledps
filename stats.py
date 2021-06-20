@@ -25,7 +25,7 @@ class Stats():
     pass
 
   # create stat object based on active buffs in duration-container
-  def fromBuffs(self, durations_):
+  def fromBuffs(self, durations_, gearStats_):
     self.__init__()
 
     # count number of active buffs
@@ -33,6 +33,7 @@ class Stats():
 
     # apply specific increases and more multipliers per stack into corresponding stat-slot
     for name, stacks in buffCount.items():
+      # print(name)
 
       # get buff data and iterate over provided stat-types (increase, more, duration, ...) and associated buffs-types (physical, attackSpeed, ...)
       for statType, buffTypes in data.getDurationData()[name]['effect'].items():
@@ -46,14 +47,14 @@ class Stats():
           # todo: probably change loop style to have if/else-statement at outer loop
           # todo: add support for more types
           if statType == 'increase':
-            self.addIncrease(buffType, value * stacks)
+            self.addIncrease(buffType, value * stacks * (1. + gearStats_.getDurationModifier(name, 'effect')))
           elif statType == 'more':
-            self.addMore(buffType, value * stacks)
+            self.addMore(buffType, value * stacks * (1. + gearStats_.getDurationModifier(name, 'effect')))
           elif statType == 'duration':
             for dm, v in value.items():
               # print(dm)
               # print(v)
-              self.addDurationModifier(buffType, dm, v)
+              self.addDurationModifier(buffType, dm, v * (1. + gearStats_.getDurationModifier(name, 'effect')))
           else:
             print('Warning: Allocation of buff-type not supported yet')
     pass
@@ -136,8 +137,8 @@ class Stats():
     pass
 
   def addMore(self, name_, value_):
-    if value_ < 1.:
-      print('Warning: More modifiers should usually be greater than 1.')
+    # if value_ < 1.:
+    #   print('Warning: More modifiers should usually be greater than 1.')
     self._more[name_] = self.getMore(name_) * value_
     pass
 

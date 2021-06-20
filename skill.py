@@ -23,8 +23,8 @@ print("enemies: " + str(enemies))
 class Default():
 
   # attack constructor; expects array of attack times (supporting cycling skills), a pattern which describes
-  # how the skill loops through its parts as well as skill specific attributes for scaling
-  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = []):
+  # todo: gearStats must only be equipment later
+  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, gearStats_ = stats.Stats()):
 
     # skillname
     self._skillName = 'Default'
@@ -40,9 +40,6 @@ class Default():
       # default pattern loops through all attacks
       self._pattern = range(len(attacktimes_))
 
-    # skill scaling attribute
-    self._attributes = attributes_
-
     # attack specific cooldown in seconds
     self._skillCooldown = 0
 
@@ -50,7 +47,19 @@ class Default():
     self._talents = {}
 
     # flag which tells if talent updates have been prepared
-    self._prepared = False
+    self._prepared = True
+
+    # stat scaling through attributes
+    self._gearStats = gearStats_
+    self._attrributeStats = stats.Stats()
+
+    # _localSkillStats should have properties for stats effecting skill damage only
+    self._localSkillStats = [stats.Stats() for i in range(self._nAttacks)]
+    # _globalSkillStats should have properties for stats effecting all damage; todo: must be returned or applied as buff
+    self._globalSkillStats = stats.Stats()
+    # initial loop position
+    self._patternCycle = cycle(self._pattern)
+    self._n = next(self._patternCycle)
 
     pass
 
@@ -107,13 +116,19 @@ class Default():
     # executes skill only if not on cooldown
     if not self.onCooldown(durations_):
 
-      skillDamage = self.skillHit(tmpStats_, durations_)
+      # attack specific stats composed from current tmpStats (including buffs), localSkillStats as well as attribute scaling)
+      tmpStats = tmpStats_ + self._localSkillStats[self._n]
+      tmpAndAttrStats = tmpStats + self._attrributeStats
+      # print(tmpStats)
 
-      durations = self.skillEffect(tmpStats_, durations_)
+      skillDamage = self.skillHit(tmpAndAttrStats, durations_)
 
-      durations = self.applyOnHit(tmpStats_, durations)
+      durations = self.skillEffect(tmpAndAttrStats, durations_)
 
-      triggerDamage, durations = self.onHitTrigger(tmpStats_, durations)
+      durations = self.applyOnHit(tmpAndAttrStats, durations)
+
+      # trigger does not get attribute stats passed
+      triggerDamage, durations = self.onHitTrigger(tmpStats, durations)
 
       # prepare next attack
       self._n = next(self._patternCycle)
@@ -121,7 +136,7 @@ class Default():
       durations = self.applyCooldown(durations)
 
       # return everything which has to be passed to character: damage, (new) durations, (next attack time,)
-      return (skillDamage + triggerDamage), self.getAttacktime(tmpStats_), durations
+      return (skillDamage + triggerDamage), self.getAttacktime(tmpStats), durations
 
     else:
       # print(self._skillName + " is still on cooldown")
@@ -142,8 +157,7 @@ class Default():
 
     # print("defaultOnHitChance")
     # onHit chance for all generic hits only
-    chance = stats_.getDurationModifier(name_, 'onHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit')
+    chance = stats_.getDurationModifier(name_, 'onHit')
 
     return chance
 
@@ -158,14 +172,6 @@ class Default():
       if chance == 0:
         continue
 
-      # when a condition is provided test if the requirement is fullfilled, i.e., if a buff/debuff is applied more than once
-      # for ct, c in data.getDurationData()[name]['condition'].items():
-      #   print(ct)
-      #   print(c)
-      #   print(self.evaluateCondition(durations_, ct, c))
-      #    #and durations_.countActiveByNames(condition)[condition] == 0
-      #   continue
-
       if not all([self.evaluateCondition(durations_, ct, c) for ct, c in data.getDurationData()[name]['condition'].items()]):
         print('Warning: Conditions not met!')
         return durations_
@@ -179,7 +185,7 @@ class Default():
         applications += 1
       # one bleed for each application
       for i in range(applications):
-        durations_.add(name, tmpStats_ = stats_, skillAttributes_ = self._attributes)
+        durations_.add(name, tmpStats_ = stats_)
 
       # print('Duration: {}, chance: {}'.format(name, chance))
 
@@ -207,8 +213,7 @@ class Default():
 
     # print("defaultTriggerChance")
     # trigger chance on hit only
-    chance = stats_.getTriggerModifier(trigger_, 'onHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit')
+    chance = stats_.getTriggerModifier(trigger_, 'onHit')
 
     return chance
 
@@ -238,7 +243,7 @@ class Default():
         # return damage, irrelevant attacktime (beacuse trigger are instant), and modified durations_
         # info['onTriggerExecutions'] tells how many projectiles/executions happen which can hit the same target
         for _ in range(info['onTriggerExecutions']):
-          triggerDamage, _, durations_ = eval(trigger)().attack(durations_, stats_)
+          triggerDamage, _, durations_ = eval(trigger)(gearStats_ = self._gearStats).attack(durations_, stats_)
           damage += triggerDamage
 
     return damage, durations_
@@ -264,12 +269,12 @@ class Default():
   # generic implementation; must not be changed by implemented skills
   def getAttacktime(self, stats_ = stats.Stats()):
     self.prepare()
-    return self._attacktimes[self._n] / (1. + stats_.getIncrease('meleeAttackSpeed') + self._localSkillStats[self._n].getIncrease('meleeAttackSpeed')) / (stats_.getMore('meleeAttackSpeed') * self._localSkillStats[self._n].getMore('meleeAttackSpeed'))
+    return self._attacktimes[self._n] / (1. + stats_.getIncrease('meleeAttackSpeed')) / stats_.getMore('meleeAttackSpeed')
 
 # generic melee attack class
 class Melee(Default):
-  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = []):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, gearStats_ = stats.Stats()):
+    super().__init__(attacktimes_ = attacktimes_, pattern_ = pattern_, gearStats_= gearStats_)
 
     # skillname
     self._skillName = 'Melee'
@@ -281,9 +286,7 @@ class Melee(Default):
     # print("meleeOnHitChance")
     # onHit chance for generic hit and melee hit
     chance = stats_.getDurationModifier(name_,'onHit') \
-            + stats_.getDurationModifier(name_,'onMeleeHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_,'onHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_,'onMeleeHit')
+            + stats_.getDurationModifier(name_,'onMeleeHit')
 
     return chance
 
@@ -292,16 +295,14 @@ class Melee(Default):
     # print("meleeTriggerChance")
     # onHit chance for generic hit and melee hit
     chance = stats_.getTriggerModifier(trigger_, 'onHit') \
-            + stats_.getTriggerModifier(trigger_, 'onMeleeHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onMeleeHit')
+            + stats_.getTriggerModifier(trigger_, 'onMeleeHit')
 
     return chance
 
 # generic spell attack class
 class Spell(Default):
-  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = []):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, gearStats_ = stats.Stats()):
+    super().__init__(attacktimes_ = attacktimes_, pattern_ = pattern_, gearStats_= gearStats_)
 
     # skillname
     self._skillName = 'Spell'
@@ -313,9 +314,7 @@ class Spell(Default):
     # print("spellOnHitChance")
     # onHit chance generic hit and spell hit
     chance = stats_.getDurationModifier(name_, 'onHit') \
-            + stats_.getDurationModifier(name_, 'onSpellHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_, 'onSpellHit')
+            + stats_.getDurationModifier(name_, 'onSpellHit')
 
     return chance
 
@@ -324,16 +323,14 @@ class Spell(Default):
     # print("spellTriggerChance")
     # onHit chance for generic hit and spell hit
     chance = stats_.getTriggerModifier(trigger_, 'onHit') \
-            + stats_.getTriggerModifier(trigger_, 'onSpellHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onSpellHit')
+            + stats_.getTriggerModifier(trigger_, 'onSpellHit')
 
     return chance
 
 # generic throw attack class
 class Throw(Default):
-  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = []):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, gearStats_ = stats.Stats()):
+    super().__init__(attacktimes_ = attacktimes_, pattern_ = pattern_, gearStats_= gearStats_)
 
     # skillname
     self._skillName = 'Throw'
@@ -345,9 +342,7 @@ class Throw(Default):
     # print("throwOnHitChance")
     # onHit chance for generic hit and throw hit
     chance = stats_.getDurationModifier(name_, 'onHit') \
-            + stats_.getDurationModifier(name_, 'onThrowHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_, 'onHit') \
-            + self._localSkillStats[self._n].getDurationModifier(name_, 'onThrowHit')
+            + stats_.getDurationModifier(name_, 'onThrowHit')
 
     return chance
 
@@ -356,9 +351,7 @@ class Throw(Default):
     # print("throwTriggerChance")
     # onHit chance for generic hit and throw hit
     chance = stats_.getTriggerModifier(trigger_, 'onHit') \
-            + stats_.getTriggerModifier(trigger_, 'onThrowHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onHit') \
-            + self._localSkillStats[self._n].getTriggerModifier(trigger_, 'onThrowHit')
+            + stats_.getTriggerModifier(trigger_, 'onThrowHit')
 
     return chance
 
@@ -374,14 +367,17 @@ class Throw(Default):
 # Rive
 class Rive(Melee):
 
-  def __init__(self, attacktimes_ = [0.68182 * 0.75, 0.68182 * 0.75, 0.68182 * 0.93], pattern_ = [0, 1, 2], attributes_ = ['strength']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0.68182 * 0.75, 0.68182 * 0.75, 0.68182 * 0.93], pattern_ = [0, 1, 2], gearStats_ = gearStats_)
 
     # skillname
     self._skillName = 'Rive'
 
     # available and supported talents
     self._talents = {'cadence' : [0,1], 'flurry' : [0,5], 'sever' : [0,3], 'twistingFangs' : [0,3], 'execution' : [0,1], 'indomitable' : [0,1]}
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
 
     pass
 
@@ -402,7 +398,8 @@ class Rive(Melee):
     if self._talents['cadence'][0] == 1:
       self._pattern = [0,1,0,1,2]
 
-    self._localSkillStats[0].addTriggerModifier('RiveIndomitable', 'onMeleeHit', 1. * self._talents['indomitable'][0])
+    # indomitable: rive spell proc in first hit; onHit as only applied by rive
+    self._localSkillStats[0].addTriggerModifier('RiveIndomitable', 'onHit', 1. * self._talents['indomitable'][0])
 
     pass
 
@@ -433,12 +430,15 @@ class Rive(Melee):
 # Warpath
 class Warpath(Melee):
   # warpath has doubled attack time; multiplicative order does not matter
-  def __init__(self, attacktimes_ = [0.68182 / 2.], pattern_ = None, attributes_ = ['strength']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0.68182 / 2.], pattern_ = None, gearStats_ = gearStats_)
 
     self._skillName = "Warpath"
     # available and supported talents
     # self._talents = {'temporalCascade' : [0,5], 'drainingAssault' : [0,5]}
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
 
     pass
 
@@ -455,14 +455,17 @@ class Warpath(Melee):
 # Swipe
 class Swipe(Melee):
 
-  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = ['strength']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0.68182], pattern_ = None, gearStats_ = gearStats_)
 
     # skillname
     self._skillName = 'Swipe'
 
     # available and supported talents
     self._talents = {'bloodBeast' : [0,5], 'rending' : [0,4], 'aspectOfThePanther' : [0,4], 'felineHunter' : [0,1]}
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
 
     pass
 
@@ -478,7 +481,6 @@ class Swipe(Melee):
 
     # rending: physShred on hit
     self._localSkillStats[0].addDurationModifier('physicalShred', 'onHit', 0.25 * self._talents['rending'][0])
-
 
     # aspectOfThePanther modifies maxStack of aspectOfThePantherGeneric buff
     data.durationData['swipeAspectofThePantherGeneric']['maxStack'] = 2 * self._talents['aspectOfThePanther'][0]
@@ -500,6 +502,71 @@ class Swipe(Melee):
 
     return durations_
 
+# Serpent Strike
+class SerpentStrike(Melee):
+
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0.68182], pattern_ = None, gearStats_ = gearStats_)
+
+    # skillname
+    self._skillName = 'SerpentStrike'
+
+    # available and supported talents
+    self._talents = {'scorpionStrikes' : [0,5], 'chronoStrike' : [0,5], 'debilitatingPoison' : [0,3], 'nagasaVenom' : [0,6], 'plaguebearer' : [0,4], 'venomousIntent' : [0,1]}
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('dexterity'))
+    self._attrributeStats.addDurationModifier('poison', 'onMeleeHit', 0.04 * gearStats_.getAttribute('dexterity'))
+
+    pass
+
+  def prepareSkill(self):
+    # print("serpentStrikePrepare")
+
+    # reset skill specific buff data to default
+    data.durationData['serpentStrikeOnHit']['effect']['increase']['poison'] = 0.
+    data.durationData['serpentStrikeOnHit']['effect']['increase']['overTime'] = 0.
+
+    # generic 140% increase poison chance
+    self._localSkillStats[0].addDurationModifier('poison', 'onHit', 1.4)
+
+    # debilitatingPoison: adds blinding poison chance
+    self._localSkillStats[0].addDurationModifier('blindingPoison', 'onHit', 0.17 * self._talents['debilitatingPoison'][0])
+
+    # scorpionStrikes and chronoStrike implemented by modifying serpentStrikeOnHit buff
+    # scorpionStrikes: global increse poison damage
+    data.durationData['serpentStrikeOnHit']['effect']['increase']['poison'] = 0.12 * self._talents['scorpionStrikes'][0]
+    # chronoStrike: global increase over time damage
+    data.durationData['serpentStrikeOnHit']['effect']['increase']['overTime'] = 0.1 * self._talents['chronoStrike'][0]
+
+    # nagasaVenom: poison chance and duration
+    self._localSkillStats[0].addDurationModifier('poison', 'onHit', 0.1 * self._talents['chronoStrike'][0])
+    self._localSkillStats[0].addDurationModifier('poison', 'duration', 0.1 * self._talents['chronoStrike'][0])
+
+    # plaguebearer: plague chance on hit
+    self._localSkillStats[0].addDurationModifier('plague', 'onHit', 0.25 * self._talents['plaguebearer'][0])
+
+    # venomousIntent: reduced poison duration and some additional poison
+    # todo verify how it really works
+    self._localSkillStats[0].addDurationModifier('poison', 'duration', -0.35 * self._talents['venomousIntent'][0])
+    self._localSkillStats[0].addDurationModifier('poison', 'onMeleeHit', 1. * self._talents['venomousIntent'][0])
+    # old: it may triggers a skill but according to mike it is more like an additional poison; trigger which is only applied by Serpent Strike (thus as onHit)
+    # self._localSkillStats[0].addTriggerModifier('SerpentStrikePoisonSpit', 'onHit', .25 * self._talents['venomousIntent'][0])
+
+    pass
+
+  # skill specific proc stuff
+  def skillEffect(self, stats_, durations_):
+
+    # print("serpentStrikeSkillEffect")
+
+    # scorpionStrikes and/or chronoStrike: add onHitBuffs
+    if self._talents['scorpionStrikes'][0] > 0 or self._talents['chronoStrike'][0]:
+      durations_.add('serpentStrikeOnHit')
+
+    return durations_
+
 #########################################################################################################
 # Trigger skills
 #########################################################################################################
@@ -515,10 +582,15 @@ class Trigger():
 # Manifest Strike trigger
 class ManifestStrike(Trigger, Melee):
   # todo: attribute scaling?
-  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength', 'attunement']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0], pattern_ = None, gearStats_ = gearStats_)
 
     self._skillName = "ManifestStrike"
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
+    # todo: is attuenemt scaling really just increase?
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('attunement'))
 
     pass
 
@@ -533,11 +605,15 @@ class ManifestStrike(Trigger, Melee):
 
 # SentinelAxeThrower trigger
 class SentinelAxeThrower(Trigger, Throw):
-  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength', 'dexterity']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0], pattern_ = None, gearStats_ = gearStats_)
 
     self._skillName = "SentinelAxeThrower"
     self._skillCooldown = 1
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('dexterity'))
 
     pass
 
@@ -552,10 +628,13 @@ class SentinelAxeThrower(Trigger, Throw):
 
 # Rive Indomitable trigger
 class RiveIndomitable(Trigger, Spell):
-  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['strength']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0], pattern_ = None, gearStats_ = gearStats_)
 
     self._skillName = "RiveIndomitable"
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('strength'))
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
@@ -568,10 +647,13 @@ class RiveIndomitable(Trigger, Spell):
 
 # Divine Bolt trigger
 class DivineBolt(Trigger, Spell):
-  def __init__(self, attacktimes_ = [0], pattern_ = None, attributes_ = ['attunement']):
-    super().__init__(attacktimes_, pattern_, attributes_)
+  def __init__(self, gearStats_):
+    super().__init__(attacktimes_ = [0], pattern_ = None, gearStats_ = gearStats_)
 
     self._skillName = "DivineBolt"
+
+    # generic skill specific damage increase provided by attributes
+    self._attrributeStats.addIncrease('generic', 0.04 * gearStats_.getAttribute('attunement'))
 
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
@@ -581,3 +663,21 @@ class DivineBolt(Trigger, Spell):
     # print("riveDivineBoltSkillHit")
 
     return damage
+
+# # Serpent Strike Poison Spit trigger
+# class SerpentStrikePoisonSpit(Trigger, Spell):
+#   def __init__(self, gearStats_):
+#     super().__init__(attacktimes_ = [0], pattern_ = None, gearStats_ = gearStats_)
+
+#     self._skillName = "SerpentStrikePoisonSpit"
+
+#     self._localSkillStats[0].addDurationModifier('poison', 'onSpellHit', 1.)
+
+#   # skill specific hit which should be overriden by skill-Implementations
+#   def skillHit(self, stats_, durations_):
+
+#     damage = Damage()
+
+#     # print("riveDivineBoltSkillHit")
+
+#     return damage

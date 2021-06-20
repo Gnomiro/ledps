@@ -91,13 +91,13 @@ s.addDurationModifier('bleed', 'onHit', 0.20)
 # humble idol 3
 s.addDurationModifier('bleed', 'onHit', 0.12)
 
-skill = skill.Rive()
+skill = skill.Rive(gearStats_ = s)
 skill.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1, indomitable = 1)
 
 # warpath's drainingAssault adds global more damage while spinning
 # drainingAssault = 5
 # s.addMore('generic', 1 + 0.15 * drainingAssault)
-# skill = skill.Warpath()
+# skill = skill.Warpath(gearStats_ = s)
 
 print(s)
 

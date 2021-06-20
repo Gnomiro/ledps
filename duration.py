@@ -14,11 +14,8 @@ import damage
 class Duration():
 
   # create duration object; by default requires duration 'name_' string only;
-  # for damagingAilments tmpStats_ (e.g., gearStats + buffs) can be passed
-  # as they are snappshotted at application time
-  # 'skillAttributes_' provide the attributes of the applying skill as they scale the damagingAilments as well
   # skill cooldowns can be passed by specifying 'duration_' and 'type_ = 'cooldown''; otherwise these values are ignored
-  def __init__(self, name_, tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
+  def __init__(self, name_, tmpStats_ = stats.Stats(), duration_ = None, type_ = None):
 
     if name_ in data.getDurationData().keys():
       # default duration behaviour; determined by name_; duration_ and type_ are ignored
@@ -28,6 +25,9 @@ class Duration():
       self._baseDuration = data.getDurationData()[name_]['baseDuration']
       self._duration = self._baseDuration
       self._duration *= (1. + tmpStats_.getDurationModifier(name_, 'duration'))
+      # for poison builtInShred apply second buff with same duration modifer
+      if name_ == 'poisonBuiltinShred':
+        self._duration *= (1. + tmpStats_.getDurationModifier('poison', 'duration'))
 
     elif duration_ != None and type_ == 'cooldown' and name_ in chain(data.getSupportedSkills(), data.getSupportedTriggers()):
       # duration is a skill-specific cooldown
@@ -50,9 +50,6 @@ class Duration():
     if self.getType() != 'damagingAilment':
       return
 
-    # additional scaling attribute provided by applying skill, i.e., strength, dexterity
-    self._skillAttributes = skillAttributes_
-
     # scale damage by ailment specific modifiers
     self._baseDamage = data.getDurationData()[self.getName()]['baseDamage']
     self._damage = self._baseDamage
@@ -62,8 +59,6 @@ class Duration():
 
     # get sum of relevant increase modifiers
     increase = tmpStats_.getIncreaseByTagList(data.getDurationData()[self.getName()]['tags'])
-    # general attribute-scaling for damagingAilment; assumed to be always 4%; todo: check if sometimes different
-    increase += 0.04 * sum([tmpStats_.getAttribute(a) for a in self._skillAttributes])
 
     # get product of relevant more modifiers
     more = tmpStats_.getMoreByTagList(data.getDurationData()[self.getName()]['tags'])
@@ -139,10 +134,10 @@ class Durations():
     pass
 
   # add an ailment
-  def add(self, name_, tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
+  def add(self, name_, tmpStats_ = stats.Stats(), duration_ = None, type_ = None):
 
     # create duration object; passing all stats
-    duration = Duration(name_, tmpStats_ = tmpStats_, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
+    duration = Duration(name_, tmpStats_ = tmpStats_, duration_ = duration_, type_ = type_)
 
     # replace oldest duration if it is not a cooldown and has a maxStack size otherwise just add it
     if duration.getType() != 'cooldown' and data.getDurationData()[duration.getName()]['maxStack'] != 0 and self.countActiveByNames(duration.getName())[duration.getName()] >= data.getDurationData()[duration.getName()]['maxStack']:
@@ -159,7 +154,7 @@ class Durations():
 
     # poison applies a build in poison shred as well which has not stack limitation
     if duration.getType() == 'damagingAilment' and duration.getName() == 'poison':
-      self._durations['shred'].append(Duration('poisonBuiltinShred', skillAttributes_ = skillAttributes_))
+      self._durations['shred'].append(Duration('poisonBuiltinShred'))
 
     pass
 
@@ -225,9 +220,6 @@ class Durations():
 
   # process next tick for all durations; calculating damage
   def tick(self, timestep_ = 0.1, boss_ = False):
-
-    if self._verbosity >= 2:
-        print(self.countActive())
 
     # create empty damage object
     tick_dmg = damage.Damage()
