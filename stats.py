@@ -49,6 +49,11 @@ class Stats():
             self.addIncrease(buffType, value * stacks)
           elif statType == 'more':
             self.addMore(buffType, value * stacks)
+          elif statType == 'duration':
+            for dm, v in value.items():
+              # print(dm)
+              # print(v)
+              self.addDurationModifier(buffType, dm, v)
           else:
             print('Warning: Allocation of buff-type not supported yet')
     pass

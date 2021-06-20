@@ -49,7 +49,7 @@
 * Stats
   * Rename stats in all classes: talentStats, gearStats, skillStats, buffStats, tmpStats
 * Environment/Simulator
-  * Global container class managing Character, Stats, Skill, Enemy, etc
+  * Global container class managing Character, gearStats, buffStats, Skill, Enemy, etc -> reduced neccessary objects to pass around
 * Skills
   * add skill _tags alongside _attributes for skill-damage scaling
   * make attributes not passed by constructor but set like _skillname

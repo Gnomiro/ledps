@@ -151,6 +151,8 @@ class Durations():
     else:
       tmpStats = stats.Stats()
 
+    # print(tmpStats)
+
     # create duration object; passing all stats
     duration = Duration(name_, tmpStats_ = tmpStats, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
 

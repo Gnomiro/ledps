@@ -33,6 +33,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
 
   # Primalist Aspect of the Shark buff
   # default limited to one stack
+  # todo: add armour shred chance
   'aspectOfTheShark' : {'type' : 'buff',
                         'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50}}, # todo: check value
                         'condition': {},
@@ -43,7 +44,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
   # todo: scale with talents, currently maximum stats
   'aspectOfTheBoar'  : {'type' : 'buff',
                         'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50},
-                                   'durationModifier' : {'bleed' : {'onHit' : 0.4, 'effect' : 1.2} }
+                                    'duration'  : {'bleed' : {'onHit' : 0.4, 'effect' : 1.2} }
                                    },
                         'condition': {},
                         'baseDuration' : 3., 'maxStack' : 1},
@@ -51,13 +52,12 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
   # Primalist Aspect of the Viper buff
   # 3% onHit per Talent (up to 30%)
   # todo: talents for poison effectiveness/duration
-  'aspectOfTheViper'  : {'type' : 'buff',
+  'aspectOfTheViper' : {'type' : 'buff',
                         'effect' : {'increase' : {'overTime' : 1.},
-                                   'durationModifier' : {'poison' : {'duration' : 1.} }
+                                    'duration'  : {'poison' : {'duration' : 1.} }
                                    },
                         'condition': {},
                         'baseDuration' : 3., 'maxStack' : 1},
-
 
   # type: skillProvidedBuff
   # buffs provided by skills; to be applied in skill implementation(mostly skillEffect)
