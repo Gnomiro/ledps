@@ -467,11 +467,15 @@ class Swipe(Melee):
   def prepareSkill(self):
     # print("swipePrepare")
 
+    # reset skill specific duration modification
+    # todo: handle this somehow more general
+    data.durationData['swipeAspectofThePantherGeneric']['maxStack'] = 1
+
     # bloodBeast: bleed chance on hit
     self._localSkillStats[0].addDurationModifier('bleed', 'onHit', 0.2 * self._talents['bloodBeast'][0])
 
     # rending: physShred on hit
-    self._localSkillStats[1].addDurationModifier('physicalShred', 'onHit', 0.25 * self._talents['rending'][0])
+    self._localSkillStats[0].addDurationModifier('physicalShred', 'onHit', 0.25 * self._talents['rending'][0])
 
 
     # aspectOfThePanther modifies maxStack of aspectOfThePantherGeneric buff
