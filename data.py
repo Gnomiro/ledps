@@ -58,12 +58,26 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
                         'condition': {},
                         'baseDuration' : 3., 'maxStack' : 1},
 
+
   # type: skillProvidedBuff
   # buffs provided by skills; to be applied in skill implementation(mostly skillEffect)
   'riveExecution'     : {'type' : 'skillProvidedBuff',
                          'effect' : {'increase' : {'physical' : 0.15}},
                          'condition': {},
                          'baseDuration' : 2., 'maxStack' : 0},
+
+  # Primalist Swipe Aspect of the Panther buff
+  'swipeAspectofThePantherGeneric' : {'type' : 'skillProvidedBuff',
+                                      'effect' : {'increase' : {'generic' : .1},
+                                                 },
+                                      'condition': {},
+                                      'baseDuration' : 4., 'maxStack' : 1},
+  'swipeAspectofThePantherSpeed'   : {'type' : 'skillProvidedBuff',
+                                      'effect' : {'increase' : {'meleeAttackSpeed' : .15, 'castSpeed' : .15},
+                                                 },
+                                      'condition': {},
+                                      'baseDuration' : 4., 'maxStack' : 1},
+
               }
 
 # returns durationData object, if type specified only specific type
@@ -93,7 +107,7 @@ def getSupportedElementTypes():
   return supportedElementTypes
 
 # available attributes providing scaling
-supportedTags  =  [ 'meleeAttackSpeed',
+supportedTags  =  [ 'meleeAttackSpeed', 'castSpeed',
                     'generic', 'melee', 'overTime',
                     'physical', 'physicalOverTime',
                     'fire', 'fireOverTime',

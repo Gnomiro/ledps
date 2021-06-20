@@ -365,6 +365,9 @@ class Throw(Default):
 # Class Skill implementations
 #########################################################################################################
 
+#########################################################################################################
+# Sentinel
+#########################################################################################################
 
 # Rive
 class Rive(Melee):
@@ -382,9 +385,6 @@ class Rive(Melee):
 
   def prepareSkill(self):
     # print("RivePrepare")
-
-    # reinitialize local skillStats
-    self._localSkillStats = [stats.Stats() for i in range(self._nAttacks)]
 
     # flurry: increased melee attack for first and second hit
     self._localSkillStats[0].addIncrease('meleeAttackSpeed', 0.08 * self._talents['flurry'][0])
@@ -445,6 +445,54 @@ class Warpath(Melee):
     # todo: only for ailments, i.e., currently shred and ailments
     return super().getOnHitChance(name_, stats_) * 0.6
 
+
+#########################################################################################################
+# Primalist
+#########################################################################################################
+
+# Swipe
+class Swipe(Melee):
+
+  def __init__(self, attacktimes_ = [0.68182], pattern_ = None, attributes_ = ['strength']):
+    super().__init__(attacktimes_, pattern_, attributes_)
+
+    # skillname
+    self._skillName = 'Swipe'
+
+    # available and supported talents
+    self._talents = {'bloodBeast' : [0,5], 'rending' : [0,4], 'aspectOfThePanther' : [0,4], 'felineHunter' : [0,1]}
+
+    pass
+
+  def prepareSkill(self):
+    # print("swipePrepare")
+
+    # bloodBeast: bleed chance on hit
+    self._localSkillStats[0].addDurationModifier('bleed', 'onHit', 0.2 * self._talents['bloodBeast'][0])
+
+    # rending: physShred on hit
+    self._localSkillStats[1].addDurationModifier('physicalShred', 'onHit', 0.25 * self._talents['rending'][0])
+
+
+    # aspectOfThePanther modifies maxStack of aspectOfThePantherGeneric buff
+    data.durationData['swipeAspectofThePantherGeneric']['maxStack'] = 2 * self._talents['aspectOfThePanther'][0]
+
+    pass
+
+  # skill specific proc stuff
+  def skillEffect(self, stats_, durations_):
+
+    # print("swipeSkillEffect")
+
+    # aspectOfThePanther: add increase generic buff
+    if self._talents['aspectOfThePanther'][0] > 0:
+      durations_.add('swipeAspectofThePantherGeneric')
+
+    # felineHunter: add generic increased speed buff
+    if self._talents['felineHunter'][0] == 1:
+      durations_.add('swipeAspectofThePantherSpeed')
+
+    return durations_
 
 #########################################################################################################
 # Trigger skills

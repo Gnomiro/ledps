@@ -51,6 +51,8 @@
 * Environment/Simulator
   * Global container class managing Character, Stats, Skill, Enemy, etc
 * Skills
+  * add skill _tags alongside _attributes for skill-damage scaling
+  * make attributes not passed by constructor but set like _skillname
   * pass gearStats on init and add skillStats?
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
 
