@@ -3,6 +3,8 @@ random.seed()
 from itertools import cycle
 from math import floor
 
+from damage import Damage
+
 import stats, duration, data
 
 # generic work in progress enemy counter; scales some buff creations linearly
@@ -98,20 +100,20 @@ class Default():
     pass
 
   # empty duration container if no durations are passed, but regularly this should always be provided
-  def attack(self, durations_ = duration.Durations(), stats_ = stats.Stats()):
+  def attack(self, durations_ = duration.Durations(), tmpStats_ = stats.Stats()):
 
     self.prepare()
 
     # executes skill only if not on cooldown
     if not self.onCooldown(durations_):
 
-      skillDamage = self.skillHit(stats_, durations_)
+      skillDamage = self.skillHit(tmpStats_, durations_)
 
-      durations = self.skillEffect(stats_, durations_)
+      durations = self.skillEffect(tmpStats_, durations_)
 
-      durations = self.applyOnHit(stats_, durations)
+      durations = self.applyOnHit(tmpStats_, durations)
 
-      triggerDamage, durations = self.onHitTrigger(stats_, durations)
+      triggerDamage, durations = self.onHitTrigger(tmpStats_, durations)
 
       # prepare next attack
       self._n = next(self._patternCycle)
@@ -119,16 +121,16 @@ class Default():
       durations = self.applyCooldown(durations)
 
       # return everything which has to be passed to character: damage, (new) durations, (next attack time,)
-      return (skillDamage + triggerDamage), self.getAttacktime(stats_), durations
+      return (skillDamage + triggerDamage), self.getAttacktime(tmpStats_), durations
 
     else:
       # print(self._skillName + " is still on cooldown")
-      return 0, self.getAttacktime(stats_), durations_
+      return Damage(), self.getAttacktime(tmpStats_), durations_
 
   # skill specific hit which should be overriden by skill-Implementations
-  def skillHit(self, stats_, durations_):
+  def skillHit(self, tmpStats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("defaultSkillHit")
 
@@ -177,7 +179,7 @@ class Default():
         applications += 1
       # one bleed for each application
       for i in range(applications):
-        durations_.add(name, skillAttributes_ = self._attributes)
+        durations_.add(name, tmpStats_ = stats_, skillAttributes_ = self._attributes)
 
       # print('Duration: {}, chance: {}'.format(name, chance))
 
@@ -214,7 +216,7 @@ class Default():
   # generic implementation; must not be changed by implemented skills
   def onHitTrigger(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     for trigger, info in data.getSupportedTriggerData().items():
       chance = self.getTriggerChance(trigger, stats_) * info['onHitEffectiveness']
@@ -407,7 +409,7 @@ class Rive(Melee):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("riveSkillHit")
 
@@ -523,7 +525,7 @@ class ManifestStrike(Trigger, Melee):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("manifestStrikeSkillHit")
 
@@ -542,7 +544,7 @@ class SentinelAxeThrower(Trigger, Throw):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("sentinelAxeThrowerSkillHit")
 
@@ -558,7 +560,7 @@ class RiveIndomitable(Trigger, Spell):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("riveIndomitableSkillHit")
 
@@ -574,7 +576,7 @@ class DivineBolt(Trigger, Spell):
   # skill specific hit which should be overriden by skill-Implementations
   def skillHit(self, stats_, durations_):
 
-    damage = 0
+    damage = Damage()
 
     # print("riveDivineBoltSkillHit")
 

@@ -1,6 +1,6 @@
 import stats
 import skill
-import character
+import simulator
 import damage
 
 # assume berserker as global buff
@@ -35,8 +35,8 @@ boss = False
 print('Boss: {}'.format(boss))
 overallDamage = damage.Damage()
 for i in range(repeats):
-  c = character.Character(s, skill, verbosity = 0)
-  damage = c.combat(endtime = endtime, boss = boss)
+  sim = simulator.Simulator(s, skill, verbosity_ = 0)
+  damage = sim.combat(endtime_ = endtime, boss_ = boss)
   print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
   overallDamage += damage
 

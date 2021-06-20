@@ -1,6 +1,6 @@
 import stats
 import skill
-import character
+import simulator
 import damage
 # import sys
 # sys.path.append("playground/")
@@ -107,9 +107,9 @@ boss = False
 print('Boss: {}'.format(boss))
 overallDamage = damage.Damage()
 for i in range(repeats):
-  c = character.Character(s, skill, verbosity = 0)
+  sim = simulator.Simulator(s, skill, verbosity_ = 0)
   # boss = True reduces shred effect
-  damage = c.combat(endtime = endtime, boss = boss)
+  damage = sim.combat(endtime_ = endtime, boss_ = boss)
   print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
   overallDamage += damage
 

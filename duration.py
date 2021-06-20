@@ -129,32 +129,20 @@ class Duration():
 class Durations():
 
   # constructor; expecting gearStats for scaling behaviour
-  def __init__(self, gearStats_ = stats.Stats(), verbosity_ = 0):
+  def __init__(self, verbosity_ = 0):
 
     # does not work as it points to the same lists in every dict: self._durations = dict.fromkeys(data.getSupportedDurationTypes(), [])
     self._durations = {key : [] for key in data.getSupportedDurationTypes()}
 
-    self._gearStats = gearStats_
     self._verbosity = verbosity_
 
     pass
 
   # add an ailment
-  def add(self, name_, skillAttributes_ = [], duration_ = None, type_ = None):
-
-    # allocate buffs into temporary stats object if duration-type is of damagingAilment -> snapshotting
-    # add gearStats as well
-    if name_ in data.getDurationData().keys() and data.getDurationData()[name_]['type'] == 'damagingAilment':
-      tmpStats = stats.Stats().fromBuffs(self)
-      # add gear stats to temporary stats; not necessary if not a adamaing ailment
-      tmpStats += self._gearStats
-    else:
-      tmpStats = stats.Stats()
-
-    # print(tmpStats)
+  def add(self, name_, tmpStats_ = stats.Stats(), skillAttributes_ = [], duration_ = None, type_ = None):
 
     # create duration object; passing all stats
-    duration = Duration(name_, tmpStats_ = tmpStats, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
+    duration = Duration(name_, tmpStats_ = tmpStats_, skillAttributes_ = skillAttributes_, duration_ = duration_, type_ = type_)
 
     # replace oldest duration if it is not a cooldown and has a maxStack size otherwise just add it
     if duration.getType() != 'cooldown' and data.getDurationData()[duration.getName()]['maxStack'] != 0 and self.countActiveByNames(duration.getName())[duration.getName()] >= data.getDurationData()[duration.getName()]['maxStack']:
@@ -248,17 +236,6 @@ class Durations():
     for d in self.getAll():
       # process duration object, receive damage and accumulate it
       tick_dmg += d.tick(timestep_)
-
-    # get penetration from gearStats_ and normalize it to 1. to multiply damage values later
-    penetration = {element: (self._gearStats.getPenetration(element) + 1.) for element in self._gearStats.getPenetrations().keys()}
-    # print(penetration)
-    # count active shreds and add them to penetration from gear
-    shreds = self.countActiveByTypes('shred')
-    for key in shreds:
-      penetration[data.getDurationData()[key]['element']] = penetration.get(data.getDurationData()[key]['element'], 1.0) + shreds[key] * 0.05 * (0.4 if boss_ else 1.)
-    # print(penetration)
-    # scale damage by penetration
-    tick_dmg.multiplyEachElementSeperately(penetration)
 
     # removes inactive duration objects
     self.removeInactive()
