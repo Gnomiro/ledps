@@ -55,19 +55,19 @@ s.addDurationModifier('aspectOfTheViper', 'onHit', .03 * 10)
 s.addIncrease('meleeAttackSpeed', 0.05 * 10)
 
 # 4 out of 5 points in envenom
-s.addDurationModifier('poison', 'onMeleeHit', 0.02 * 4)
+s.addDurationModifier('poison', 'onMeleeHit', 0.03 * 4)
 
 # 5 in circle of life and 1 point in dragon slayer
 s.addDurationModifier('aspectOfTheShark', 'onHit', 0.05 * 5 * 1) # currently ignores the 5s default application and assumes boss fights!
 
 # 8 points in ocean maw
-s.addDurationModifier('aspectOfTheShark', 'duration', 0.15 * 8)
 s.addDurationModifier('aspectOfTheShark', 'effect', 0.15 * 8)
+s.addDurationModifier('aspectOfTheShark', 'duration', 0.15 * 8)
 
 # feeding frenzy hard coded: aspect of the shark modifications (for stacking) and buff effect
 data.durationData['aspectOfTheShark']['maxStack'] = 0.
-data.durationData['aspectOfTheShark']['effect']['increase']['meleeAttackSpeed'] *= 0.4
-data.durationData['aspectOfTheShark']['effect']['increase']['melee'] *= 0.4
+data.durationData['aspectOfTheShark']['effect']['increase']['meleeAttackSpeed'] = 0.04
+data.durationData['aspectOfTheShark']['effect']['increase']['melee'] = 0.2
 
 # 10 points in primal aspects
 s.addDurationModifier('aspectOfTheShark', 'duration', 0.1 * 10)
@@ -90,6 +90,7 @@ s.addDurationModifier('aspectOfTheShark', 'effect', 0.69)
 # Relic
 s.addDurationModifier('aspectOfTheShark', 'effect', 0.20)
 s.addIncrease('poison', 0.6)
+s.addDurationModifier('bleed', 'onHit', 0.37)
 
 # Gloves 
 s.addIncrease('meleeAttackSpeed', 0.15)
@@ -100,7 +101,7 @@ s.addAttribute('strength', 8)
 
 # rings amulet and belt unknown
 # set attributes to mactch character screen
-s.addAttribute('strength', 28)
+s.addAttribute('strength', 18)
 s.addAttribute('dexterity', 16)
 # melee attack speed provided by base-type
 s.addIncrease('meleeAttackSpeed', 0.15)
@@ -122,16 +123,19 @@ s.addDurationModifier('aspectOfTheShark', 'duration', 0.23 * 3)
 s.addIncrease('overTime', 0.1 * 2)
 s.addIncrease('poison', 0.08 * 2)
 
-# grand heorot idol 1 (2x)
-s.addDurationModifier('poison', 'onHit', 0.2 * 2)
-s.addDurationModifier('aspectOfTheViper', 'effect', 0.17 * 2)
+# grand heorot idol 1
+s.addDurationModifier('poison', 'onHit', 0.2)
+s.addDurationModifier('aspectOfTheViper', 'effect', 0.17)
+# grand heorot idol 2
+s.addDurationModifier('poison', 'onHit', 0.2)
+s.addDurationModifier('aspectOfTheViper', 'effect', 0.17)
 
 #######################################################
 # Serpent strike
 #######################################################
 
 skill = skill.SerpentStrike(gearStats_ = s)
-skill.setTalent(scorpionStrikes = 5, chronoStrike = 5, debilitatingPoison = 1, nagasaVenom = 6, plaguebearer = 2, venomousIntent = 1)
+skill.setTalent(scorpionStrikes = 5, chronoStrike = 5, debilitatingPoison = 1, nagasaVenom = 4, plaguebearer = 2, venomousIntent = 1) # nagasaVenom can be 6 for 20% inc poison chance
 
 print(s)
 
@@ -139,16 +143,18 @@ print(s)
 # Simualtor
 #######################################################
 
-repeats = 5
+repeats = 2
 endtime = 600
 # boss = True reduces shred effect
 boss = True
 print('Boss: {}'.format(boss))
 overallDamage = damage.Damage()
 for i in range(repeats):
+  print('\n########################## Fight {}'.format(i + 1))
   sim = simulator.Simulator(s, skill, verbosity_ = 1)
   damage = sim.combat(endtime_ = endtime, boss_ = boss)
-  print("Damage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
+  print("\nDamage:\n{}\nDPS:\n{}\n".format(damage, damage.dps(endtime) ))
   overallDamage += damage
 
+print('\n########################## Result')
 print("Average Damage: {}, Average DPS: {}".format(overallDamage.total() / repeats, overallDamage.total() / endtime / repeats))

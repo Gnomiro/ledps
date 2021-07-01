@@ -25,7 +25,8 @@ class Stats():
     pass
 
   # create stat object based on active buffs in duration-container
-  def fromBuffs(self, durations_, gearStats_):
+  # gearAndSkillStats_: gear and skills can provide increased buff effects
+  def fromBuffs(self, durations_, gearAndSkillStats_):
     self.__init__()
 
     # count number of active buffs
@@ -47,14 +48,18 @@ class Stats():
           # todo: probably change loop style to have if/else-statement at outer loop
           # todo: add support for more types
           if statType == 'increase':
-            self.addIncrease(buffType, value * stacks * (1. + gearStats_.getDurationModifier(name, 'effect')))
+            self.addIncrease(buffType, value * stacks * (1. + gearAndSkillStats_.getDurationModifier(name, 'effect')))
+            # print('name : {}, statTye : {}, buffType : {}, v : {}, stacks: {}, effect : {}'.format(name, statType, buffType, value, stacks, gearAndSkillStats_.getDurationModifier(name, 'effect')))
           elif statType == 'more':
-            self.addMore(buffType, value * stacks * (1. + gearStats_.getDurationModifier(name, 'effect')))
+            self.addMore(buffType, value * stacks * (1. + gearAndSkillStats_.getDurationModifier(name, 'effect')))
+            # print('name : {}, statTye : {}, buffType : {}, v : {}, stacks: {}, effect : {}'.format(name, statType, buffType, value, stacks, gearAndSkillStats_.getDurationModifier(name, 'effect')))
           elif statType == 'duration':
             for dm, v in value.items():
               # print(dm)
               # print(v)
-              self.addDurationModifier(buffType, dm, v * (1. + gearStats_.getDurationModifier(name, 'effect')))
+              # todo: is this correct? scaling buff effects
+              # print('name : {}, statTye : {}, buffType : {}, dm : {}, v : {}, stacks: {}, effect : {}'.format(name, statType, buffType, dm, v, stacks, gearAndSkillStats_.getDurationModifier(name, 'effect')))
+              self.addDurationModifier(buffType, dm, v * stacks * (1. + gearAndSkillStats_.getDurationModifier(name, 'effect')))
           else:
             print('Warning: Allocation of buff-type not supported yet')
     pass
@@ -254,7 +259,8 @@ class Stats():
     self.addTriggerModifier('DivineBolt', 'onMeleeHit', 0.2)
 
   def sharedDivinity(self, points = 5):
-    data.supportedTriggerData['DivineBolt']['onTriggerExecutions'] += 1 * points
+    # does not shotgun the same target!
+    # data.supportedTriggerData['DivineBolt']['onTriggerExecutions'] += 1 * points
     data.supportedTriggerData['DivineBolt']['onHitEffectiveness'] *= (1. - 0.1 * points)
 
   def redemption(self, points = 7, recentlyHit = False):

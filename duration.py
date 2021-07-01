@@ -46,6 +46,12 @@ class Duration():
     # elapsed time
     self._elapsed = 0
 
+    # if name_ == 'aspectOfTheShark':
+    #   print('aspectOfTheShark added: {}'.format(self._duration))
+
+    # if name_ == 'serpentStrikeOnHit':
+    #   print('serpentStrikeOnHit added: {}'.format(self._duration))
+
     # skip remaining part for non-damaging ailments
     if self.getType() != 'damagingAilment':
       return
@@ -89,6 +95,7 @@ class Duration():
   # returns state of duration buff
   def isActive(self):
     if self.isPermanent():
+      print('isPermanent')
       return True
     else:
       return self._elapsed < self._duration # not isclose(self._elapsed, self._duration, rtol = 0, atol = 1e-2, equal_nan = False)
@@ -154,7 +161,7 @@ class Durations():
 
     # poison applies a build in poison shred as well which has not stack limitation
     if duration.getType() == 'damagingAilment' and duration.getName() == 'poison':
-      self._durations['shred'].append(Duration('poisonBuiltinShred'))
+      self._durations['shred'].append(Duration('poisonBuiltinShred', tmpStats_ = tmpStats_))
 
     pass
 

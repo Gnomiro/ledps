@@ -23,7 +23,7 @@ s.redemption(points = 7, recentlyHit = False)
 # s.reverenceOfDuality(points = 10)
 s.reverenceOfDuality(points = 4)
 s.divineBolt(points = 1)
-s.sharedDivinity(points = 5)
+# s.sharedDivinity(points = 5)
 
 # aura like skills
 s.holyAura(callToArms = 4, fanaticism = 4, active = False)

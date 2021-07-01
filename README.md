@@ -57,6 +57,11 @@
   * constructor gets gearStats for attributes
    -> with character implementation this can be passed from equipment to skill within simulator
   * Global modifiers like warpath global more while channeling -> added to gearStats or gearStats + globalSkillStat = envirnomentStats?
+* Skill Rotation
+    * Track skill on character and allow a priority queue for using them.
+    * Second option fixes attack pattern
+* Ailments
+  * They seem to track their applying skill; penetration is snappshotted this way on application time (by apllying skill) -> summed up wth resistanceShred at damage time
 
 [20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
 In addition. Is the shred from poison as well limited by 20 stacks? Or is it possible top have poison shred stack to 20 alongside additional poison stack to further reduce the resistance?
@@ -87,3 +92,11 @@ So it only applies an additional poison on hit and procs no other on Hit effects
 [00:44] Oeller: Thanks. So it probably provides only a marginal damage increase even if it procs on every hit (no chance specified). Wording could be improved. I will make a suggestion.
 [00:46] Mike W: Every application of poison reduces the target's poison resistance. So it does have a multiplicative damage increase with your other poison applications.
 [00:47] Oeller: Yes. But it has inherent duration reduction of 0.35; considering DR  of penetration for a lot of stacks it is probably not the best. Poison/ailment Duration could provide a better scaling
+
+EQ and Aftershock
+[16:31] Oeller: What are the damage effectiveness and attributes for Earthquake Aftershock? 300% like the initial hit? The skilltree does nowhere provide the skill when pressing alt. Already opened a bugreport.
+[17:09] Mike W: The initial hit is 350%
+The aftershocks are 100%
+Strength and Attunement Damage 4%
+
+[22:14] Trasochi: Yeah the ticks don't deal a constant amount of damage. So for example, if ticks happened every 1 second and an ailment lasted 2.5 seconds and dealt a total of 10 damage, it would deal 4 damage with the first tick, 4 damage with the second tick, and 2 damage immediately when it expired. If you increase the duration by 10%, so that it lasts 2.75 seconds and deals a total of 11 damage it would deal 3 damage immediately when it expires.

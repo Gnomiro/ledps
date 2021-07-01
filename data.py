@@ -41,13 +41,13 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
   # default limited to one stack
   # todo: add armour shred chance
   'aspectOfTheShark' : {'type' : 'buff',
-                        'effect' : {'increase' : {'meleeAttackSpeed' : 0.1, 'melee': 0.50}}, # todo: check value
+                        'effect' : {'increase' : {'meleeAttackSpeed' : 0.04, 'melee': 0.20}}, # todo: check value
                         'condition': {},
-                        'baseDuration' : 3., 'maxStack' : 1},
+                        'baseDuration' : 3., 'maxStack' : 0},
 
   # Primalist Aspect of the Boar buff
-  # on getHit or 4% onHit per Talent (up to 20%)
-  # todo: scale with talents, currently maximum stats
+  # on recentlyHit or 4% onHit per Talent (up to 20%)
+  # todo: scale with talents, currently maximum stats for bleed/physical but not defence
   'aspectOfTheBoar'  : {'type' : 'buff',
                         'effect' : {'increase' : {'physical' : 0.4},
                                     'duration'  : {'bleed' : {'onHit' : 0.4, 'effect' : 1.2} }
@@ -60,7 +60,7 @@ durationData = {'bleed'         : { 'element' : 'physical', 'type' : 'damagingAi
   # todo: talents for poison effectiveness/duration
   'aspectOfTheViper' : {'type' : 'buff',
                         'effect' : {'increase' : {'overTime' : 1.},
-                                    'duration'  : {'poison' : {'duration' : 1.} }
+                                    'duration'  : {'poison' : {'onHit' : 1.} }
                                    },
                         'condition': {},
                         'baseDuration' : 3., 'maxStack' : 1},
@@ -148,7 +148,7 @@ supportedTriggerData = {  'ManifestStrike'          : {'onHitEffectiveness' : 1.
                           'SentinelAxeThrower'      : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                           'RiveIndomitable'         : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                           'DivineBolt'              : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
-                          # 'SerpentStrikePoisonSpit' : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
+                          'SerpentStrikePoisonSpit' : {'onHitEffectiveness' : 1., 'onTriggerExecutions' : 1},
                        }
 
 def getSupportedTriggerData():

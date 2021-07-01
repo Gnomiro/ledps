@@ -40,8 +40,8 @@ class Simulator():
     # start timer
     t = 0
 
-    # time of last hit
-    lastattack = 0.
+    # time of next hit
+    nextattack = 0.
 
     # assumptions
     # first hit at t = 0
@@ -68,12 +68,8 @@ class Simulator():
       if t!= 0:
         ailmentDamage = self._durations.tick(frametime, boss_)
 
-      # accumualte effects of active buffs into stat-object
-      # considers buff effects provided by gear/talents
-      tmpStats = stats.Stats().fromBuffs(self._durations, self._gearStats)
-
-      # add constant gear stats to temporary stats
-      tmpStats += self._gearStats
+      # progress to next frame
+      t += frametime
 
       if self._verbosity >= 3:
         print(tmpStats)
@@ -84,15 +80,25 @@ class Simulator():
       # reset skill damage
       skillDamage = Damage()
       # accumulate hits happening between previous and current server frame
-      while lastattack <= t:
-        lastattack += attacktime
+      # todo: maybe do all calculations based on attack times and update ailments accordingly while doing the outer loop to ensure frametimes as timesteps
+      while nextattack <= t:
         # receive skillHitDamage, new attacktime as well as updated durations (ailments/buffs/etc applied are here)
-        skillDamageHit, attacktime, self._durations = self._skill.attack(self._durations, tmpStats)
+        skillDamageHit, attacktime, self._durations = self._skill.attack(self._durations)
+        # todo: penetration still only applied at frametime
+        nextattack += attacktime
         # skillDamage of server-frame
         skillDamage += skillDamageHit
 
       # sum up damage
       frameDamage = skillDamage + ailmentDamage
+
+      # buff allocation for penetration
+      # accumulate effects of active buffs into stat-object
+      # considers buff effects provided by gear/talents
+      tmpStats = stats.Stats().fromBuffs(self._durations, self._gearStats)
+
+      # add constant gear stats to temporary stats
+      tmpStats += self._gearStats
 
       # get penetration for all elemt types; normalized to 1
       # todo: consider skill specific penetration somehow; return from attack or maybe calculate penetration already in the skill
@@ -104,7 +110,7 @@ class Simulator():
       shreds = self._durations.countActiveByTypes('shred')
       for key in shreds:
         # scale shred by penetration value and reduced boss effect; if poisonBuiltInShred also scale with poison effect
-        penetration[data.getDurationData()[key]['element']] += shreds[key] * 0.05 * (0.4 if boss_ else 1.) * (1. if key != 'poisonBuiltInShred' else (1. + tmpStats.getDurationData('poison', 'effect')))
+        penetration[data.getDurationData()[key]['element']] += shreds[key] * 0.05 * (0.4 if boss_ else 1.) * (1. if key != 'poisonBuiltinShred' else (1. + tmpStats.getDurationModifier('poison', 'effect')))
       # print(penetration)
 
       # scale damage by penetration
@@ -119,8 +125,6 @@ class Simulator():
           print('Overall tick damage: {}\n'.format(tickDamage))
         damage += tickDamage
         tickDamage = Damage()
-
-      t += frametime
 
     # flush remaining damage into global counter
     if self._verbosity >= 2:
