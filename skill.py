@@ -428,7 +428,7 @@ class Rive(Melee):
 
     # print("riveSkillEffect")
     # execution: add buff per removed ignite stack
-    if self._talents['execution'][0] == 1:
+    if self._talents['execution'][0] == 1 and self._n == 2:
       # number of active ignites; currently multiplied by number of enemies assuming equally applied ignite stacks
       nIgnites = durations_.countActiveByNames('ignite')['ignite'] * enemies
       # removes all ignite debuffs and adds equal number of riveExecution buffs
