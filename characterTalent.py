@@ -31,7 +31,7 @@ class SentinelJuggernaut(TalentBase):
 
 
 class SentinelBlademaster(TalentBase):
-    """docstring for SentinelBlademaster"""
+  """docstring for SentinelBlademaster"""
 
   def __init__(self, points_):
     super(SentinelBlademaster, self).__init__('SentinelBlademaster', points_)
@@ -39,7 +39,7 @@ class SentinelBlademaster(TalentBase):
 
 
 class SentinelAxeThrower(TalentBase):
-    """docstring for SentinelAxeThrower"""
+  """docstring for SentinelAxeThrower"""
 
   def __init__(self, points_):
     super(SentinelAxeThrower, self).__init__('SentinelAxeThrower', points_)
@@ -47,7 +47,7 @@ class SentinelAxeThrower(TalentBase):
 
 
 class PaladinPenance(TalentBase):
-    """docstring for PaladinPenance"""
+  """docstring for PaladinPenance"""
 
   def __init__(self, points_):
     super(PaladinPenance, self).__init__('PaladinPenance', points_)
@@ -56,7 +56,7 @@ class PaladinPenance(TalentBase):
 
 
 class PaladinConviction(TalentBase):
-    """docstring for PaladinConviction"""
+  """docstring for PaladinConviction"""
 
   def __init__(self, points_):
     super(PaladinConviction, self).__init__('PaladinConviction', points_)
@@ -67,7 +67,7 @@ class PaladinConviction(TalentBase):
 
 
 class PaladinDivineBolt(TalentBase):
-    """docstring for PaladinDivineBolt"""
+  """docstring for PaladinDivineBolt"""
 
   def __init__(self, points_):
     super(PaladinDivineBolt, self).__init__('PaladinDivineBolt', points_)
@@ -75,7 +75,7 @@ class PaladinDivineBolt(TalentBase):
 
 
 class PaladinRedemption(TalentBase):
-    """docstring for PaladinRedemption"""
+  """docstring for PaladinRedemption"""
 
   def __init__(self, points_):
     super(PaladinRedemption, self).__init__('PaladinRedemption', points_)
@@ -84,7 +84,7 @@ class PaladinRedemption(TalentBase):
 
 
 class PaladinReverenceOfDuality(TalentBase):
-    """docstring for PaladinReverenceOfDuality"""
+  """docstring for PaladinReverenceOfDuality"""
 
   def __init__(self, points_):
     super(PaladinReverenceOfDuality, self).__init__('PaladinReverenceOfDuality', points_)
@@ -92,7 +92,7 @@ class PaladinReverenceOfDuality(TalentBase):
 
 
 class BeastmasterUrsineStrength(TalentBase):
-    """docstring for BeastmasterUrsineStrength"""
+  """docstring for BeastmasterUrsineStrength"""
 
   def __init__(self, points_):
     super(BeastmasterUrsineStrength, self).__init__('BeastmasterUrsineStrength', points_)

@@ -36,15 +36,20 @@ class Default:
 
     self._durationContainer = durationContainer.DurationContainer(self._collection)
 
+    self._canTrigger = True
+
     self._prepared = False
+    pass
 
   def setCollection(self, collection_):
     self._prepared = False
     self._collection = collection_
+    pass
 
   def setDurationContainer(self, durationContainer_):
     self._prepared = False
     self._durationContainer = durationContainer_
+    pass
 
   def setTalent(self, **talents_):
     for key, value in talents_.items():
@@ -72,21 +77,24 @@ class Default:
       self._patternCycle = cycle(self._pattern)
       self._n = next(self._patternCycle)
       self._prepared = True
+      pass
 
   def prepareSkill(self):
     pass
 
-
-  def attack(self):
+  def attack(self, canTriggerOverride_ = None):
 
     self.prepare()
 
     allModifier = modifier.fromBuff(self._durationContainer)
     allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
+    damage = element.ElementContainer()
+
     if self._durationContainer.addCooldown(self._skillName, self._skillCooldown):
 
       skillDamage = self.skillHit(allModifier)
+      damage += skillDamage
 
       resistances = element.ElementContainer(default_ = 0.0)
       penetration = element.ElementContainer(default_ = 0.0, **allModifier.getPenetrations())
@@ -94,7 +102,7 @@ class Default:
       resistances -= shred
       resistances.setUpperLimit(0.75)
       penetration -= resistances
-      skillDamage.imultiply(penetration, shift_ = 1.0)
+      damage.imultiply(penetration, shift_ = 1.0)
 
       self.skillEffect(allModifier)
       allModifier = modifier.fromBuff(self._durationContainer)
@@ -104,17 +112,19 @@ class Default:
       allModifier = modifier.fromBuff(self._durationContainer)
       allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
-      triggerDamage = self.onHitTrigger(allModifier)
-      allModifier = modifier.fromBuff(self._durationContainer)
-      allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      if (canTriggerOverride_ if canTriggerOverride_ is not None else self._canTrigger):
+        triggerDamage = self.onHitTrigger(allModifier)
+        allModifier = modifier.fromBuff(self._durationContainer)
+        allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+        damage += triggerDamage # penetration already applied in skill's own attack routine
 
       self._n = next(self._patternCycle)
 
-      return (skillDamage + triggerDamage, self.getAttacktime(allModifier))
     else:
       if verbosity >= 1:
         print(self._skillName + ' is still on cooldown')
-      return (element.ElementContainer(), self.getAttacktime(allModifier))
+
+    return (damage, self.getAttacktime(allModifier))
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
@@ -134,6 +144,7 @@ class Default:
             applications += 1
         for i in range(applications):
           self._durationContainer.add(name, modifier_ = modifier_, skillName_= self._skillName , skillN_ = self._n)
+    pass
 
   def skillEffect(self, modifier_):
     pass
@@ -153,7 +164,7 @@ class Default:
           if random.random() <= chance - applications:
             applications += 1
         for i in range(applications):
-          triggerDamage, _ = self._collection.getSkillOnTheFly(self._durationContainer).attack()
+          triggerDamage, _ = self._collection.getSkillOnTheFly(self._durationContainer).attack(canTriggerOverride_ = False)
           damage += triggerDamage
       return damage
 
@@ -170,7 +181,9 @@ class Melee(Default):
 
   def __init__(self, attacktimes_= [0.68182], attackdelays_ = [0], pattern_ = None):
     super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
+
     self._skillName = 'melee'
+    pass
 
   def getOnHitChance(self, name_, modifier_):
     chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onMeleeHit')
@@ -184,8 +197,10 @@ class Melee(Default):
 class Spell(Default):
 
   def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_=attacktimes_, attackdelays_=attackdelays_, pattern_=pattern_)
+    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
+
     self._skillName = 'spell'
+    pass
 
   def getOnHitChance(self, name_, modifier_):
     chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onSpellHit')
@@ -199,8 +214,10 @@ class Spell(Default):
 class Throw(Default):
 
   def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_=attacktimes_, attackdelays_=attackdelays_, pattern_=pattern_)
+    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
+
     self._skillName = 'throw'
+    pass
 
   def getOnHitChance(self, name_, modifier_):
     chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onThrowHit')
@@ -215,7 +232,9 @@ class Rive(Melee):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0.511365, 0.511365, 0.477274], attackdelays_ = [0.02, 0.02, 0.005], pattern_ = [0, 1, 2])
+
     self._skillName = 'rive'
+
     self._talents = {'cadence': [0, 1],
                      'flurry': [0, 5],
                      'sever': [0, 3],
@@ -224,6 +243,7 @@ class Rive(Melee):
                      'indomitable': [0, 1],
                      'ironReach': [0, 4],
                      'tripleThreat': [0, 1]}
+    pass
 
   def prepareSkill(self):
 
@@ -244,6 +264,7 @@ class Rive(Melee):
     self._localSkillModifier[0].addTrigger('RiveIndomitable', 'onHit', 1.0 * self._talents['indomitable'][0])
 
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    pass
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
@@ -255,67 +276,84 @@ class Rive(Melee):
       self._durationContainer._durations['ignite'] = list([])
       for i in range(nIgnites):
         self._durationContainer.add('riveExecution', modifier_)
+    pass
 
 
-class Trigger:
 
-  def getTriggerChance(self, trigger_, modifier_):
-    return 0
-
-
-class ManifestStrike(Trigger, Melee):
+class ManifestStrike(Melee):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'manifestStrike'
 
+    # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
+    # self._canTrigger = False
+    pass
+
   def prepareSkill(self):
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
+    pass
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
     return damage
 
 
-class SentinelAxeThrower(Trigger, Throw):
+class SentinelAxeThrower(Throw):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'sentinelAxeThrower'
+
     self._skillCooldown = 1
+
+    # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
+    # self._canTrigger = False
+    pass
 
   def prepareSkill(self):
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+    pass
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
     return damage
 
 
-class RiveIndomitable(Trigger, Spell):
+class RiveIndomitable(Spell):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'riveIndomitable'
 
+    # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
+    # self._canTrigger = False
+    pass
+
   def prepareSkill(self):
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    pass
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
     return damage
 
 
-class DivineBolt(Trigger, Spell):
+class DivineBolt(Spell):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'divineBolt'
 
+    # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
+    # self._canTrigger = False
+    pass
+
   def prepareSkill(self):
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
+    pass
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
@@ -340,13 +378,13 @@ def getDefaultObjectByName(name_):
 import sys, inspect
 
 # base classes
-baseClasses = ['default', 'trigger']
+baseClasses = ['default']
 
 # collect all durations and to de-capitalize them
 allClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__]
 
 # implemented class; allClasses.remove(baseClasses)
-implementedClasses = [name for name in allDurations if name not in baseClasses]
+implementedClasses = [name for name in allClasses if name not in baseClasses]
 
 def getBaseClasses():
   return baseClasses
@@ -364,9 +402,9 @@ def getImplementedClasses():
 ############################################################################################
 
 def getDefaultObjectByName(name_):
-  if name_ in getImplementedDurations():
+  if name_ in getImplementedClasses():
     # capitalize name of requested duration
     className = name_[0].upper() + name_[1:]
     return eval(className)()
   else:
-    raise error.InvalidDuration(name_)
+    raise error.UnsupportedSkill(name_)

@@ -53,6 +53,11 @@ class Modifier():
     total += other_
     return total
 
+  def iaddMultiple(self, *other_):
+    for other in other_:
+      self += other
+    return self
+
   def __str__(self):
     return 'increases:\n' + str(self._increase) + '\nmore:\n' + str(self._more) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
 

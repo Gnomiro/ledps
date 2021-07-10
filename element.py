@@ -24,7 +24,7 @@ class ElementContainer():
       info += ('{}: {}, '.format(key, self._element[key]))
     return info[:-2] # remove last comma and space
 
-  def __iadd__(self, other):
+  def __iadd__(self, other_):
     for element in self._element.keys():
       self._element[element] = self._element[element] + other_._element[element]
     return self
@@ -55,6 +55,10 @@ class ElementContainer():
   def iaddValue(self, value_):
     for element in self._element.keys():
       self._element[element] = self._element[element]
+    return self
+
+  def iassignByElement(self, element_, value_):
+    self._element[element_] = value_
     return self
 
   def addValue(self, value_):
@@ -88,7 +92,7 @@ class ElementContainer():
   def multiplyByFactor(self, factor_, shift_ = 0.):
     result = ElementContainer()
     for element in self._element.keys():
-      result._element[element] = elf._element[element] * (factor_ + shift_)
+      result._element[element] = self._element[element] * (factor_ + shift_)
     return result
 
   def setUpperLimit(self, limit_):
@@ -98,3 +102,15 @@ class ElementContainer():
 
   def getSum(self):
     return sum(self._element.values())
+
+
+############################################################################################
+# Additional constructor functions
+############################################################################################
+
+def fromShred(durationContainer_):
+  shred = ElementContainer()
+  for shred in durationContainer_.getActiveByTypes('shred'):
+    shred += shred.getShred()
+  else:
+    return modifier

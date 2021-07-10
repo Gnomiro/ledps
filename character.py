@@ -1,4 +1,4 @@
-import talent, modifier, characterTalent
+import characterTalent, modifier
 
 verbosity = 0
 
@@ -46,13 +46,13 @@ class CharacterInterface(object):
           self._talentModifier += characterTalent.Talent(name, points).getModifier()
       self._prepared = True
 
-    def getModifier(self):
-      self.prepare()
-      return self._classModifier + self._talentModifier
+  def getModifier(self):
+    self.prepare()
+    return self._classModifier + self._talentModifier
 
 
 class Sentinel(CharacterInterface):
-    """docstring for Sentinel"""
+  """docstring for Sentinel"""
 
   def __init__(self, name_ = 'Sentinel'):
     super(Sentinel, self).__init__(name_)
@@ -79,7 +79,7 @@ class Sentinel(CharacterInterface):
 
 
 class Paladin(Sentinel):
-    """docstring for Paladin"""
+  """docstring for Paladin"""
 
   def __init__(self):
     super(Paladin, self).__init__('Paladin')
@@ -120,7 +120,7 @@ class Paladin(Sentinel):
                           })
 
 class Primalist(CharacterInterface):
-    """docstring for Primalist"""
+  """docstring for Primalist"""
 
   def __init__(self, name_ = 'Primalist'):
     super(Primalist, self).__init__(name_)
@@ -146,7 +146,7 @@ class Primalist(CharacterInterface):
 
 
 class Beastmaster(Primalist):
-    """docstring for Beastmaster"""
+  """docstring for Beastmaster"""
 
   def __init__(self):
     super(Beastmaster, self).__init__('Beastmaster')

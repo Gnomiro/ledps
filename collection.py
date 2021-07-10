@@ -27,7 +27,7 @@ class Collection():
     return self._equipment
 
   def getEquipmentModifier(self):
-    return self.getEquipmentModifier().getModifier()
+    return self.getEquipment().getModifier()
 
   def getPersistentModifier(self):
     return self.getEquipmentModifier() + self.getCharacterModifier()
@@ -36,6 +36,11 @@ class Collection():
     if name_ not in self._durationCollection:
       self._durationCollection[name_] = duration.getDefaultObjectByName(name_)
     return self._durationCollection[name_]
+
+  def getDurationCopy(self, name_):
+    if name_ not in self._durationCollection:
+      self._durationCollection[name_] = duration.getDefaultObjectByName(name_)
+    return copy.copy(self._durationCollection[name_])
 
   def getSkill(self, name_):
     if name_ not in self._skillCollection:

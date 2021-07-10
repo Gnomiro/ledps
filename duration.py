@@ -54,6 +54,9 @@ class Duration():
     else:
       return self._elapsed < self._duration
 
+  def getRemainingDuration(self):
+    return self._duration - self._elapsed
+
   def applyModifier(self, modifier_):
     pass
 
@@ -137,7 +140,14 @@ class Shred(Duration):
     toolbox.validateInput(self._name, required, **kwargs_)
 
     self._types.append('shred')
-    self._shredElement = kwargs_['shredElement_']
+
+    self._shred = element.ElementContainer()
+
+    self._shred.iassignByElement(kwargs_['shredElement_'], 0.05)
+
+  def getShred(self):
+
+    return self._shred
 
 
 ############################################################################################
@@ -194,13 +204,13 @@ class PhysicalShred(Shred):
 import sys, inspect
 
 # base classes
-baseClasses = ['cooldown', 'damagingAilment', 'shred', 'buff', 'duration']
+baseClasses = ['damagingAilment', 'shred', 'buff', 'duration', 'cooldown']
 
 # collect all durations and to de-capitalize them
 allClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__]
 
 # implemented class; allClasses.remove(baseClasses)
-implementedClasses = [name for name in allDurations if name not in baseClasses]
+implementedClasses = [name for name in allClasses if name not in baseClasses] + ['cooldown']
 
 def getBaseClasses():
   return baseClasses
@@ -218,7 +228,7 @@ def getImplementedClasses():
 ############################################################################################
 
 def getDefaultObjectByName(name_):
-  if name_ in getImplementedDurations():
+  if name_ in getImplementedClasses():
     # capitalize name of requested duration
     className = name_[0].upper() + name_[1:]
     return eval(className)()

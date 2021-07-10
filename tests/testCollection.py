@@ -1,11 +1,7 @@
 import sys
 sys.path.append('..')
 
-import collection
-
-import element, duration
-
-import copy
+import collection, duration, element
 
 import unittest
 
@@ -28,7 +24,11 @@ class CollectionTestCase(unittest.TestCase):
   def test_copyViability(self):
 
     # iterates over all implemented durations and calld their constructor in first if statement
-    for name in duration.getImplementedDurations():
+    for name in duration.getImplementedClasses():
+
+      if name == 'cooldown':
+        continue
+
       if collection_.getDuration(name).hasType('damagingAilment'):
         self.copyDamagingAilment(name)
       if collection_.getDuration(name).hasType('shred'):
@@ -37,13 +37,13 @@ class CollectionTestCase(unittest.TestCase):
         self.copyBuff(name)
 
   def copyDamagingAilment(self, name_):
-    b = copy.copy(collection_.getDuration(name_))
+    b = collection_.getDurationCopy(name_)
 
     b.tick(8.)
 
     b._baseDamage = element.ElementContainer(default_ = 1.)
 
-    b2 = copy.copy(collection_.getDuration(name_))
+    b2 = collection_.getDurationCopy(name_)
 
     self.assertEqual(b._damage.getSum(), b2._damage.getSum())
     self.assertNotEqual(b.isActive(), b2.isActive())
@@ -52,11 +52,11 @@ class CollectionTestCase(unittest.TestCase):
     pass
 
   def copyShred(self, name_):
-    print('CollectionTest: Add copyShred Test')
+    print('CollectionTest: Add copyShred test not implemented yet.')
     pass
 
   def copyBuff(self, name_):
-    print('CollectionTest: Add copyBuff Test')
+    print('CollectionTest: Add copyBuff test not implemented yet.')
     pass
 
 if __name__ == '__main__':
