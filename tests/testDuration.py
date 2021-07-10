@@ -33,15 +33,4 @@ class DurationTestCase(unittest.TestCase):
     self.assertEqual(b.isActive(), False)
 
 if __name__ == '__main__':
-  print('Base durations:\n{}'.format(duration.getBaseDurations()))
-  print('Implemented durations:\n{}'.format(duration.getImplementedDurations()))
-  print('Valid durations:\n{}'.format(duration.getValidDurations()))
-
-  b = duration.Bleed()
-
-  p = duration.Poison()
-
-  ps = duration.PhysicalShred()
-
-
   unittest.main()

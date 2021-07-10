@@ -18,3 +18,10 @@ class InvalidDuration(Exception):
     self.message = 'Warning: \'{}\' is an invalid duration.'.format(element_)
     super().__init__(self.message)
     pass
+
+class UnsupportedSkill(Exception):
+
+  def __init__(self, element_):
+    self.message = 'Warning: \'{}\' is an unsupported skill.'.format(element_)
+    super().__init__(self.message)
+    pass

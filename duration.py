@@ -193,21 +193,23 @@ class PhysicalShred(Shred):
 
 import sys, inspect
 
-# base duration types
-baseDurations = ['cooldown', 'damagingAilment', 'shred', 'buff', 'duration']
-# collect all durations and cast to de-capitalize
-allDurations = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass)if obj.__module__ is __name__]
-#
-implementedDurations = [name for name in allDurations if name not in baseDurations]
+# base classes
+baseClasses = ['cooldown', 'damagingAilment', 'shred', 'buff', 'duration']
 
-def getBaseDurations():
-  return baseDurations
+# collect all durations and to de-capitalize them
+allClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__]
 
-def getValidDurations():
-  return allDurations
+# implemented class; allClasses.remove(baseClasses)
+implementedClasses = [name for name in allDurations if name not in baseClasses]
 
-def getImplementedDurations():
-  return implementedDurations
+def getBaseClasses():
+  return baseClasses
+
+def getAllClasses():
+  return allClasses
+
+def getImplementedClasses():
+  return implementedClasses
 
 ############################################################################################
 ############################################################################################
@@ -215,10 +217,10 @@ def getImplementedDurations():
 ############################################################################################
 ############################################################################################
 
-def getDefaultDuration(name_):
+def getDefaultObjectByName(name_):
   if name_ in getImplementedDurations():
     # capitalize name of requested duration
     className = name_[0].upper() + name_[1:]
-    return eval(className + '()')
+    return eval(className)()
   else:
     raise error.InvalidDuration(name_)
