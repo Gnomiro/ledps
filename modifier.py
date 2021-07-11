@@ -154,7 +154,7 @@ class Modifier():
 
 def fromBuff(durationContainer_):
   modifier = Modifier()
-  for buff in durationContainer_.getActiveByTypes('buff'):
-    modifier += buff.getBuffModifier()
-  else:
-    return modifier
+  for buff in durationContainer_.getActiveWithType('buff'):
+    modifier += buff.getModifier()
+
+  return modifier

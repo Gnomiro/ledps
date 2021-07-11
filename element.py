@@ -2,7 +2,7 @@ import error
 
 import numpy
 
-elements = ['physical', 'poison']
+elements = ['physical', 'fire', 'poison']
 
 def getValidElements():
   return elements
@@ -35,18 +35,18 @@ class ElementContainer():
         self._element[element] = self._element[element] + other._element[element]
     return self
 
-  def __add__(self, other):
+  def __add__(self, other_):
     result = element.ElementContainer()
     for element in self._element.keys():
       result._element[element] = self._element[element] + other_._element[element]
     return result
 
-  def __isub__(self, other):
+  def __isub__(self, other_):
     for element in self._element.keys():
       self._element[element] = self._element[element] - other_._element[element]
     return self
 
-  def __sub__(self, other):
+  def __sub__(self, other_):
     result = element.ElementContainer()
     for element in self._element.keys():
       result._element[element] = self._element[element] - other_._element[element]
@@ -108,9 +108,8 @@ class ElementContainer():
 # Additional constructor functions
 ############################################################################################
 
-def fromShred(durationContainer_):
+def fromResistanceShred(durationContainer_):
   shred = ElementContainer()
-  for shred in durationContainer_.getActiveByTypes('shred'):
-    shred += shred.getShred()
-  else:
-    return modifier
+  for s in durationContainer_.getActiveWithType('resistanceShred'):
+    shred += s.getShred()
+  return shred

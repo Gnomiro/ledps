@@ -40,7 +40,7 @@ class Collection():
   def getDurationCopy(self, name_):
     if name_ not in self._durationCollection:
       self._durationCollection[name_] = duration.getDefaultObjectByName(name_)
-    return copy.copy(self._durationCollection[name_])
+    return copy.deepcopy(self._durationCollection[name_]) # todo: implement a simple copy routine which creates a copy with copies of only relevant objects
 
   def getSkill(self, name_):
     if name_ not in self._skillCollection:
@@ -52,7 +52,6 @@ class Collection():
     return self._skillCollection
 
   def getSkillOnTheFly(self, name_, durationContainer_):
-    print('Warning: Collection getSkillOnTheFly not implemented yet.')
     if name_ not in self._skillCollection:
       self.getSkill(name_)
       self._skillCollection[name_].setDurationContainer(durationContainer_)

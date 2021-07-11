@@ -6,7 +6,7 @@ from math import floor
 
 import element, modifier, durationContainer, collection, character, error
 
-# todo: change all catalogue to collection
+import warnings
 
 verbosity = 0
 
@@ -86,6 +86,8 @@ class Default:
 
     self.prepare()
 
+    warnings.warn('Skill hit damage is not yet accounted for.')
+
     allModifier = modifier.fromBuff(self._durationContainer)
     allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
@@ -96,13 +98,17 @@ class Default:
       skillDamage = self.skillHit(allModifier)
       damage += skillDamage
 
+      # penetration
+      # applied for duration objects seperately
       resistances = element.ElementContainer(default_ = 0.0)
       penetration = element.ElementContainer(default_ = 0.0, **allModifier.getPenetrations())
-      shred = element.fromShred(self._durationContainer)
+      shred = element.fromResistanceShred(self._durationContainer)
       resistances -= shred
       resistances.setUpperLimit(0.75)
       penetration -= resistances
       damage.imultiply(penetration, shift_ = 1.0)
+
+      # todo: armour mitigation and armour shred
 
       self.skillEffect(allModifier)
       allModifier = modifier.fromBuff(self._durationContainer)
@@ -158,15 +164,14 @@ class Default:
     for trigger, info in modifier_.getTriggers().items():
       chance = self.getTriggerChance(trigger, modifier_)
       if chance != 0:
-        skill = self._catalogue.getSkillOnTheFlytriggerself._catalogueself._durationContainerself._persistentModifier
         applications = floor(chance)
         if applications != chance:
           if random.random() <= chance - applications:
             applications += 1
         for i in range(applications):
-          triggerDamage, _ = self._collection.getSkillOnTheFly(self._durationContainer).attack(canTriggerOverride_ = False)
+          triggerDamage, _ = self._collection.getSkillOnTheFly(trigger, self._durationContainer).attack(canTriggerOverride_ = False)
           damage += triggerDamage
-      return damage
+    return damage
 
   def getSkillModifier(self, n_=0):
     self.prepare()
@@ -261,7 +266,7 @@ class Rive(Melee):
     if self._talents['cadence'][0] == 1:
       self._pattern = [0, 1, 0, 1, 2]
 
-    self._localSkillModifier[0].addTrigger('RiveIndomitable', 'onHit', 1.0 * self._talents['indomitable'][0])
+    self._localSkillModifier[0].addTrigger('riveIndomitable', 'onHit', 1.0 * self._talents['indomitable'][0])
 
     self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     pass
@@ -297,6 +302,7 @@ class ManifestStrike(Melee):
 
   def skillHit(self, modifier_):
     damage = element.ElementContainer()
+
     return damage
 
 

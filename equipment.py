@@ -1,5 +1,7 @@
 import modifier
 
+import warnings
+
 class Equipment():
   """docstring for Equipment"""
 
@@ -7,25 +9,29 @@ class Equipment():
     self._modifier = modifier.Modifier()
 
   def getModifier(self):
-    print('Warning: Equipment does not look for changes currently.')
+    warnings.warn('Equipment does not look for changes currently.')
     return self._modifier
 
   def setExamplePaladinEquipment(self):
+
+    # blessings
     self._modifier.addDuration('physicalShred', 'onHit', 0.45)
     self._modifier.addDuration('ignite', 'onHit', 0.89)
     self._modifier.addDuration('bleed', 'onHit', 0.87)
 
+    # sigils of hope
     empoweringSigils = 3
     numberOfSigils = 4
     self._modifier.addIncrease('generic', 0.06 * empoweringSigils * numberOfSigils)
 
+    # holy aura
     factor = 1
     callToArms = 4
     fanaticism = 4
-
     self._modifier.addIncrease('generic', 0.3 * factor)
     self._modifier.addIncrease('physical', 0.1 * callToArms * factor)
     self._modifier.addIncrease('meleeAttackSpeed', 0.04 * fanaticism * factor)
+
     self._modifier.addIncrease('physical', 0.32)
     self._modifier.addDuration('bleed', 'duration', 0.16)
     self._modifier.addDuration('bleed', 'effect', 0.34)
@@ -55,7 +61,7 @@ class Equipment():
     self._modifier.addIncrease('physical', 0.08)
     self._modifier.addIncrease('overTime', 0.05)
     self._modifier.addDuration('bleed', 'onHit', 0.12)
-    self._modifier.addTrigger('ManifestStrike', 'onMeleeHit', 0.1)
+    self._modifier.addTrigger('manifestStrike', 'onMeleeHit', 0.1)
     self._modifier.addDuration('bleed', 'onHit', 0.11)
     self._modifier.addDuration('bleed', 'onHit', 0.36)
     self._modifier.addDuration('bleed', 'onHit', 0.2)

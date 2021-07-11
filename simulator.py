@@ -69,7 +69,7 @@ class Simulator:
     overallDamage += tickDamage
 
     if verbosity >= 1:
-      print('Active durations at end of fight:')
+      print('\nActive durations at end of fight:')
       print(self._durationContainer.countActive())
 
     return overallDamage

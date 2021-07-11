@@ -1,6 +1,8 @@
-import toolbox, error, element
+import toolbox, error, element, modifier
 
 import copy
+
+import warnings
 
 ############################################################################################
 ############################################################################################
@@ -30,6 +32,8 @@ class Duration():
     self._duration = self._baseDuration
     self._maxStacks = kwargs_['maxStacks_']
 
+    self._appliedBy = (None, None)
+
   def getName(self):
     return self._name
 
@@ -45,6 +49,12 @@ class Duration():
   def getMaxStacks(self):
     return self._maxStacks
 
+  def setAppliedBy(self, skillName_, skillN_):
+    self._appliedBy = (skillName_, skillN_)
+
+  def getAppliedBy(self):
+    return self._appliedBy
+
   def isPermanent(self):
     return self._permanent
 
@@ -58,6 +68,8 @@ class Duration():
     return self._duration - self._elapsed
 
   def applyModifier(self, modifier_):
+
+    self._duration *= (1. + modifier_.getDuration(self._name, 'duration'))
     pass
 
   def tick(self, timestep_):
@@ -84,16 +96,31 @@ class DamagingAilment(Duration):
     super(DamagingAilment, self).__init__(name_ = name_, **kwargs_)
     self._types.append('damagingAilment')
 
-    required = ['damage_']
+    required = ['damage_', 'scalingTags_']
     toolbox.validateInput(self._name, required, **kwargs_)
 
     self._baseDamage = kwargs_['damage_']
     self._damage = self._baseDamage
 
+    self._scalingTags = kwargs_['scalingTags_']
+
 
   def applyModifier(self, modifier_):
     super(DamagingAilment, self).applyModifier(modifier_)
-    print('Warning: damagingAilment.applyModifier() not implemented yet.')
+
+    # print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    # print(modifier_)
+    # print(self._name)
+    # print(self._damage)
+
+    self._damage.imultiplyByFactor(modifier_.getDuration(self._name, 'effect'), shift_ = 1.)
+    self._damage.imultiplyByFactor(modifier_.getIncreaseByTagList(self._scalingTags), shift_ = 1.)
+    self._damage.imultiplyByFactor(modifier_.getMoreByTagList(self._scalingTags), shift_ = 0.)
+
+    # print(self._damage)
+    # print(self._duration)
+    # print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+
     pass
 
   def tick(self, timestep_):
@@ -112,38 +139,41 @@ class Buff(Duration):
 
     self._types.append('buff')
 
-    print('Warning: buff has no Modifier() object yet.')
-    self._modifier = None
+    self._modifier = modifier.Modifier()
 
   def applyModifier(self, modifier_):
     super(Buff, self).applyModifier(modifier_)
-    print('Warning: buff.applyModifier() not implemented yet.')
+    warnings.warn('buff.applyModifier() not implemented yet.')
     pass
 
 
   def getModifier(self):
 
-    print('Warning: buff.getModifier() not implemented yet.')
-
-    return
+    return self._modifier
 
 ############################################################################################
-# Shred base
+# ResistanceShred base
 ############################################################################################
 
-class Shred(Duration):
+class ResistanceShred(Duration):
   """docstring for Shred"""
   def __init__(self, name_, **kwargs_):
-    super(Shred, self).__init__(name_ = name_, **kwargs_)
+    super(ResistanceShred, self).__init__(name_ = name_, **kwargs_)
 
     required = ['shredElement_']
     toolbox.validateInput(self._name, required, **kwargs_)
 
-    self._types.append('shred')
+    self._types.append('resistanceShred')
 
     self._shred = element.ElementContainer()
 
     self._shred.iassignByElement(kwargs_['shredElement_'], 0.05)
+
+  def applyModifier(self, modifier_):
+    super(ResistanceShred, self).applyModifier(modifier_)
+    # todo: does poison shred scale with poison effect?!?!?!
+    # would nee to scale self._shred values accordingly
+    pass
 
   def getShred(self):
 
@@ -171,6 +201,14 @@ class Cooldown(Duration):
 # Buffs
 ############################################################################################
 
+class RiveExecution(Buff):
+  """docstring for RiveExecution"""
+  def __init__(self):
+    super(RiveExecution, self).__init__(name_ = 'riveExecution', duration_ = 2., maxStacks_ = 0)
+
+    self._modifier.addIncrease('physical', 0.15)
+
+
 ############################################################################################
 # DamagingAilments
 ############################################################################################
@@ -178,19 +216,23 @@ class Cooldown(Duration):
 class Bleed(DamagingAilment):
   """docstring for Bleed"""
   def __init__(self):
-    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4, damage_ = element.ElementContainer(physical = 53), maxStacks_ = 0)
+    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), scalingTags_ =  ['generic', 'physical', 'physicalOverTime', 'overTime'], maxStacks_ = 0)
 
+class Ignite(DamagingAilment):
+  """docstring for Ignite"""
+  def __init__(self):
+    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), scalingTags_ =  ['generic', 'fire', 'fireOverTime', 'overTime'], maxStacks_ = 0)
 
-class Poison(Shred, DamagingAilment):
+class Poison(ResistanceShred, DamagingAilment):
   """docstring for Poison"""
   def __init__(self):
-    super(Poison, self).__init__(name_ = 'poison', duration_ = 3, damage_ = element.ElementContainer(poison = 20), shredElement_ = 'physical', maxStacks_ = 0)
+    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 0)
 
 ############################################################################################
 # Shreds
 ############################################################################################
 
-class PhysicalShred(Shred):
+class PhysicalShred(ResistanceShred):
   """docstring for PhysicalShred"""
   def __init__(self):
     super(PhysicalShred, self).__init__(name_ = 'physicalShred', shredElement_ = 'physical', duration_ = 4, maxStacks_ = 20)
@@ -204,7 +246,7 @@ class PhysicalShred(Shred):
 import sys, inspect
 
 # base classes
-baseClasses = ['damagingAilment', 'shred', 'buff', 'duration', 'cooldown']
+baseClasses = ['damagingAilment', 'resistanceShred', 'buff', 'duration', 'cooldown']
 
 # collect all durations and to de-capitalize them
 allClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__]

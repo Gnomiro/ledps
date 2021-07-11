@@ -1,5 +1,7 @@
 import characterTalent, modifier
 
+import warnings
+
 verbosity = 0
 
 class CharacterInterface(object):
@@ -30,7 +32,7 @@ class CharacterInterface(object):
         else:
           self._talents[key][0] = value
       else:
-        print('Warning: Talent with name \'{}\' is not available for \'{}\'. Skipped.'.format(key, self._skillName))
+        print('Warning: Talent with name \'{}\' is not available for \'{}\'. Skipped.'.format(key, self._name))
         continue
       if verbosity >= 1:
         print('{}: {}'.format(key, self._talents[key][0]))
@@ -84,7 +86,7 @@ class Paladin(Sentinel):
   def __init__(self):
     super(Paladin, self).__init__('Paladin')
 
-    print('Warning: Paladin mastery conditional modifier always active at maximum value.')
+    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
     self._classModifier.addIncrease('physical', 1.0)
     self._classModifier.addIncrease('fire', 1.0)
 
