@@ -19,9 +19,9 @@ endtime = 60
 
 overallDamage = element.ElementContainer()
 
-for i in range(repeats):
-  sim = simulator.Simulator(collection_, mainAttack_ = 'rive')
+sim = simulator.Simulator(collection_, mainAttack_ = 'rive')
 
+for i in range(repeats):
   damage = sim.simulate(endtime_ = endtime)
   print("\nDamage:\n{}\nDPS:\n{}\n".format(damage, damage.multiplyByFactor(1. / endtime)))
   overallDamage += damage

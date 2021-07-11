@@ -26,6 +26,10 @@ class Simulator:
 
   def simulate(self, endtime_ = 1000):
 
+    self._collection.resetDurationCollection()
+    self._collection.prepare()
+    self._durationContainer.reset()
+
     t = 0
     nextattack = 0.0
     attacktime = 0

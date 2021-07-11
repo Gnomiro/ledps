@@ -11,6 +11,21 @@ class Collection():
 
     self._skillCollection = {}
     self._durationCollection = {}
+
+    self._prepared = False
+    pass
+
+  def prepare(self):
+    if not self._prepared:
+      self._character.prepare()
+      # todo: do similar things for skills as they also have duration objects they change globally
+      self._character.applyModification(self)
+      self._prepared = True
+    pass
+
+  def resetDurationCollection(self):
+    self._durationCollection = {}
+    self._prepared = False
     pass
 
   def getCharacter(self):

@@ -16,6 +16,9 @@ class TalentBase:
   def getModifier(self):
     return self._modifier
 
+  def applyModification(self, collection_):
+    pass
+
 
 class TalentNotImplemented(TalentBase):
   """docstring for TalentNotImplemented"""
@@ -124,3 +127,6 @@ class Talent:
 
   def getModifier(self):
     return self._talent.getModifier()
+
+  def applyModification(self, collection_):
+    return self._talent.applyModification(collection_)

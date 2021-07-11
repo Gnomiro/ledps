@@ -33,6 +33,7 @@ class Duration():
     self._maxStacks = kwargs_['maxStacks_']
 
     self._appliedBy = (None, None)
+    pass
 
   def getName(self):
     return self._name
@@ -43,14 +44,18 @@ class Duration():
   def getTypes(self):
     return self._types
 
-  def hasStackLimit(self):
+  def isApplicable(self):
     return self._maxStacks != 0
+
+  def hasStackLimit(self):
+    return self._maxStacks != -1
 
   def getMaxStacks(self):
     return self._maxStacks
 
   def setAppliedBy(self, skillName_, skillN_):
     self._appliedBy = (skillName_, skillN_)
+    pass
 
   def getAppliedBy(self):
     return self._appliedBy
@@ -103,23 +108,15 @@ class DamagingAilment(Duration):
     self._damage = self._baseDamage
 
     self._scalingTags = kwargs_['scalingTags_']
+    pass
 
 
   def applyModifier(self, modifier_):
     super(DamagingAilment, self).applyModifier(modifier_)
 
-    # print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-    # print(modifier_)
-    # print(self._name)
-    # print(self._damage)
-
     self._damage.imultiplyByFactor(modifier_.getDuration(self._name, 'effect'), shift_ = 1.)
     self._damage.imultiplyByFactor(modifier_.getIncreaseByTagList(self._scalingTags), shift_ = 1.)
     self._damage.imultiplyByFactor(modifier_.getMoreByTagList(self._scalingTags), shift_ = 0.)
-
-    # print(self._damage)
-    # print(self._duration)
-    # print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 
     pass
 
@@ -140,6 +137,7 @@ class Buff(Duration):
     self._types.append('buff')
 
     self._modifier = modifier.Modifier()
+    pass
 
   def applyModifier(self, modifier_):
     super(Buff, self).applyModifier(modifier_)
@@ -168,6 +166,7 @@ class ResistanceShred(Duration):
     self._shred = element.ElementContainer()
 
     self._shred.iassignByElement(kwargs_['shredElement_'], 0.05)
+    pass
 
   def applyModifier(self, modifier_):
     super(ResistanceShred, self).applyModifier(modifier_)
@@ -190,6 +189,7 @@ class Cooldown(Duration):
     super(Cooldown, self).__init__(name_ = name_, duration_ = duration_, maxStacks_ = 1)
 
     self._types.append('cooldown')
+    pass
 
 ############################################################################################
 ############################################################################################
@@ -204,10 +204,67 @@ class Cooldown(Duration):
 class RiveExecution(Buff):
   """docstring for RiveExecution"""
   def __init__(self):
-    super(RiveExecution, self).__init__(name_ = 'riveExecution', duration_ = 2., maxStacks_ = 0)
+    super(RiveExecution, self).__init__(name_ = 'riveExecution', duration_ = 2., maxStacks_ = -1)
 
     self._modifier.addIncrease('physical', 0.15)
+    pass
 
+class AspectOfTheShark(Buff):
+  """docstring for AspectOfTheShark"""
+  def __init__(self):
+    super(AspectOfTheShark, self).__init__(name_ = 'aspectOfTheShark', duration_ = 3., maxStacks_ = 1)
+
+    self._modifier.addIncrease('melee', 0.5)
+    self._modifier.addIncrease('meleeAttackSpeed', 0.1)
+    pass
+
+class AspectOfTheBoar(Buff):
+  """docstring for AspectOfTheBoar"""
+  def __init__(self):
+    super(AspectOfTheBoar, self).__init__(name_ = 'aspectOfTheBoar', duration_ = 0., maxStacks_ = 1)
+
+    # aspect of the boar has a default duration of 0 and provides nothing without talents
+
+    pass
+
+class AspectOfTheViper(Buff):
+  """docstring for AspectOfTheViper"""
+  def __init__(self):
+    super(AspectOfTheViper, self).__init__(name_ = 'aspectOfTheViper', duration_ = 3., maxStacks_ = 1)
+
+    self._modifier.addIncrease('damageOverTime', 1.)
+    self._modifier.addDuration('poison', 'onHit', 1.)
+    pass
+
+# Swipe aspect of the panther stackable part
+class SwipeAspectOfThePantherStackable(Buff):
+  """docstring for SwipeAspectOfThePantherStackable"""
+  def __init__(self):
+    super(SwipeAspectOfThePantherStackable, self).__init__(name_ = 'swipeAspectOfThePantherStackable', duration_ = 4., maxStacks_ = 0)
+
+    pass
+
+# Swipe aspect of the panther not stackable part
+class SwipeAspectOfThePantherNotStackable(Buff):
+  """docstring for SwipeAspectOfThePantherNotStackable"""
+  def __init__(self):
+    super(SwipeAspectOfThePantherNotStackable, self).__init__(name_ = 'swipeAspectOfThePantherNotStackable', duration_ = 4., maxStacks_ = 1)
+
+    pass
+
+class SerpentStrikeScorpionStrikes(Buff):
+  """docstring for SerpentStrikeScorpionStrikes"""
+  def __init__(self):
+    super(SerpentStrikeScorpionStrikes, self).__init__(name_ = 'serpentStrikeScorpionStrikes', duration_ = 4., maxStacks_ = -1)
+
+    pass
+
+class SerpentStrikeChronoStrike(Buff):
+  """docstring for SerpentStrikeChronoStrike"""
+  def __init__(self):
+    super(SerpentStrikeChronoStrike, self).__init__(name_ = 'serpentStrikeChronoStrike', duration_ = 4., maxStacks_ = -1)
+
+    pass
 
 ############################################################################################
 # DamagingAilments
@@ -216,17 +273,17 @@ class RiveExecution(Buff):
 class Bleed(DamagingAilment):
   """docstring for Bleed"""
   def __init__(self):
-    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), scalingTags_ =  ['generic', 'physical', 'physicalOverTime', 'overTime'], maxStacks_ = 0)
+    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), scalingTags_ =  ['generic', 'physical', 'physicalOverTime', 'overTime'], maxStacks_ = -1)
 
 class Ignite(DamagingAilment):
   """docstring for Ignite"""
   def __init__(self):
-    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), scalingTags_ =  ['generic', 'fire', 'fireOverTime', 'overTime'], maxStacks_ = 0)
+    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), scalingTags_ =  ['generic', 'fire', 'fireOverTime', 'overTime'], maxStacks_ = -1)
 
 class Poison(ResistanceShred, DamagingAilment):
   """docstring for Poison"""
   def __init__(self):
-    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 0)
+    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = -1)
 
 ############################################################################################
 # Shreds

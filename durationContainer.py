@@ -13,6 +13,9 @@ class DurationContainer():
     self._collection = collection_
     pass
 
+  def reset(self):
+    self._durations = {}
+    pass
 
   def add(self, name_, modifier_, skillName_ = None, skillN_ = None):
 
@@ -25,7 +28,9 @@ class DurationContainer():
     if name_ not in self._durations.keys():
       self._durations[name_] = list([])
 
-    if duration.hasStackLimit() and self.countActiveByName(name_)[name_] >= duration.getMaxStacks():
+    if not duration.isApplicable():
+      pass
+    elif duration.hasStackLimit() and self.countActiveByName(name_)[name_] >= duration.getMaxStacks():
       if verbosity >= 1:
         print('Limit of {} reached; replace oldest'.format(name_))
 

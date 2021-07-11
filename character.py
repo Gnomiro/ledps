@@ -10,7 +10,10 @@ class CharacterInterface(object):
   def __init__(self, name_):
 
     self._name = name_
+    # list of available talents with point limit
     self._talents = {}
+    # list of associated talent objects of active talents
+    self._activeTalents = {}
     self._classModifier = modifier.Modifier()
     self._talentModifier = modifier.Modifier()
     self._prepared = True
@@ -22,20 +25,22 @@ class CharacterInterface(object):
     return self._talents
 
   def setTalent(self, **talents_):
-    for key, value in talents_.items():
+    for name, value in talents_.items():
       # cast input: uncapitalize key, cast value to integer
-      key, value = key[0].lower() + key[1:], int(value)
-      if key in self._talents.keys():
-        if value > self._talents[key][1] or value < 0:
-          print('Warning: Value \'{}\' not supported for talent \'{}\' of class \'{}\'. Set to \'{}\' instead.'.format(value, key,  self._name, self._talents[key][1]))
-          self._talents[key][0] = self._talents[key][1]
+      talentName, points = name[0].lower() + name[1:], int(value)
+      if talentName in self._talents.keys():
+        if points > self._talents[talentName][1] or points < 0:
+          print('Warning: Value \'{}\' not supported for talent \'{}\' of class \'{}\'. Set to \'{}\' instead.'.format(points, talentName,  self._name, self._talents[talentName][1]))
+          self._talents[talentName][0] = self._talents[talentName][1]
         else:
-          self._talents[key][0] = value
+          self._talents[talentName][0] = value
       else:
-        print('Warning: Talent with name \'{}\' is not available for \'{}\'. Skipped.'.format(key, self._name))
+        print('Warning: Talent with name \'{}\' is not available for \'{}\'. Skipped.'.format(talentName, self._name))
         continue
+      # store talent object
+      self._activeTalents.update({talentName: characterTalent.Talent(talentName, self._talents[talentName][0])})
       if verbosity >= 1:
-        print('{}: {}'.format(key, self._talents[key][0]))
+        print('{}: {}'.format(talentName, self._talents[talentName][0]))
       self._prepared = False
     pass
 
@@ -45,12 +50,21 @@ class CharacterInterface(object):
       for name in self._talents.keys():
         points = self._talents[name][0]
         if points != 0:
-          self._talentModifier += characterTalent.Talent(name, points).getModifier()
+          self._talentModifier += self._activeTalents[name].getModifier()
       self._prepared = True
 
   def getModifier(self):
     self.prepare()
     return self._classModifier + self._talentModifier
+
+  def applyModification(self, collection_):
+    self.prepare()
+    for name, talent in self._activeTalents.items():
+      for name in self._talents.keys():
+        if self._talents[name][0] != 0:
+          talent.applyModification(collection_)
+
+    pass
 
 
 class Sentinel(CharacterInterface):

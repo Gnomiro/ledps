@@ -9,7 +9,7 @@ class CollectionTestCase(unittest.TestCase):
 
   # run before every test
   def setUp(self):
-    self.collection_ = collection.Collection()
+    self._collection = collection.Collection()
     pass
 
   # run after every test
@@ -17,9 +17,27 @@ class CollectionTestCase(unittest.TestCase):
     pass
 
   def test_getDuration(self):
-    b = self.collection_.getDuration('bleed')
+    b = self._collection.getDuration('bleed')
 
     self.assertEqual(b.getName(), 'bleed')
+
+
+
+  def test_collectionReset(self):
+
+    b = self._collection.getDuration('bleed')
+
+    b._damage.imultiplyByFactor(5)
+
+    b2 = self._collection.getDuration('bleed')
+
+    self.assertEqual(b._damage, b2._damage)
+
+    self._collection.resetDurationCollection()
+
+    b3 = self._collection.getDuration('bleed')
+
+    self.assertNotEqual(b._damage, b3._damage)
 
   def test_copyViability(self):
 
@@ -61,6 +79,9 @@ class CollectionTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
   collection_ = collection.Collection()
+
+
+
 
 
   unittest.main()
