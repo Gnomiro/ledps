@@ -1,21 +1,21 @@
-## LEDPS v0.2
+# LEDPS v0.2
 
-# Mostly supported
+## Mostly supported
 * Paladin/sentinel bleed-relevant talents
 * Ailments: Bleed, Ignite, Poison
 * ResistanceShred: Physical, Poison
 * Supported attack types: Default, Melee, Spell, Throw
 * Skills: Rive, ManifestStrike, DivineBolt, SentinelAxeThrower
 
-# Not supported yet
+## Not supported yet
 * Hit damage
 * Armour daamge reduction
 * Multi target encounter
 
-# Open questions
+## Open questions
 * Can Trigger trigger?
 
-# Coding/naming conventions
+## Coding/naming conventions
 * Naming style: 'camilleCase'
 * Class intern variables with leading '\_': '\_variableName'
 * Input variables with trailing '\_': 'variableName\_'
@@ -24,7 +24,7 @@
 * Classes start with uppercase letter
 * Function definitions should end either with return or pass
 
-# ToDo-shortlist
+## ToDo-shortlist
 * Add more comments
 * Implement rotation system to incorporate stuff like Holy Symbols and Divine Aura as skills and not hard-coded
 * Refactor modifier to track them differently

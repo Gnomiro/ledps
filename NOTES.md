@@ -1,15 +1,15 @@
-## Useful coding stuff
+# Useful coding stuff
 * Best way for counting occurences:
   active = {}
   for a in self.getActive(type):
     active[a.getName()] = active.get(a.getName(), 0) + 1
 
-## Questions
-# General
+# Questions
+## General
 * Can Trigger trigger?
 
-## Relevant comments from devs
-# General
+# Relevant comments from devs
+## General
 * [20:27] Oeller: Poison has less effect on bosses. Does that apply only for the built-in shred or also for 20 DoT damage? Not clear in the game guide.
 In addition. Is the shred from poison as well limited by 20 stacks? Or is it possible top have poison shred stack to 20 alongside additional poison stack to further reduce the resistance?
 [20:41] Mike W: built in shred only; not limited
@@ -40,7 +40,7 @@ So it only applies an additional poison on hit and procs no other on Hit effects
 [00:46] Mike W: Every application of poison reduces the target's poison resistance. So it does have a multiplicative damage increase with your other poison applications.
 [00:47] Oeller: Yes. But it has inherent duration reduction of 0.35; considering DR  of penetration for a lot of stacks it is probably not the best. Poison/ailment Duration could provide a better scaling
 
-# EQ and Aftershock
+## EQ and Aftershock
 * [16:31] Oeller: What are the damage effectiveness and attributes for Earthquake Aftershock? 300% like the initial hit? The skilltree does nowhere provide the skill when pressing alt. Already opened a bugreport.
 [17:09] Mike W: The initial hit is 350%
 The aftershocks are 100%
