@@ -184,7 +184,7 @@ class Beastmaster(Primalist):
                           'beastmasterDeepWounds': [0, 8],
                           'beastmasterPrimalStrength': [0, 5],
                           'beastmasterAxeAndClaw': [0, 5],
-                          'beastmasterHuntersOfTheDeep': [0, 4],
+                          'beastmasterHunterOfTheDeep': [0, 4],
                           'beastmasterEnvenom': [0, 5],
                           'beastmasterHawkWings': [0, 10],
                           'beastmasterLifeInTheWilderness': [0, 8],

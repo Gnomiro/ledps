@@ -141,7 +141,40 @@ class Buff(Duration):
 
   def applyModifier(self, modifier_):
     super(Buff, self).applyModifier(modifier_)
-    warnings.warn('buff.applyModifier() not implemented yet.')
+
+    # use this alongside effect for aspect of the shark for now
+    # print(modifier_.getDuration(self._name, 'effectMultiplier')) # effectMultiplier = 0 as default
+
+    effect = modifier_.getDuration(self._name, 'effect')
+    effectMultiplier = (1 if modifier_.getDuration(self._name, 'effectMultiplier') == 0 else modifier_.getDuration(self._name, 'effectMultiplier'))
+
+    # only required if effect modifier are not 0
+    if effect == 0  and effectMultiplier == 0:
+      return
+
+    for name, value in self._modifier.getIncreases().items():
+      self._modifier.setIncrease(name, self._modifier.getIncrease(name) * (1. + effect) * (effectMultiplier))
+
+    for name, value in self._modifier.getMores().items():
+      self._modifier.setMore(name, self._modifier.getMore(name) * (1. + effect) * (effectMultiplier))
+
+    for name, value in self._modifier.getPenetrations().items():
+      self._modifier.setPenetration(name, self._modifier.getPenetration(name) * (1. + effect) * (effectMultiplier))
+
+    # duration modification handled in base class; furthermore duration should not be scaled by effect
+
+    for name, value in self._modifier.getAttributes().items():
+      warnings.warn('buff.applyModifier(): Effect does not scale attributes from buffs.')
+      pass
+
+    for name in self._modifier.getDurations().keys():
+      for modifier, value in self._modifier.getDurations()[name].items():
+        self._modifier.setDuration(name, modifier, self._modifier.getDuration(name, modifier) * (1. + effect) * (effectMultiplier))
+
+    for name in self._modifier.getTriggers().keys():
+      warnings.warn('buff.applyModifier(): Effect does not trigger chances from buffs.')
+      pass
+
     pass
 
 
@@ -284,6 +317,16 @@ class Poison(ResistanceShred, DamagingAilment):
   """docstring for Poison"""
   def __init__(self):
     super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = -1)
+
+class Plague(DamagingAilment):
+  """docstring for Plague"""
+  def __init__(self):
+    super(Plague, self).__init__(name_ = 'plague', duration_ = 4., damage_ = element.ElementContainer(poison = 90.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 1)
+
+class BlindingPoison(DamagingAilment):
+  """docstring for BlindingPoison"""
+  def __init__(self):
+    super(BlindingPoison, self).__init__(name_ = 'blindingPoison', duration_ = 4., damage_ = element.ElementContainer(poison = 30.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 1)
 
 ############################################################################################
 # Shreds

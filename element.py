@@ -2,7 +2,7 @@ import error
 
 import numpy
 
-elements = ['physical', 'fire', 'poison']
+elements = ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']
 
 def getValidElements():
   return elements

@@ -5,8 +5,7 @@ skill_ =  collection_.getSkill('rive')
 skill_.setTalent(cadence = 1, flurry = 5, sever = 3, twistingFangs = 3, execution = 1,
                  indomitable = 1, ironReach = 1, tripleThreat = 1)
 
-character_ = collection_.getCharacter()
-# character.setClass('Paladin') # todo: implement; currently paladin is constructed
+character_ = collection_.setCharacter('paladin')
 character_.setTalent(sentinelJuggernaut = 8, sentinelAxeThrower = 1, sentinelBlademaster = 5,
                      paladinConviction = 8, paladinDivineBolt = 1, paladinPenance = 10,
                      paladinReverenceOfDuality = 8, paladinRedemption = 7)

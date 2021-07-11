@@ -1,4 +1,4 @@
-import duration, skill, character, equipment
+import duration, skill, character, equipment, error
 
 import copy
 
@@ -20,6 +20,8 @@ class Collection():
       self._character.prepare()
       # todo: do similar things for skills as they also have duration objects they change globally
       self._character.applyModification(self)
+      for s in self._skillCollection.values():
+        s.applyModification(self)
       self._prepared = True
     pass
 
@@ -28,9 +30,20 @@ class Collection():
     self._prepared = False
     pass
 
+  def setCharacter(self, name_):
+    if self._character is not None:
+      print('Warning: Previously selected class is replaced!')
+    # todo: make this more smart; get available classes like available duration/skills
+    if name_ in ['paladin', 'beastmaster']:
+      characterClass = name_[0].upper() + name_[1:]
+      self._character = eval('character.' + characterClass)()
+    else:
+      raise error.UnsupportedClass(name_)
+    return self._character
+
   def getCharacter(self):
     if self._character is None:
-      self._character = character.Paladin()
+      raise error.UnsupportedClass('NoClass')
     return self._character
 
   def getCharacterModifier(self):

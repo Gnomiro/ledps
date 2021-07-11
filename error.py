@@ -32,3 +32,10 @@ class UnsupportedSkill(Exception):
     self.message = 'Warning: \'{}\' is an unsupported skill.'.format(skill_)
     super().__init__(self.message)
     pass
+
+class UnsupportedClass(Exception):
+
+  def __init__(self, skill_):
+    self.message = 'Warning: \'{}\' is an unsupported class.'.format(skill_)
+    super().__init__(self.message)
+    pass

@@ -14,6 +14,13 @@
 
 ## Open questions
 * Can Trigger trigger?
+* Does buff effect scale buff stats like onHit as from aspectOfTheViper?
+* Buff (e.g., Aspect of the Shark) every 3 seconds?
+  * Trigger with 100% chance
+  * Create buff-skill with 0% trigger/onHit chance and 3s cooldown which applies aspect of the shark
+  * Mabe a general skill-type which gets the 'to be applied' buff as input?
+* Buffs which fall of after hit?
+  * check for them on attack?
 
 ## Coding/naming conventions
 * Naming style: 'camilleCase'
@@ -26,8 +33,14 @@
 
 ## ToDo-shortlist
 * Add more comments
+* Skills
+  * Refactor skill-talents like character talents
+* Character
+  * Split talents into classpecific files in subfolder
+  * handle amstery differently and allow talent access to all class-trees within a class
 * Implement rotation system to incorporate stuff like Holy Symbols and Divine Aura as skills and not hard-coded
 * Refactor modifier to track them differently
+  * Add BuffEffect less/more multiplier
   * Account for flat damage
   * Sort by elements
   * Seperate by hit, damageOverTime

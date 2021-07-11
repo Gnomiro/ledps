@@ -12,6 +12,67 @@ class Equipment():
     warnings.warn('Equipment does not look for changes currently.')
     return self._modifier
 
+  def setExampleBeastmasterEquipment(self):
+
+    # assume berserker as always active
+    self._modifier.addIncrease('meleeAttackSpeed', 0.6)
+
+    # assume howl as always active (frenzy, generic increase)
+    self._modifier.addIncrease('meleeAttackSpeed', 0.2)
+    # self._modifier.addIncrease('castSpeed', 0.2)
+    self._modifier.addIncrease('generic', 0.5)
+
+    # helmet
+    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.46)
+    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.39)
+
+    # Body Armour
+    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.69)
+
+    # Relic
+    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.20)
+    self._modifier.addIncrease('poison', 0.6)
+    self._modifier.addDuration('bleed', 'onHit', 0.37)
+
+    # Gloves
+    self._modifier.addIncrease('meleeAttackSpeed', 0.15)
+    self._modifier.addAttribute('strength', 8)
+
+    # Boots
+    self._modifier.addAttribute('strength', 8)
+
+    # rings amulet and belt unknown
+    # set attributes to mactch character screen
+    self._modifier.addAttribute('strength', 18)
+    self._modifier.addAttribute('dexterity', 16)
+    # melee attack speed provided by base-type
+    self._modifier.addIncrease('meleeAttackSpeed', 0.15)
+
+    # Weapon
+    self._modifier.addMore('meleeAttackSpeed', 0.97)
+    self._modifier.addIncrease('poison', 1.92)
+    self._modifier.addIncrease('meleeAttackSpeed', 0.48)
+    self._modifier.addAttribute('strength', 10)
+    self._modifier.addAttribute('dexterity', 10)
+    # other attributes do not scale serpent strike and thus are ignored
+    self._modifier.addDuration('poison', 'onHit', 0.96)
+
+    # adorned heorot idol 1 (3x)
+    self._modifier.addDuration('aspectOfTheShark', 'duration', 0.23 * 3)
+    # self._modifier.addDuration('aspectOfTheBoar', 'effect', 0.11) # provides defence only
+
+    # eterran idol 1 (2x)
+    self._modifier.addIncrease('overTime', 0.1 * 2)
+    self._modifier.addIncrease('poison', 0.08 * 2)
+
+    # grand heorot idol 1
+    self._modifier.addDuration('poison', 'onHit', 0.2)
+    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.17)
+    # grand heorot idol 2
+    self._modifier.addDuration('poison', 'onHit', 0.2)
+    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.17)
+    pass
+
   def setExamplePaladinEquipment(self):
 
     # blessings
@@ -66,3 +127,4 @@ class Equipment():
     self._modifier.addDuration('bleed', 'onHit', 0.36)
     self._modifier.addDuration('bleed', 'onHit', 0.2)
     self._modifier.addDuration('bleed', 'onHit', 0.12)
+    pass

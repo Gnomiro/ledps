@@ -10,6 +10,16 @@ import warnings
 
 verbosity = 0
 
+############################################################################################
+############################################################################################
+# Base attacks
+############################################################################################
+############################################################################################
+
+############################################################################################
+# Default attack implementing most general routines
+############################################################################################
+
 class Default:
 
   def __init__(self, attacktimes_= None, attackdelays_ = None, pattern_ = None):
@@ -78,6 +88,9 @@ class Default:
       self._n = next(self._patternCycle)
       self._prepared = True
       pass
+
+  def applyModification(self, collection_):
+    pass
 
   def prepareSkill(self):
     pass
@@ -182,6 +195,10 @@ class Default:
     return self._attackdelays[self._n] + self._attacktimes[self._n] / (1.0 + modifier_.getIncrease('meleeAttackSpeed')) / modifier_.getMore('meleeAttackSpeed')
 
 
+############################################################################################
+# Melee attack
+############################################################################################
+
 class Melee(Default):
 
   def __init__(self, attacktimes_= [0.68182], attackdelays_ = [0], pattern_ = None):
@@ -198,6 +215,9 @@ class Melee(Default):
     chance = modifier_.getTrigger(trigger_, 'onHit') + modifier_.getTrigger(trigger_, 'onMeleeHit')
     return chance
 
+############################################################################################
+# Spell attack
+############################################################################################
 
 class Spell(Default):
 
@@ -232,6 +252,15 @@ class Throw(Default):
     chance = modifier_.getTrigger(trigger_, 'onHit') + modifier_.getTrigger(trigger_, 'onThrowHit')
     return chance
 
+############################################################################################
+############################################################################################
+# Sentinel skills
+############################################################################################
+############################################################################################
+
+############################################################################################
+# Rive
+############################################################################################
 
 class Rive(Melee):
 
@@ -283,7 +312,9 @@ class Rive(Melee):
         self._durationContainer.add('riveExecution', modifier_)
     pass
 
-
+############################################################################################
+# ManifestStrike (trigger)
+############################################################################################
 
 class ManifestStrike(Melee):
 
@@ -305,6 +336,9 @@ class ManifestStrike(Melee):
 
     return damage
 
+############################################################################################
+# Sentinel axe thrower (trigger)
+############################################################################################
 
 class SentinelAxeThrower(Throw):
 
@@ -327,6 +361,9 @@ class SentinelAxeThrower(Throw):
     damage = element.ElementContainer()
     return damage
 
+############################################################################################
+# Rive indomitable (trigger)
+############################################################################################
 
 class RiveIndomitable(Spell):
 
@@ -346,6 +383,9 @@ class RiveIndomitable(Spell):
     damage = element.ElementContainer()
     return damage
 
+############################################################################################
+# Divine bolt (trigger)
+############################################################################################
 
 class DivineBolt(Spell):
 
@@ -365,15 +405,107 @@ class DivineBolt(Spell):
     damage = element.ElementContainer()
     return damage
 
+############################################################################################
+############################################################################################
+# Primalist
+############################################################################################
+############################################################################################
 
-def getDefaultObjectByName(name_):
-  if name_ in getImplementedDurations():
-    # capitalize name of requested duration
-    skillName = name_[0].upper() + name_[1:]
-    return eval(skillName)()
-  else:
-    raise error.UnsupportedSkill(name_)
+############################################################################################
+# SerpentStrike
+############################################################################################
 
+class SerpentStrike(Melee):
+  """docstring for SerpentStrike"""
+  def __init__(self):
+    super(SerpentStrike, self).__init__(attacktimes_ = [0.68182 * 0.75], attackdelays_ = [0.022], pattern_ = None)
+
+    self._skillName = 'serpentStrike'
+
+    # available and supported talents
+    self._talents = {'scorpionStrikes' : [0,5],
+                     'chronoStrike' : [0,5],
+                     'debilitatingPoison' : [0,3],
+                     'nagasaVenom' : [0,6],
+                     'plaguebearer' : [0,4],
+                     'venomousIntent' : [0,1]
+                    }
+
+    pass
+
+  def prepareSkill(self):
+
+    # generic skill specific damage increase provided by attributes
+    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+    self._attributeModifier.addDuration('poison', 'onMeleeHit', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+
+    # generic 140% increase poison chance and 40% increased duration
+    self._localSkillModifier[0].addDuration('poison', 'onHit', 1.4)
+    self._localSkillModifier[0].addDuration('poison', 'duration', .4)
+
+    # debilitatingPoison: adds blinding poison chance
+    self._localSkillModifier[0].addDuration('blindingPoison', 'onHit', 0.17 * self._talents['debilitatingPoison'][0])
+
+    # nagasaVenom: poison chance and duration
+    self._localSkillModifier[0].addDuration('poison', 'onHit', 0.1 * self._talents['chronoStrike'][0])
+    self._localSkillModifier[0].addDuration('poison', 'duration', 0.1 * self._talents['chronoStrike'][0])
+
+    # plaguebearer: plague chance on hit
+    self._localSkillModifier[0].addDuration('plague', 'onHit', 0.25 * self._talents['plaguebearer'][0])
+
+    # venomousIntent: reduced poison duration and poisonSpit trigger
+    self._localSkillModifier[0].addDuration('poison', 'duration', -0.35 * self._talents['venomousIntent'][0])
+    self._localSkillModifier[0].addTrigger('serpentStrikePoisonSpit', 'onHit', 1. * self._talents['venomousIntent'][0])
+
+    pass
+
+  def applyModification(self, collection_):
+
+    # scorpionStrikes and chronoStrike implemented by modifying serpentStrikeOnHit buff
+    # scorpionStrikes: global increased poison damage
+    collection_.getDuration('serpentStrikeScorpionStrikes').getModifier().addIncrease('poison', 0.12 * self._talents['scorpionStrikes'][0])
+    # chronoStrike: global increased over time damage
+    collection_.getDuration('serpentStrikeChronoStrike').getModifier().addIncrease('overTime', 0.1 * self._talents['chronoStrike'][0])
+
+    pass
+
+  def skillHit(self, modifier_):
+    damage = element.ElementContainer()
+
+    return damage
+
+  def skillEffect(self, modifier_):
+
+    if self._talents['scorpionStrikes'][0] != 0:
+      self._durationContainer.add('serpentStrikeScorpionStrikes', modifier_)
+
+    if self._talents['chronoStrike'][0] != 0:
+      self._durationContainer.add('serpentStrikeChronoStrike', modifier_)
+
+    pass
+
+############################################################################################
+# SerpentStrikePoisonSpit (trigger)
+# todo: spell? attribute scaling?
+############################################################################################
+
+class SerpentStrikePoisonSpit(Spell):
+
+  def __init__(self):
+    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    self._skillName = 'serpentStrikePoisonSpit'
+
+    # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
+    # self._canTrigger = False
+    pass
+
+  def prepareSkill(self):
+    pass
+
+  def skillHit(self, modifier_):
+    damage = element.ElementContainer()
+    return damage
 
 ############################################################################################
 ############################################################################################
