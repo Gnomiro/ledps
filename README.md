@@ -2,10 +2,11 @@
 
 ## Mostly supported
 * Paladin/sentinel bleed-relevant talents
-* Ailments: Bleed, Ignite, Poison
+* Beastmaster/primalist poison-relevant talents
+* Ailments: Bleed, Ignite, Poison, Plague, BlindingPoison
 * ResistanceShred: Physical, Poison
 * Supported attack types: Default, Melee, Spell, Throw
-* Skills: Rive, ManifestStrike, DivineBolt, SentinelAxeThrower
+* Skills: Rive, ManifestStrike, DivineBolt, SentinelAxeThrower, SerpentStrike
 
 ## Not supported yet
 * Hit damage
