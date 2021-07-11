@@ -237,6 +237,11 @@ class PhysicalShred(ResistanceShred):
   def __init__(self):
     super(PhysicalShred, self).__init__(name_ = 'physicalShred', shredElement_ = 'physical', duration_ = 4, maxStacks_ = 20)
 
+class PoisonShred(ResistanceShred):
+  """docstring for PhysicalShred"""
+  def __init__(self):
+    super(PoisonShred, self).__init__(name_ = 'poisonShred', shredElement_ = 'poison', duration_ = 4, maxStacks_ = 20)
+
 ############################################################################################
 ############################################################################################
 # Duration implementation information

@@ -11,6 +11,7 @@ class TalentBase:
     self._name = name_
     self._points = points_
     self._modifier = modifier.Modifier()
+    pass
 
   def getModifier(self):
     return self._modifier
@@ -22,6 +23,7 @@ class TalentNotImplemented(TalentBase):
   def __init__(self, name_):
     super(TalentNotImplemented, self).__init__(name_, 0)
     warnings.warn('{} not implemented yet.'.format(self._name))
+    pass
 
 
 class SentinelJuggernaut(TalentBase):
@@ -30,6 +32,7 @@ class SentinelJuggernaut(TalentBase):
   def __init__(self, points_):
     super(SentinelJuggernaut, self).__init__(name_ = 'sentinelJuggernaut', points_ = points_)
     self._modifier.addAttribute('strength', points_)
+    pass
 
 
 class SentinelBlademaster(TalentBase):
@@ -38,6 +41,7 @@ class SentinelBlademaster(TalentBase):
   def __init__(self, points_):
     super(SentinelBlademaster, self).__init__(name_ = 'SentinelBlademaster', points_ = points_)
     self._modifier.addIncrease('meleeAttackSpeed', 0.06 * points_)
+    pass
 
 
 class SentinelAxeThrower(TalentBase):
@@ -46,6 +50,7 @@ class SentinelAxeThrower(TalentBase):
   def __init__(self, points_):
     super(SentinelAxeThrower, self).__init__(name_ = 'sentinelAxeThrower', points_ = points_)
     self._modifier.addTrigger('sentinelAxeThrower', 'onHit', 0.08 * points_)
+    pass
 
 
 class PaladinPenance(TalentBase):
@@ -55,6 +60,7 @@ class PaladinPenance(TalentBase):
     super(PaladinPenance, self).__init__(name_ = 'paladinPenance', points_ = points_)
     self._modifier.addDuration('bleed', 'onMeleeHit', 0.2 * points_)
     self._modifier.addDuration('bleed', 'onThrowHit', 0.2 * points_)
+    pass
 
 
 class PaladinConviction(TalentBase):
@@ -66,6 +72,7 @@ class PaladinConviction(TalentBase):
     self._modifier.addPenetration('physical', 0.02 * points_)
     self._modifier.addIncrease('fire', 0.04 * points_)
     self._modifier.addPenetration('fire', 0.02 * points_)
+    pass
 
 
 class PaladinDivineBolt(TalentBase):
@@ -74,6 +81,7 @@ class PaladinDivineBolt(TalentBase):
   def __init__(self, points_):
     super(PaladinDivineBolt, self).__init__(name_ = 'paladinDivineBolt', points_ = points_)
     self._modifier.addTrigger('divineBolt', 'onMeleeHit', 0.2 * points_)
+    pass
 
 
 class PaladinRedemption(TalentBase):
@@ -83,6 +91,7 @@ class PaladinRedemption(TalentBase):
     super(PaladinRedemption, self).__init__(name_ = 'paladinRedemption', points_ = points_)
     self._modifier.addDuration('bleed', 'effect', 0.07 * points_)
     warnings.warn('\'{}\' conditionals are disabled.'.format(self._name))
+    pass
 
 
 class PaladinReverenceOfDuality(TalentBase):
@@ -91,6 +100,7 @@ class PaladinReverenceOfDuality(TalentBase):
   def __init__(self, points_):
     super(PaladinReverenceOfDuality, self).__init__(name_ = 'paladinReverenceOfDuality', points_ = points_)
     self._modifier.addIncrease('generic', 0.02 * points_)
+    pass
 
 
 class BeastmasterUrsineStrength(TalentBase):
@@ -99,6 +109,7 @@ class BeastmasterUrsineStrength(TalentBase):
   def __init__(self, points_):
     super(BeastmasterUrsineStrength, self).__init__(name_ = 'beastmasterUrsineStrength', points_ = points_)
     self._modifier.addAttribute('strength', points_)
+    pass
 
 
 class Talent:
