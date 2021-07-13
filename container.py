@@ -47,7 +47,6 @@ class TypeContainer():
     if k == None and k not in self._keys:
       raise error.MissingContainerType(self._name, self._keys, **types_)
     else:
-      # print(k)
       if not isinstance(self.getDefaultValue(k), TypeContainer):
         result = self._data.get(k, self.getDefaultValue(k))
       else:
@@ -62,7 +61,6 @@ class TypeContainer():
     if k == None:
       raise error.MissingContainerType(self._name, self._keys, **types_)
     elif k in self._keys:
-      # print(k)
       self._data.setdefault(k, copy.deepcopy(self.getDefaultValue(k)))
       if not isinstance(self.getDefaultValue(k), TypeContainer):
         self._data[k] = type(self.getDefaultValue(k))(value_)
@@ -70,17 +68,35 @@ class TypeContainer():
         self._data[k].set(value_ = value_, **types_)
     pass
 
+  # positions are switched here. self is the empty object wich receives the sum from left_ and right_
   def _add(self, left_, right_):
 
     for i in set(left_._data.keys()) | set(right_._data.keys()):
       key = {self._keyName: i}
       if (i in left_._data.keys() and not isinstance(left_._data.get(i), TypeContainer)) or (i in right_._data.keys() and not isinstance(right_._data.get(i), TypeContainer)):
-        key = {self._keyName: i}
         self._data[i] = left_.get(**key) + right_.get(**key)
       else:
-        self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+        if i not in self._data:
+          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
         self._data[i]._add(left_._data.get(i, copy.deepcopy(left_.getDefaultValue(i))), right_._data.get(i, copy.deepcopy(right_.getDefaultValue(i))))
-    pass
+    return self
+
+    # return statement?
+
+  def _iadd(self, other_):
+
+    for i in set(other_._data.keys()) | set(self._data.keys()):
+      key = {self._keyName: i}
+      if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
+        if i not in self._data:
+          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+        self._data[i] += other_.get(**key)
+      else:
+        if i not in self._data:
+          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+        self._data[i]._iadd(other_._data.get(i, other_.getDefaultValue(i)))
+    return self
+
 
   # human readable
   def __str__(self):
@@ -195,12 +211,11 @@ class ContainerImplementation():
     pass
 
   def __iadd__(self, other_):
-    super().__iadd__(other_)
-    return self
+    return self._container._iadd(other_._container)
 
+  # switches around objects to store new values in result
   def __add__(self, other_, result_):
-    result_._container._add(self._container, other_._container)
-    return result_
+    return result_._container._add(self._container, other_._container)
 
   def __str__(self):
     return self._container.__str__()
@@ -218,6 +233,11 @@ class AttributeContainer(ContainerImplementation):
     self._container = AttributeTypeContainer(defaultValue_ = defaultValue_)
     pass
 
+  def __iadd__(self, other_):
+    super().__iadd__(other_)
+    self._container._defaultValue += other_._container._defaultValue
+    return self
+
   def __add__(self, other_):
     result = AttributeContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
     super().__add__(other_, result)
@@ -233,6 +253,11 @@ class ResistanceContainer(ContainerImplementation):
     self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
     pass
 
+  def __iadd__(self, other_):
+    super().__iadd__(other_)
+    self._container._defaultValue += other_._container._defaultValue
+    return self
+
   def __add__(self, other_):
     result = ResistanceContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
     super().__add__(other_, result)
@@ -246,6 +271,11 @@ class PenetrationContainer(ContainerImplementation):
   """docstring for PenetrationContainer"""
   def __init__(self, defaultValue_ = 0.):
     self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
+
+  def __iadd__(self, other_):
+    super().__iadd__(other_)
+    self._container._defaultValue += other_._container._defaultValue
+    return self
 
   def __add__(self, other_):
     result = PenetrationContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
