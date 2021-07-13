@@ -1,5 +1,7 @@
 import error
 
+import copy
+
 from print_dict import pd
 
 _attackTypes = ['melee', 'spell', 'throwing', 'bow']
@@ -36,20 +38,20 @@ class TypeContainer():
 
   def get(self, **types_):
     k = types_[self._keyName] if self._keyName in types_.keys() else self._defaultKey
-    # fall back if container has no default value
-    # multiplerContainer implements its own routine to return product of increase and more if nothing is specified
-    if k == None:
-      result = self._data
-    elif k in self._keys:
+    # if no suitable argument was passed and no defaulKey is available raise an exceptions
+    if k == None and k not in self._keys:
+      raise error.MissingContainerType(self._name, self._keys, **types_)
+    else:
       # print(k)
       if not isinstance(self._defaultValue, TypeContainer):
-      # if isinstance(self._defaultValue, (int, float, complex)) and not isinstance(self._defaultValue, bool):
+        # if isinstance(self._defaultValue, (int, float, complex)) and not isinstance(self._defaultValue, bool):
         result = self._data.get(k, self._defaultValue)
       else:
         result = self._data.get(k, self._defaultValue).get(**types_)
+    # else:
+    #   result = self._defaultValue
 
     return result
-
 
   def set(self, value_, **types_):
     k = types_[self._keyName] if self._keyName in types_.keys() else self._defaultKey
@@ -59,12 +61,28 @@ class TypeContainer():
       raise error.MissingContainerType(self._name, self._keys, **types_)
     elif k in self._keys:
       # print(k)
-      self._data.setdefault(k, self._defaultValue)
+      self._data.setdefault(k, copy.deepcopy(self._defaultValue))
       if not isinstance(self._defaultValue, TypeContainer):
-      # if isinstance(self._defaultValue, (int, float, complex)) and not isinstance(self._defaultValue, bool):
+        # if isinstance(self._defaultValue, (int, float, complex)) and not isinstance(self._defaultValue, bool):
         self._data[k] = value_
       else:
         self._data[k].set(value_ = value_, **types_)
+
+  def _add(self, left_, right_):
+
+    for i in set(left_._data.keys()) | set(right_._data.keys()):
+      if not isinstance(self._defaultValue, TypeContainer):
+        key = {self._keyName: i}
+        # if isinstance(self, MultiplierTypeContainer) and i == 'more':
+        #   self._data[i] = left_.get(**key) * right_.get(**key)
+        # else:
+        #   self._data[i] = left_.get(**key) + right_.get(**key)
+        self._data[i] = self.merge(i, left_.get(**key), right_.get(**key))
+      else:
+
+        self._data[i] = copy.deepcopy(self._defaultValue)
+        self._data[i]._add(left_._data.get(i, copy.deepcopy(left_._defaultValue)), right_._data.get(i, copy.deepcopy(right_._defaultValue)))
+
 
   # human readable
   def __str__(self):
@@ -73,6 +91,9 @@ class TypeContainer():
   # general string representation
   def __repr__(self):
     return self._data.__repr__()
+
+  def merge(self, key, left_, right_):
+    return left_ + right_
 
 ######################################################################
 # Attack type container
@@ -117,6 +138,7 @@ class AttributeTypeContainer(TypeContainer):
   def __init__(self, defaultValue_ = 0, extrakeys_ = [], defaultKey_ = None,):
     super(AttributeTypeContainer, self).__init__(keys_ = _attributeTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'attributeTypeContainer'
+    self._keyName = 'attributeType_'
 
 ######################################################################
 # Multiplier type container
@@ -132,15 +154,8 @@ class MultiplierTypeContainer(TypeContainer):
     self._data['more'] = 1.
     self._data['increase'] = 0.
 
-  def get(self, **types_):
-    k = types_[self._keyName] if self._keyName in types_.keys() else self._defaultKey
-    # multiplerContainer implements its own routine to dict of no key is required
-    if k == None:
-      result = self._data
-    elif k in self._keys:
-      result = self._data[k]
-
-    return result
+  def merge(self, key, left_, right_):
+    return (left_ * right_ if key == 'more' else left_ + right_)
 
 ######################################################################
 # DurationModifer type container
@@ -172,6 +187,10 @@ class ContainerImplementation():
   def set(self, value_, **types_):
     self._container.set(value_, **types_)
 
+  def _add(self, left_, right_):
+    self._container._add(left_._container, right_._container)
+    return self
+
   def __str__(self):
     return self._container.__str__()
 
@@ -186,6 +205,11 @@ class AttributeContainer(ContainerImplementation):
   """docstring for AttributeContainer"""
   def __init__(self, defaultValue_ = 0):
     self._container = AttributeTypeContainer(defaultValue_ = defaultValue_)
+
+  def __add__(self, other_):
+    result = AttributeContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
+    result._add(self, other_)
+    return result
 
 ######################################################################
 # Resistance container class
@@ -222,3 +246,8 @@ class MultiplierContainer(ContainerImplementation):
   """docstring for MultiplierContainer"""
   def __init__(self):
     self._container = AttackTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = DamageTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = ElementTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = MultiplierTypeContainer())))
+
+  def __add__(self, other_):
+    result = MultiplierContainer()
+    result._add(self, other_)
+    return result
