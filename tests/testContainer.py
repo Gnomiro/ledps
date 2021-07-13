@@ -15,56 +15,82 @@ class ContainerTestCase(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def test_1(self):
-
-    multiplier = container.MultiplierContainer()
+  def test_addMultiplierContainer(self):
+    multiplier1 = container.MultiplierContainer()
     multiplier2 = container.MultiplierContainer()
-    attributes = container.AttributeContainer(defaultValue_ = 1)
-    attributes2 = container.AttributeContainer(defaultValue_ = 2)
-    penetration = container.PenetrationContainer(defaultValue_ = 0)
 
-    durationModifier = container.DurationModifierContainer()
+    multiplier1.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 2.)
+    multiplier2.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 3.)
+    multiplier1.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 4.)
+    multiplier2.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 7.)
+    multiplier2.set(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase', value_ = 1.)
 
-    durationModifier.set(durationModifierType_ = 'onHit', multiplierType_ = 'increase', value_ = 1)
-    durationModifier.set(durationModifierType_ = 'duration', multiplierType_ = 'increase', value_ = 1)
-
-    print('\nDuration Modifer:\n{}'.format(durationModifier))
-
-    multiplier.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 2)
-    multiplier.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 1)
-
-    print('\n')
-
-    print(multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more'))
-    print(multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
-
-    print(multiplier.get(attackType_ = 'generic', elementType_ = 'fire', multiplierType_ = 'increase'))
-
-    multiplier.set(attackType_ = 'spell', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 1)
-    print(multiplier)
-    print('\nMultiplier1:\n{}'.format(multiplier))
-
-    multiplier2.set(attackType_ = 'melee', multiplierType_ = 'increase', value_ = 4)
-    print('\nMultiplier2:\n{}'.format(multiplier2))
-
-    print('\nMultiplier1:\n{}'.format(multiplier))
-
-    print('\nMultiplier1+2:\n{}'.format(multiplier + multiplier2))
-
-    print('\n')
-
-    print(multiplier.get(attackType_ = 'melee', multiplierType_ = 'more'))
-    print(multiplier.get(attackType_ = 'melee', multiplierType_ = 'increase'))
-    print(multiplier)
-
-    attributes.set(attributeType_ = 'strength', value_ = 4)
-    attributes2.set(attributeType_ = 'dexterity', value_ = 1)
-    print(attributes)
-    print(attributes2)
-    print(attributes + attributes2)
-
+    multiplier3 = multiplier1 + multiplier2
+    # print('4 * 7 = 28 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')))
+    self.assertEqual(container.More(28.), multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more'))
+    # print('2 + 3 = 5 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase')))
+    self.assertEqual(5., multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
+    # print('1 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase')))
+    self.assertEqual(1., multiplier3.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase'))
+    # print('0 == {}'.format(multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase')))
+    self.assertEqual(0., multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase'))
+    # print('1 == {}'.format(multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more')))
+    self.assertEqual(container.More(1.), multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more'))
+    self.assertEqual(3., multiplier2.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     pass
 
+
+  def test_addPenetrationContainer(self):
+    # ResistanceContainer is the same
+    penetration1 = container.PenetrationContainer(defaultValue_ = 10.)
+    penetration2 = container.PenetrationContainer(defaultValue_ = 20.)
+
+    penetration2.set(elementType_ = 'fire', value_ = 30.)
+
+    penetration3 = penetration1 + penetration2
+
+    self.assertEqual(30., penetration2.get(elementType_ = 'fire'))
+    self.assertEqual(40., penetration3.get(elementType_ = 'fire'))
+    self.assertEqual(30., penetration3.get(elementType_ = 'physical'))
+    pass
+
+  def test_addAttributeContainer(self):
+    attributes1 = container.AttributeContainer(defaultValue_ = 2.)
+    attributes2 = container.AttributeContainer(defaultValue_ = 5.)
+
+    attributes1.set(attributeType_ = 'strength' , value_ = 7.)
+    attributes2.set(attributeType_ = 'dexterity' , value_ = -4.)
+
+    attributes3 = attributes1 + attributes2
+
+
+    self.assertEqual(7., attributes1.get(attributeType_ = 'strength'))
+    self.assertEqual(12., attributes3.get(attributeType_ = 'strength'))
+    self.assertEqual(-2., attributes3.get(attributeType_ = 'dexterity'))
+    self.assertEqual(7., attributes3.get(attributeType_ = 'vitality'))
+    pass
+
+  def test_addDurationModifierContainer(self):
+
+    durationModifier1 = container.DurationModifierContainer()
+    durationModifier2 = container.DurationModifierContainer()
+
+    durationModifier1.set(durationModifierType_ = 'onHit', multiplierType_ = 'increase', value_ = 1.)
+    durationModifier2.set(durationModifierType_ = 'onHit', multiplierType_ = 'increase', value_ = 2.)
+    durationModifier2.set(durationModifierType_ = 'duration', multiplierType_ = 'increase', value_ = 3.)
+    durationModifier2.set(durationModifierType_ = 'duration', multiplierType_ = 'more', value_ = 3.)
+    durationModifier1.set(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase', value_ = 7.)
+
+    durationModifier3 = durationModifier1 + durationModifier2
+
+    self.assertEqual(1., durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'))
+    self.assertEqual(7., durationModifier1.get(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase'))
+    self.assertEqual(3., durationModifier3.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'))
+    self.assertEqual(3., durationModifier2.get(durationModifierType_ = 'duration', multiplierType_ = 'increase'))
+    self.assertEqual(container.More(3.), durationModifier3.get(durationModifierType_ = 'duration', multiplierType_ = 'more'))
+    self.assertEqual(container.More(1.), durationModifier3.get(durationModifierType_ = 'onHit', multiplierType_ = 'more'))
+
+    pass
 
 if __name__ == '__main__':
   unittest.main()
