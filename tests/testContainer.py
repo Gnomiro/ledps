@@ -26,15 +26,11 @@ class ContainerTestCase(unittest.TestCase):
     multiplier2.set(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase', value_ = 1.)
 
     multiplier3 = multiplier1 + multiplier2
-    # print('4 * 7 = 28 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')))
+
     self.assertEqual(container.More(28.), multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more'))
-    # print('2 + 3 = 5 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase')))
     self.assertEqual(5., multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
-    # print('1 == {}'.format(multiplier3.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase')))
     self.assertEqual(1., multiplier3.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase'))
-    # print('0 == {}'.format(multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase')))
     self.assertEqual(0., multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase'))
-    # print('1 == {}'.format(multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more')))
     self.assertEqual(container.More(1.), multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more'))
     self.assertEqual(3., multiplier2.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     pass
@@ -62,7 +58,6 @@ class ContainerTestCase(unittest.TestCase):
     attributes2.set(attributeType_ = 'dexterity' , value_ = -4.)
 
     attributes3 = attributes1 + attributes2
-
 
     self.assertEqual(7., attributes1.get(attributeType_ = 'strength'))
     self.assertEqual(12., attributes3.get(attributeType_ = 'strength'))

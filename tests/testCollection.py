@@ -21,8 +21,6 @@ class CollectionTestCase(unittest.TestCase):
 
     self.assertEqual(b.getName(), 'bleed')
 
-
-
   def test_collectionReset(self):
 
     b = self._collection.getDuration('bleed')
@@ -47,21 +45,21 @@ class CollectionTestCase(unittest.TestCase):
       if name == 'cooldown':
         continue
 
-      if collection_.getDuration(name).hasType('damagingAilment'):
+      if self._collection.getDuration(name).hasType('damagingAilment'):
         self.copyDamagingAilment(name)
-      if collection_.getDuration(name).hasType('shred'):
+      if self._collection.getDuration(name).hasType('shred'):
         self.copyShred(name)
-      if collection_.getDuration(name).hasType('buff'):
+      if self._collection.getDuration(name).hasType('buff'):
         self.copyBuff(name)
 
   def copyDamagingAilment(self, name_):
-    b = collection_.getDurationCopy(name_)
+    b = self._collection.getDurationCopy(name_)
 
     b.tick(8.)
 
     b._baseDamage = element.ElementContainer(default_ = 1.)
 
-    b2 = collection_.getDurationCopy(name_)
+    b2 = self._collection.getDurationCopy(name_)
 
     self.assertEqual(b._damage.getSum(), b2._damage.getSum())
     self.assertNotEqual(b.isActive(), b2.isActive())

@@ -16,7 +16,7 @@ class DurationTestCase(unittest.TestCase):
     pass
 
   def test_initImplementedDurations(self):
-    for d in duration.getImplementedDurations():
+    for d in duration.getImplementedClasses():
       c = d[0].upper() + d[1:]
       eval('duration.' + c)
 
