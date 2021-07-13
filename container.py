@@ -2,6 +2,8 @@ import error
 
 import copy
 
+from toolbox import More
+
 from print_dict import pd
 
 _attackTypes = ['melee', 'spell', 'throwing', 'bow']
@@ -66,6 +68,7 @@ class TypeContainer():
         self._data[k] = type(self.getDefaultValue(k))(value_)
       else:
         self._data[k].set(value_ = value_, **types_)
+    pass
 
   def _add(self, left_, right_):
 
@@ -77,6 +80,7 @@ class TypeContainer():
       else:
         self._data[i] = copy.deepcopy(self.getDefaultValue(i))
         self._data[i]._add(left_._data.get(i, copy.deepcopy(left_.getDefaultValue(i))), right_._data.get(i, copy.deepcopy(right_.getDefaultValue(i))))
+    pass
 
   # human readable
   def __str__(self):
@@ -96,6 +100,7 @@ class AttackTypeContainer(TypeContainer):
     super(AttackTypeContainer, self).__init__(keys_ = _attackTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'attackTypeContainer'
     self._keyName = 'attackType_'
+    pass
 
 ######################################################################
 # Element type container
@@ -107,6 +112,7 @@ class ElementTypeContainer(TypeContainer):
     super(ElementTypeContainer, self).__init__(keys_ = _elementTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'elementTypeContainer'
     self._keyName = 'elementType_'
+    pass
 
 ######################################################################
 # Damage type container
@@ -118,6 +124,7 @@ class DamageTypeContainer(TypeContainer):
     super(DamageTypeContainer, self).__init__(keys_ = _damageTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'damageTypeContainer'
     self._keyName = 'damageType_'
+    pass
 
 ######################################################################
 # Attribute type container
@@ -129,29 +136,7 @@ class AttributeTypeContainer(TypeContainer):
     super(AttributeTypeContainer, self).__init__(keys_ = _attributeTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'attributeTypeContainer'
     self._keyName = 'attributeType_'
-
-######################################################################
-# More class which overrides addition to multiplication for mergin more multipliers
-######################################################################
-
-class More(object):
-  """docstring for More"""
-  def __init__(self, value_ = 1.):
-    self._value = value_
-
-  def __add__(self, other_):
-    result = More(1.)
-    result._value = self._value * other_._value
-    return result
-
-  def __eq__(self, other_):
-    return self._value == other_._value
-
-  def __repr__(self):
-    return self._value.__repr__()
-
-  def __str__(self):
-    return self._value.__str__()
+    pass
 
 ######################################################################
 # Multiplier type container
@@ -165,6 +150,7 @@ class MultiplierTypeContainer(TypeContainer):
     self._name = 'multiplierTypeContainer'
     self._keyName = 'multiplierType_'
     self._data['more'] = More(1.)
+    pass
 
   def getDefaultValue(self, key):
     if key != 'more':
@@ -182,6 +168,7 @@ class DurationModifierTypeContainer(TypeContainer):
     self._name = 'durationModiferTypeContainer'
     self._keyName = 'durationModifierType_'
     self._data['onHit'] = AttackTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = MultiplierTypeContainer())
+    pass
 
   def getDefaultValue(self, key):
     if key != 'onHit':
@@ -205,9 +192,10 @@ class ContainerImplementation():
 
   def set(self, value_, **types_):
     self._container.set(value_, **types_)
+    pass
 
-  def _add(self, left_, right_):
-    self._container._add(left_._container, right_._container)
+  def __iadd__(self, other_):
+    super().__iadd__(other_)
     return self
 
   def __add__(self, other_, result_):
@@ -228,6 +216,7 @@ class AttributeContainer(ContainerImplementation):
   """docstring for AttributeContainer"""
   def __init__(self, defaultValue_ = 0.):
     self._container = AttributeTypeContainer(defaultValue_ = defaultValue_)
+    pass
 
   def __add__(self, other_):
     result = AttributeContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
@@ -242,6 +231,7 @@ class ResistanceContainer(ContainerImplementation):
   """docstring for ResistanceContainer"""
   def __init__(self, defaultValue_ = 0.):
     self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
+    pass
 
   def __add__(self, other_):
     result = ResistanceContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
@@ -284,6 +274,7 @@ class MultiplierContainer(ContainerImplementation):
   """docstring for MultiplierContainer"""
   def __init__(self):
     self._container = AttackTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = DamageTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = ElementTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = MultiplierTypeContainer())))
+    pass
 
   def __add__(self, other_):
     result = MultiplierContainer()
