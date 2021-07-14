@@ -48,6 +48,19 @@ class Modifier():
       self += other
     return self
 
+  def scaleByFactor(self, factor_):
+    self._multiplier.scaleByFactor(factor_)
+    self._penetration.scaleByFactor(factor_)
+    self._attribute.scaleByFactor(factor_)
+
+    for name in self._duration.keys():
+      self._duration[name].scaleByFactor(factor_)
+
+    for name in self._trigger.keys():
+      self._trigger[name].scaleByFactor(factor_)
+
+    return self
+
   def __str__(self):
     return 'multiplier:\n' + str(self._multiplier) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
 

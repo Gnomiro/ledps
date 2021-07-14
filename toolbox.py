@@ -21,8 +21,11 @@ class More(object):
     result._value = self._value * other_._value
     return result
 
-  def __iadd__(self, other_):
-    self._value = self._value * other_._value
+  # this is for scalar multiplication from outside (ring-structure) and thus other must be shifted back after initial construction
+  # python does not allow for the definition of __imult__ between two different types; as far as I know
+  def __imul__(self, other_):
+    self._value = (self._value - 1.) * (other_._value - 1.) + 1.
+    # self._value = 2 * self._value - 1. - self._value * other_._value + other_._value
     return self
 
   def __eq__(self, other_):

@@ -6,6 +6,7 @@ from toolbox import More
 
 from print_dict import pd
 
+_categoryTypes = ['damage', 'speed']
 _attackTypes = ['melee', 'spell', 'throwing', 'bow']
 _damageTypes = ['curse', 'dot', 'hit']
 _elementTypes = ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']
@@ -16,7 +17,7 @@ _durationModifierTypes = ['onHit', 'effect', 'duration']
 _attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality']
 
 def isSupported(key):
-  supported = key in itertools.chain.from_iterable([_attackTypes, _damageTypes, _elementTypes, _multiplierTypes, _durationModifierTypes, _attackTypes, _attributeTypes, ['generic', None]])
+  supported = key in itertools.chain.from_iterable([_attackTypes, _damageTypes, _elementTypes, _multiplierTypes, _durationModifierTypes, _attackTypes, _attributeTypes, _categoryTypes, ['generic', None]])
   if not supported:
     print('Unsupport keyword \'{}\' provided and ignored.'.format(key))
   return supported
@@ -29,6 +30,8 @@ def convertToTypes(*args_, default_ = {}, **kwargs_):
   for k in args_:
     if not isSupported(k):
       continue
+    elif k in _categoryTypes:
+      parsed['categoryType_'] = k
     elif k in _attackTypes:
       parsed['attackType_'] = k
     elif k in _damageTypes:
@@ -103,7 +106,6 @@ class TypeContainer():
 
   # positions are switched here. self is the empty object wich receives the sum from left_ and right_
   def _add(self, left_, right_):
-
     for i in set(left_._data.keys()) | set(right_._data.keys()):
       key = {self._keyName: i}
       if (i in left_._data.keys() and not isinstance(left_._data.get(i), TypeContainer)) or (i in right_._data.keys() and not isinstance(right_._data.get(i), TypeContainer)):
@@ -115,7 +117,6 @@ class TypeContainer():
     return self
 
   def _iadd(self, other_):
-
     for i in set(other_._data.keys()) | set(self._data.keys()):
       key = {self._keyName: i}
       if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
@@ -128,6 +129,15 @@ class TypeContainer():
         self._data[i]._iadd(other_._data.get(i, other_.getDefaultValue(i)))
     return self
 
+  def scaleByFactor(self, factor_):
+    for i in self._data.keys():
+      key = {self._keyName: i}
+      if not isinstance(self._data.get(i), TypeContainer):
+        t = type(self.getDefaultValue(i))
+        self._data[i] *= factor_ if type(factor_) is t else t(factor_)
+      else:
+        self._data[i].scaleByFactor(factor_)
+    pass
 
   # human readable
   def __str__(self):
@@ -183,6 +193,18 @@ class AttributeTypeContainer(TypeContainer):
     super(AttributeTypeContainer, self).__init__(keys_ = _attributeTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
     self._name = 'attributeTypeContainer'
     self._keyName = 'attributeType_'
+    pass
+
+######################################################################
+# Attribute type container
+######################################################################
+
+class CategoryTypeContainer(TypeContainer):
+  """docstring for CategoryTypeContainer"""
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
+    super(CategoryTypeContainer, self).__init__(keys_ = _categoryTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+    self._name = 'categoryTypeContainer'
+    self._keyName = 'categoryType_'
     pass
 
 ######################################################################
@@ -249,6 +271,10 @@ class ContainerImplementation():
       new += value_
     return self._container.set(new, **types_)
 
+  def scaleByFactor(self, factor_):
+    self._container.scaleByFactor(factor_)
+    return self
+
   def __iadd__(self, other_):
     self._container._iadd(other_._container)
     return self
@@ -304,6 +330,26 @@ class ResistanceContainer(ContainerImplementation):
     return result
 
 ######################################################################
+# Resistance container class; same as ResistanceContainer
+######################################################################
+
+class DamageContainer(ContainerImplementation):
+  """docstring for DamageContainer"""
+  def __init__(self, defaultValue_ = 0.):
+    self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
+    pass
+
+  def __iadd__(self, other_):
+    super().__iadd__(other_)
+    self._container._defaultValue += other_._container._defaultValue
+    return self
+
+  def __add__(self, other_):
+    result = DamageContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
+    super().__add__(other_, result)
+    return result
+
+######################################################################
 # Penetration container class; same as ResistanceContainer
 ######################################################################
 
@@ -343,7 +389,7 @@ class DurationModifierContainer(ContainerImplementation):
 class MultiplierContainer(ContainerImplementation):
   """docstring for MultiplierContainer"""
   def __init__(self):
-    self._container = AttackTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = DamageTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = ElementTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = MultiplierTypeContainer())))
+    self._container = CategoryTypeContainer(defaultKey_ = 'damage', defaultValue_ = AttackTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = DamageTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = ElementTypeContainer(extrakeys_ = ['generic'], defaultKey_ = 'generic', defaultValue_ = MultiplierTypeContainer()))))
     pass
 
   def __add__(self, other_):

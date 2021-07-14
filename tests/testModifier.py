@@ -57,7 +57,7 @@ class ModifierTestCase(unittest.TestCase):
     self.assertEqual(modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     modifier3_.addIncrease(2, 'physical')
     self.assertEqual(modifier3_.getIncrease('physical'), modifier_.getIncrease('physical') + 2.)
-    modifier3_.addMore(2, 'physical')
+    modifier3_.addMore(2., 'physical')
     self.assertEqual(modifier3_.getMore('physical'), modifier_.getMore('physical') * (1. + 2.))
 
     beforeI = modifier_.getIncrease('physical')
@@ -70,6 +70,15 @@ class ModifierTestCase(unittest.TestCase):
 
     self.assertEqual(modifier2_.getIncrease('physical') + modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     self.assertEqual(modifier2_.getMore('physical') * modifier3_.getMore('physical'), modifier_.getMore('physical'))
+
+    print(modifier_)
+    # modifier_.addMore(2., 'melee', 'hit')
+    modifier3_ = copy.deepcopy(modifier_)
+    factor = 0.3
+    modifier3_.scaleByFactor(factor)
+    self.assertEqual(modifier3_.getIncrease('melee') / factor, modifier_.getIncrease('melee'))
+    self.assertEqual((modifier3_.getMore('melee', 'hit') - 1.) / factor + 1., modifier_.getMore('melee', 'hit'))
+
     pass
 
   def test_penetration(self):
