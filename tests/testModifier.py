@@ -3,7 +3,9 @@ sys.path.append('..')
 
 import modifier
 
-import unittest, copy
+from toolbox import More
+
+import unittest
 
 class ModifierTestCase(unittest.TestCase):
 
@@ -53,7 +55,8 @@ class ModifierTestCase(unittest.TestCase):
     self.assertEqual(1. * (1. + (11.)), modifier_.getMultiplier('melee'))
     self.assertEqual((1. + 2.) * (1. + 2.) * (1. + (2. + 4.)), modifier_.getMultiplier('physical', 'spell'))
 
-    modifier3_ = copy.deepcopy(modifier_)
+    modifier3_ = modifier.Modifier()
+    modifier3_.copyFrom(modifier_)
     self.assertEqual(modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     modifier3_.addIncrease(2, 'physical')
     self.assertEqual(modifier3_.getIncrease('physical'), modifier_.getIncrease('physical') + 2.)
@@ -66,12 +69,13 @@ class ModifierTestCase(unittest.TestCase):
     self.assertEqual(beforeI + modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     self.assertEqual(beforeM * modifier3_.getMore('physical'), modifier_.getMore('physical'))
 
-    modifier_ = modifier2_ + modifier3_
+    new = modifier2_ + modifier3_
+    modifier_.copyFrom(new)
 
     self.assertEqual(modifier2_.getIncrease('physical') + modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     self.assertEqual(modifier2_.getMore('physical') * modifier3_.getMore('physical'), modifier_.getMore('physical'))
 
-    modifier3_ = copy.deepcopy(modifier_)
+    modifier3_.copyFrom(modifier_)
     factor = 0.3
     modifier3_.scaleByFactor(factor)
     self.assertEqual(modifier3_.getIncrease('melee') / factor, modifier_.getIncrease('melee'))
@@ -194,4 +198,5 @@ class ModifierTestCase(unittest.TestCase):
     pass
 
 if __name__ == '__main__':
+
   unittest.main()

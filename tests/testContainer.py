@@ -3,8 +3,6 @@ sys.path.append('..')
 
 import container
 
-from toolbox import More
-
 import unittest
 
 class ContainerTestCase(unittest.TestCase):
@@ -178,6 +176,33 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(3., durationModifier2.get(durationModifierType_ = 'duration', multiplierType_ = 'increase'))
     self.assertEqual(4., durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value)
     self.assertEqual(1., durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'more')._value)
+    pass
+
+  def test_copyFromContainer(self):
+    durationModifier1 = container.DurationModifierContainer()
+    durationModifier2 = container.DurationModifierContainer()
+
+    durationModifier1.set(durationModifierType_ = 'onHit', multiplierType_ = 'increase', value_ = 1.)
+    durationModifier1.set(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase', value_ = 7.)
+    durationModifier2.set(durationModifierType_ = 'onHit', multiplierType_ = 'increase', value_ = 2.)
+    durationModifier2.set(durationModifierType_ = 'duration', multiplierType_ = 'increase', value_ = 3.)
+    durationModifier2.set(durationModifierType_ = 'duration', multiplierType_ = 'more', value_ = 3.)
+
+    durationModifier1.copyFrom(durationModifier2)
+    durationModifier2.reset()
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'), 2)
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase'), 0)
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value, 4.)
+
+    self.assertEqual(durationModifier2.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value, 1.)
+    self.assertEqual(durationModifier2.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'), 0)
+    self.assertEqual(durationModifier2.get(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase'), 0)
+
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'), 2)
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase'), 0)
+    self.assertEqual(durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value, 4.)
+    pass
+
 
 if __name__ == '__main__':
   unittest.main()

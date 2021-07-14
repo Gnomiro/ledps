@@ -37,6 +37,24 @@ class Modifier():
 
     return self
 
+  # copies values from other modifier object; values already present in self are setted to default
+  def copyFrom(self, other_):
+    self._multiplier.copyFrom(other_._multiplier)
+    self._penetration.copyFrom(other_._penetration)
+    self._attribute.copyFrom(other_._attribute)
+
+    for name in other_._duration.keys():
+      if name not in self._duration.keys():
+        self._duration[name] = container.DurationModifierContainer()
+      self._duration[name].copyFrom(other_._duration[name])
+
+    for name in other_._trigger.keys():
+      if name not in self._trigger.keys():
+        self._trigger[name] = container.DurationModifierContainer()
+      self._trigger[name].copyFrom(other_._trigger[name])
+
+    return self
+
   def __add__(self, other_):
     total = Modifier()
     total += self

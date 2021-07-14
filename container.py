@@ -140,6 +140,31 @@ class TypeContainer():
         self._data[i].scaleByFactor(factor_)
     pass
 
+  def reset(self):
+    for i in self._data.keys():
+      key = {self._keyName: i}
+      if not isinstance(self._data.get(i), TypeContainer):
+        self._data[i] = self.getDefaultValue(i)
+      else:
+        self._data[i].reset()
+    pass
+
+  def copyFrom(self, other_):
+    for i in set(other_._data.keys()) | set(self._data.keys()):
+      key = {self._keyName: i}
+      if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
+        if i not in self._data:
+          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+        if i in other_._data:
+          self._data[i] = other_.get(**key)
+        else:
+          self._data[i] = self.getDefaultValue(i)
+      else:
+        if i not in self._data:
+          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+        self._data[i].copyFrom(other_._data.get(i, other_.getDefaultValue(i)))
+    return self
+
   # human readable
   def __str__(self):
     return self._data.__str__()
@@ -281,6 +306,14 @@ class ContainerImplementation():
 
   def scaleByFactor(self, factor_):
     self._container.scaleByFactor(factor_)
+    return self
+
+  def reset(self):
+    self._container.reset()
+    return self
+
+  def copyFrom(self, other_):
+    self._container.copyFrom(other_._container)
     return self
 
   def __iadd__(self, other_):
