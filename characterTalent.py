@@ -46,7 +46,7 @@ class SentinelJuggernaut(TalentBase):
 
   def __init__(self, points_):
     super(SentinelJuggernaut, self).__init__(name_ = 'sentinelJuggernaut', points_ = points_)
-    self._modifier.addAttribute('strength', points_)
+    self._modifier.addAttribute(1. * points_, 'strength')
     pass
 
 
@@ -55,7 +55,7 @@ class SentinelBlademaster(TalentBase):
 
   def __init__(self, points_):
     super(SentinelBlademaster, self).__init__(name_ = 'SentinelBlademaster', points_ = points_)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.06 * points_)
+    self._modifier.addIncrease(0.06 * points_, 'melee', 'speed')
     pass
 
 
@@ -64,7 +64,7 @@ class SentinelAxeThrower(TalentBase):
 
   def __init__(self, points_):
     super(SentinelAxeThrower, self).__init__(name_ = 'sentinelAxeThrower', points_ = points_)
-    self._modifier.addTrigger('sentinelAxeThrower', 'onHit', 0.08 * points_)
+    self._modifier.addTrigger('sentinelAxeThrower', 0.08 * points_, 'onHit')
     pass
 
 ############################################################################################
@@ -76,8 +76,8 @@ class PaladinPenance(TalentBase):
 
   def __init__(self, points_):
     super(PaladinPenance, self).__init__(name_ = 'paladinPenance', points_ = points_)
-    self._modifier.addDuration('bleed', 'onMeleeHit', 0.2 * points_)
-    self._modifier.addDuration('bleed', 'onThrowHit', 0.2 * points_)
+    self._modifier.addDuration('bleed', 0.08 * points_, 'onHit', 'melee')
+    self._modifier.addDuration('bleed', 0.08 * points_, 'onHit', 'throwing')
     pass
 
 
@@ -86,10 +86,10 @@ class PaladinConviction(TalentBase):
 
   def __init__(self, points_):
     super(PaladinConviction, self).__init__(name_ = 'paladinConviction', points_ = points_)
-    self._modifier.addIncrease('physical', 0.04 * points_)
-    self._modifier.addPenetration('physical', 0.02 * points_)
-    self._modifier.addIncrease('fire', 0.04 * points_)
-    self._modifier.addPenetration('fire', 0.02 * points_)
+    self._modifier.addIncrease(0.04 * points_, 'physical')
+    self._modifier.addPenetration(0.02 * points_, 'physical')
+    self._modifier.addIncrease(0.04 * points_, 'fire')
+    self._modifier.addPenetration(0.02 * points_, 'fire')
     pass
 
 
@@ -98,7 +98,7 @@ class PaladinDivineBolt(TalentBase):
 
   def __init__(self, points_):
     super(PaladinDivineBolt, self).__init__(name_ = 'paladinDivineBolt', points_ = points_)
-    self._modifier.addTrigger('divineBolt', 'onMeleeHit', 0.2 * points_)
+    self._modifier.addTrigger('divineBolt', 0.2 * points_, 'onHit', 'melee')
     pass
 
 
@@ -107,7 +107,7 @@ class PaladinRedemption(TalentBase):
 
   def __init__(self, points_):
     super(PaladinRedemption, self).__init__(name_ = 'paladinRedemption', points_ = points_)
-    self._modifier.addDuration('bleed', 'effect', 0.07 * points_)
+    self._modifier.addDuration('bleed', 0.07 * points_, 'effect')
     warnings.warn('\'{}\' conditionals are disabled.'.format(self._name))
     pass
 
@@ -117,7 +117,7 @@ class PaladinReverenceOfDuality(TalentBase):
 
   def __init__(self, points_):
     super(PaladinReverenceOfDuality, self).__init__(name_ = 'paladinReverenceOfDuality', points_ = points_)
-    self._modifier.addIncrease('generic', 0.02 * points_)
+    self._modifier.addIncrease(0.02 * points_)
     pass
 
 
@@ -132,7 +132,7 @@ class PrimalistPrimalStrength(TalentBase):
 
   def __init__(self, points_):
     super(PrimalistPrimalStrength, self).__init__(name_ = 'primalistPrimalStrength', points_ = points_)
-    self._modifier.addAttribute('strength', points_)
+    self._modifier.addAttribute(1. * points_, 'strength')
     pass
 
 class PrimalistTempestBond(TalentBase):
@@ -140,9 +140,9 @@ class PrimalistTempestBond(TalentBase):
 
   def __init__(self, points_):
     super(PrimalistTempestBond, self).__init__(name_ = 'primalistTempestBond', points_ = points_)
-    self._modifier.addIncrease('physical', 0.04 * points_ * 2)
-    self._modifier.addIncrease('cold', 0.04 * points_ * 2)
-    self._modifier.addIncrease('lightning', 0.04 * points_ * 2)
+    self._modifier.addIncrease(0.04 * points_ * 2, 'physical')
+    self._modifier.addIncrease(0.04 * points_ * 2, 'cold')
+    self._modifier.addIncrease(0.04 * points_ * 2, 'lightning')
 
     warnings.warn('PrimalistTempestBond assumes minion as active.')
     pass
@@ -156,7 +156,7 @@ class BeastmasterUrsineStrength(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterUrsineStrength, self).__init__(name_ = 'beastmasterUrsineStrength', points_ = points_)
-    self._modifier.addAttribute('strength', points_)
+    self._modifier.addAttribute(1. * points_, 'strength')
     pass
 
 class BeastmasterHunterOfTheDeep(TalentBase):
@@ -164,7 +164,7 @@ class BeastmasterHunterOfTheDeep(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterHunterOfTheDeep, self).__init__(name_ = 'beastmasterHunterOfTheDeep', points_ = points_)
-    self._modifier.addDuration('aspectOfTheShark', 'duration', 0.15 * points_)
+    self._modifier.addDuration('aspectOfTheShark', 0.15 * points_, 'duration')
     pass
 
 class BeastmasterPrimalStrength(TalentBase):
@@ -172,7 +172,7 @@ class BeastmasterPrimalStrength(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterPrimalStrength, self).__init__(name_ = 'beastmasterPrimalStrength', points_ = points_)
-    self._modifier.addAttribute('strength', points_)
+    self._modifier.addAttribute(1. * points_, 'strength')
     pass
 
 class BeastmasterViperFangs(TalentBase):
@@ -180,8 +180,8 @@ class BeastmasterViperFangs(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterViperFangs, self).__init__(name_ = 'beastmasterViperFangs', points_ = points_)
-    self._modifier.addIncrease('meleeAttackSpeed', points_ * 0.05)
-    self._modifier.addDuration('aspectOfTheViper', 'onHit', points_ * 0.03)
+    self._modifier.addIncrease(points_ * 0.05, 'melee', 'speed')
+    self._modifier.addDuration('aspectOfTheViper', points_ * 0.03, 'onHit')
     pass
 
 class BeastmasterEnvenom(TalentBase):
@@ -189,7 +189,7 @@ class BeastmasterEnvenom(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterEnvenom, self).__init__(name_ = 'beastmasterEnvenom', points_ = points_)
-    self._modifier.addDuration('poison', 'onMeleeHit', points_ * 0.08)
+    self._modifier.addDuration('poison', points_ * 0.08, 'onHit', 'melee')
     pass
 
 class BeastmasterTheCircleOfLife(TalentBase):
@@ -197,7 +197,7 @@ class BeastmasterTheCircleOfLife(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterTheCircleOfLife, self).__init__(name_ = 'beastmasterTheCircleOfLife', points_ = points_)
-    self._modifier.addDuration('aspectOfTheShark', 'onHit', points_ * 0.05)
+    self._modifier.addDuration('aspectOfTheShark', points_ * 0.05, 'onHit')
 
     warnings.warn('BeastmasterTheCircleOfLife always assumes DragonSlayer active and fight against bosses')
     pass
@@ -207,8 +207,8 @@ class BeastmasterOceanMaw(TalentBase):
 
   def __init__(self, points_):
     super(BeastmasterOceanMaw, self).__init__(name_ = 'beastmasterOceanMaw', points_ = points_)
-    self._modifier.addDuration('aspectOfTheShark', 'effect', points_ * 0.15)
-    self._modifier.addDuration('aspectOfTheShark', 'duration', points_ * 0.15)
+    self._modifier.addDuration('aspectOfTheShark', points_ * 0.15, 'effect')
+    self._modifier.addDuration('aspectOfTheShark', points_ * 0.15, 'duration')
     pass
 
 class BeastmasterFeedingFrenzy(TalentBase):
@@ -217,7 +217,8 @@ class BeastmasterFeedingFrenzy(TalentBase):
   def __init__(self, points_):
     super(BeastmasterFeedingFrenzy, self).__init__(name_ = 'beastmasterFeedingFrenzy', points_ = points_)
 
-    self._modifier.addDuration('aspectOfTheShark', 'effectMultiplier', points_ * 0.4)
+    self._modifier.addDuration('aspectOfTheShark', -points_ * 0.6, 'effect', 'more')
+    warnings.warn('Check if BeastmasterFeedingFrenzy more aspectOfTheShark works this way')
 
     pass
 
@@ -234,9 +235,9 @@ class BeastmasterPrimalAspects(TalentBase):
   def __init__(self, points_):
     super(BeastmasterPrimalAspects, self).__init__(name_ = 'beastmasterPrimalAspects', points_ = points_)
 
-    self._modifier.addDuration('aspectOfTheShark', 'duration', points_ * 0.1)
-    self._modifier.addDuration('aspectOfViper', 'duration', points_ * 0.1)
-    self._modifier.addDuration('aspectOfBoar', 'duration', points_ * 0.1)
+    self._modifier.addDuration('aspectOfTheShark', points_ * 0.1, 'duration')
+    self._modifier.addDuration('aspectOfViper', points_ * 0.1, 'duration')
+    self._modifier.addDuration('aspectOfBoar', points_ * 0.1, 'duration')
 
     pass
 
@@ -246,7 +247,7 @@ class BeastmasterAncientMight(TalentBase):
   def __init__(self, points_):
     super(BeastmasterAncientMight, self).__init__(name_ = 'beastmasterAncientMight', points_ = points_)
 
-    self._modifier.addAttribute('strength', points_)
+    self._modifier.addAttribute(1. * points_, 'strength')
     warnings.warn('BeastmasterAncientMight only provides strength and not flat damage yet.')
 
     pass

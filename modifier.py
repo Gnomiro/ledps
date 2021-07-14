@@ -166,7 +166,7 @@ class Modifier():
 
   def getDurationMore(self, name_, *args_, **kwargs_):
     if name_ not in self._duration.keys():
-      return 0
+      return 1
     types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'more')
     prod = self._duration[name_].get(**types)._value
     if types['attackType_'] != None:
@@ -190,7 +190,7 @@ class Modifier():
 
   def getTriggerMore(self, name_, *args_, **kwargs_):
     if name_ not in self._trigger.keys():
-      return 0
+      return 1
     types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'more')
     prod = self._trigger[name_].get(**types)._value
     if types['attackType_'] is not None:

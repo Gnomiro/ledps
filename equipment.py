@@ -15,116 +15,116 @@ class Equipment():
   def setExampleBeastmasterEquipment(self):
 
     # assume berserker as always active
-    self._modifier.addIncrease('meleeAttackSpeed', 0.6)
+    self._modifier.addIncrease(0.6, 'melee', 'speed')
 
     # assume howl as always active (frenzy, generic increase)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.2)
-    # self._modifier.addIncrease('castSpeed', 0.2)
-    self._modifier.addIncrease('generic', 0.5)
+    self._modifier.addIncrease(0.2, 'melee', 'speed')
+    self._modifier.addIncrease(0.2, 'spell', 'speed')
+    self._modifier.addIncrease(0.5)
 
     # helmet
-    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.46)
-    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.39)
+    self._modifier.addDuration('aspectOfTheShark', 0.46, 'effect')
+    self._modifier.addDuration('aspectOfTheViper', 0.39, 'effect')
 
     # Body Armour
-    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.69)
+    self._modifier.addDuration('aspectOfTheShark', 0.69, 'effect')
 
     # Relic
-    self._modifier.addDuration('aspectOfTheShark', 'effect', 0.20)
-    self._modifier.addIncrease('poison', 0.6)
-    self._modifier.addDuration('bleed', 'onHit', 0.37)
+    self._modifier.addDuration('aspectOfTheShark', 0.20, 'effect')
+    self._modifier.addIncrease(0.6, 'poison')
+    self._modifier.addDuration('bleed', 0.37, 'onHit')
 
     # Gloves
-    self._modifier.addIncrease('meleeAttackSpeed', 0.15)
-    self._modifier.addAttribute('strength', 8)
+    self._modifier.addIncrease(0.15, 'melee', 'speed')
+    self._modifier.addAttribute(8., 'strength')
 
     # Boots
-    self._modifier.addAttribute('strength', 8)
+    self._modifier.addAttribute(8., 'strength')
 
     # rings amulet and belt unknown
     # set attributes to mactch character screen
-    self._modifier.addAttribute('strength', 18)
-    self._modifier.addAttribute('dexterity', 16)
+    self._modifier.addAttribute(18., 'strength')
+    self._modifier.addAttribute(16., 'dexterity')
     # melee attack speed provided by base-type
-    self._modifier.addIncrease('meleeAttackSpeed', 0.15)
+    self._modifier.addIncrease(0.15, 'melee', 'speed')
 
     # Weapon
-    self._modifier.addMore('meleeAttackSpeed', 0.97)
-    self._modifier.addIncrease('poison', 1.92)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.48)
-    self._modifier.addAttribute('strength', 10)
-    self._modifier.addAttribute('dexterity', 10)
+    self._modifier.addMore(-0.03, 'melee', 'speed')
+    self._modifier.addIncrease(1.92, 'poison')
+    self._modifier.addIncrease(0.48, 'melee', 'speed')
+    self._modifier.addAttribute(10., 'strength')
+    self._modifier.addAttribute(10., 'dexterity')
     # other attributes do not scale serpent strike and thus are ignored
-    self._modifier.addDuration('poison', 'onHit', 0.96)
+    self._modifier.addDuration('poison', 0.96, 'onHit')
 
     # adorned heorot idol 1 (3x)
-    self._modifier.addDuration('aspectOfTheShark', 'duration', 0.23 * 3)
+    self._modifier.addDuration('aspectOfTheShark', 0.23 * 3, 'duration')
     # self._modifier.addDuration('aspectOfTheBoar', 'effect', 0.11) # provides defence only
 
     # eterran idol 1 (2x)
-    self._modifier.addIncrease('overTime', 0.1 * 2)
-    self._modifier.addIncrease('poison', 0.08 * 2)
+    self._modifier.addIncrease(0.1 * 2, 'dot')
+    self._modifier.addIncrease(0.08 * 2, 'poison')
 
     # grand heorot idol 1
-    self._modifier.addDuration('poison', 'onHit', 0.2)
-    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.17)
+    self._modifier.addDuration('poison', 0.2, 'onHit')
+    self._modifier.addDuration('aspectOfTheViper', 0.17, 'effect')
     # grand heorot idol 2
-    self._modifier.addDuration('poison', 'onHit', 0.2)
-    self._modifier.addDuration('aspectOfTheViper', 'effect', 0.17)
+    self._modifier.addDuration('poison', 0.2, 'onHit')
+    self._modifier.addDuration('aspectOfTheViper', 0.17, 'effect')
     pass
 
   def setExamplePaladinEquipment(self):
 
     # blessings
-    self._modifier.addDuration('physicalShred', 'onHit', 0.45)
-    self._modifier.addDuration('ignite', 'onHit', 0.89)
-    self._modifier.addDuration('bleed', 'onHit', 0.87)
+    self._modifier.addDuration('physicalShred', 0.45, 'onHit')
+    self._modifier.addDuration('ignite', 0.89, 'onHit')
+    self._modifier.addDuration('bleed', 0.87, 'onHit')
 
     # sigils of hope
     empoweringSigils = 3
     numberOfSigils = 4
-    self._modifier.addIncrease('generic', 0.06 * empoweringSigils * numberOfSigils)
+    self._modifier.addIncrease(0.06 * empoweringSigils * numberOfSigils)
 
     # holy aura
     factor = 1
     callToArms = 4
     fanaticism = 4
-    self._modifier.addIncrease('generic', 0.3 * factor)
-    self._modifier.addIncrease('physical', 0.1 * callToArms * factor)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.04 * fanaticism * factor)
+    self._modifier.addIncrease(0.3 * factor)
+    self._modifier.addIncrease(0.1 * callToArms * factor, 'physical')
+    self._modifier.addIncrease(0.04 * fanaticism * factor, 'speed', 'melee')
 
-    self._modifier.addIncrease('physical', 0.32)
-    self._modifier.addDuration('bleed', 'duration', 0.16)
-    self._modifier.addDuration('bleed', 'effect', 0.34)
-    self._modifier.addIncrease('physical', 0.99)
-    self._modifier.addPenetration('physical', 0.08)
-    self._modifier.addMore('meleeAttackSpeed', 1.24)
-    self._modifier.addIncrease('overTime', 0.43)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.22)
-    self._modifier.addIncrease('physical', 0.68)
-    self._modifier.addDuration('bleed', 'onHit', 1.05)
-    self._modifier.addIncrease('physical', 0.58)
-    self._modifier.addDuration('bleed', 'duration', 0.29)
-    self._modifier.addDuration('bleed', 'effect', 0.67)
-    self._modifier.addIncrease('physical', 0.34)
-    self._modifier.addAttribute('strength', 8)
-    self._modifier.addIncrease('physical', 0.56)
-    self._modifier.addIncrease('physical', 0.51)
-    self._modifier.addIncrease('damageOverTime', 0.19)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.39)
-    self._modifier.addAttribute('strength', 2)
-    self._modifier.addDuration('bleed', 'onHit', 0.46)
-    self._modifier.addDuration('bleed', 'duration', 0.48)
-    self._modifier.addDuration('bleed', 'duration', 0.2)
-    self._modifier.addIncrease('physicalOverTime', 0.52)
-    self._modifier.addIncrease('overTime', 0.1)
-    self._modifier.addIncrease('overTime', 0.08)
-    self._modifier.addIncrease('physical', 0.08)
-    self._modifier.addIncrease('overTime', 0.05)
-    self._modifier.addDuration('bleed', 'onHit', 0.12)
-    self._modifier.addTrigger('manifestStrike', 'onMeleeHit', 0.1)
-    self._modifier.addDuration('bleed', 'onHit', 0.11)
-    self._modifier.addDuration('bleed', 'onHit', 0.36)
-    self._modifier.addDuration('bleed', 'onHit', 0.2)
-    self._modifier.addDuration('bleed', 'onHit', 0.12)
+    self._modifier.addIncrease(0.32, 'physical')
+    self._modifier.addDuration('bleed', 0.16, 'duration')
+    self._modifier.addDuration('bleed', 0.34, 'effect')
+    self._modifier.addIncrease(0.99, 'physical')
+    self._modifier.addPenetration(0.08, 'physical')
+    self._modifier.addMore(0.24, 'speed', 'melee')
+    self._modifier.addIncrease(0.43, 'dot')
+    self._modifier.addIncrease(0.22, 'melee' ,'speed')
+    self._modifier.addIncrease(0.68, 'physical')
+    self._modifier.addDuration('bleed', 1.05, 'onHit')
+    self._modifier.addIncrease(0.58, 'physical')
+    self._modifier.addDuration('bleed', 0.29, 'duration')
+    self._modifier.addDuration('bleed', 0.67, 'effect')
+    self._modifier.addIncrease(0.34, 'physical')
+    self._modifier.addAttribute(8., 'strength')
+    self._modifier.addIncrease(0.56, 'physical')
+    self._modifier.addIncrease(0.51, 'physical')
+    self._modifier.addIncrease(0.19, 'dot')
+    self._modifier.addIncrease(0.39, 'melee', 'speed')
+    self._modifier.addAttribute(2., 'strength')
+    self._modifier.addDuration('bleed', 0.46, 'onHit')
+    self._modifier.addDuration('bleed', 0.48, 'duration')
+    self._modifier.addDuration('bleed', 0.2, 'duration')
+    self._modifier.addIncrease(0.52, 'physical', 'dot')
+    self._modifier.addIncrease(0.1, 'dot')
+    self._modifier.addIncrease(0.08, 'dot')
+    self._modifier.addIncrease(0.08, 'physical')
+    self._modifier.addIncrease(0.05, 'dot')
+    self._modifier.addDuration('bleed', 0.12, 'onHit')
+    self._modifier.addTrigger('manifestStrike', 0.1, 'onHit', 'melee')
+    self._modifier.addDuration('bleed', 0.11, 'onHit')
+    self._modifier.addDuration('bleed', 0.36, 'onHit')
+    self._modifier.addDuration('bleed', 0.2, 'onHit')
+    self._modifier.addDuration('bleed', 0.12, 'onHit')
     pass

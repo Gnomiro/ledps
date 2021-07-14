@@ -4,6 +4,11 @@ import numpy
 
 elements = ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']
 
+# refactor to typeContainer?
+# ElementTypeContainer
+# AttackTypeContainer
+# DamageTypeContainer_
+
 def getValidElements():
   return elements
 

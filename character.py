@@ -73,8 +73,8 @@ class Sentinel(CharacterInterface):
   def __init__(self, name_ = 'Sentinel'):
     super(Sentinel, self).__init__(name_)
 
-    self._classModifier.addAttribute('strength', 2)
-    self._classModifier.addAttribute('vitality', 1)
+    self._classModifier.addAttribute(2., 'strength')
+    self._classModifier.addAttribute(1., 'vitality')
 
     self._talents.update({'sentinelOverwhelm': [0, 5],
                           'sentinelJuggernaut': [0, 8],
@@ -101,8 +101,8 @@ class Paladin(Sentinel):
     super(Paladin, self).__init__('Paladin')
 
     warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
-    self._classModifier.addIncrease('physical', 1.0)
-    self._classModifier.addIncrease('fire', 1.0)
+    self._classModifier.addIncrease(1., 'physical')
+    self._classModifier.addIncrease(1., 'fire')
 
     self._talents.update({'paladinConviction':[0, 8],
                           'paladinDefiance': [0, 8],

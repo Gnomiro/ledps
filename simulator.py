@@ -76,6 +76,8 @@ class Simulator:
       print('\nActive durations at end of fight:')
       print(self._durationContainer.countActive())
 
+    print(allModifier)
+
     return overallDamage
 
   def someHits(self, nHits_=10):

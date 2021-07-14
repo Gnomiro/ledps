@@ -13,7 +13,7 @@ equipment_ = collection_.getEquipment()
 equipment_.setExampleBeastmasterEquipment()
 
 repeats = 1
-endtime = 600
+endtime = 60
 
 overallDamage = element.ElementContainer()
 

@@ -74,7 +74,7 @@ class Duration():
 
   def applyModifier(self, modifier_):
 
-    self._duration *= (1. + modifier_.getDuration(self._name, 'duration'))
+    self._duration *= modifier_.getDurationMultiplier(self._name, 'duration')
     pass
 
   def tick(self, timestep_):
@@ -101,22 +101,22 @@ class DamagingAilment(Duration):
     super(DamagingAilment, self).__init__(name_ = name_, **kwargs_)
     self._types.append('damagingAilment')
 
-    required = ['damage_', 'scalingTags_']
+    required = ['damage_', 'element_', 'tags_']
     toolbox.validateInput(self._name, required, **kwargs_)
 
     self._baseDamage = kwargs_['damage_']
     self._damage = self._baseDamage
 
-    self._scalingTags = kwargs_['scalingTags_']
+    self._tags = kwargs_['tags_']
+    self._element = kwargs_['element_']
     pass
-
 
   def applyModifier(self, modifier_):
     super(DamagingAilment, self).applyModifier(modifier_)
+    # duration modification handled in base class
 
-    self._damage.imultiplyByFactor(modifier_.getDuration(self._name, 'effect'), shift_ = 1.)
-    self._damage.imultiplyByFactor(modifier_.getIncreaseByTagList(self._scalingTags), shift_ = 1.)
-    self._damage.imultiplyByFactor(modifier_.getMoreByTagList(self._scalingTags), shift_ = 0.)
+    self._damage.imultiplyByFactor(modifier_.getDurationMultiplier(self._name, 'effect'))
+    self._damage.imultiplyByFactor(modifier_.getMultiplier(self._element, *self._tags))
 
     pass
 
@@ -141,45 +141,20 @@ class Buff(Duration):
 
   def applyModifier(self, modifier_):
     super(Buff, self).applyModifier(modifier_)
+    # duration modification handled in base class
 
-    # use this alongside effect for aspect of the shark for now
-    # print(modifier_.getDuration(self._name, 'effectMultiplier')) # effectMultiplier = 0 as default
+    effectMultiplier = modifier_.getDurationMultiplier(self._name, 'effect')
 
-    effect = modifier_.getDuration(self._name, 'effect')
-    effectMultiplier = (1 if modifier_.getDuration(self._name, 'effectMultiplier') == 0 else modifier_.getDuration(self._name, 'effectMultiplier'))
-
-    # only required if effect modifier are not 0
-    if effect == 0  and effectMultiplier == 0:
+    # only required if effect modifier is not 0
+    if effectMultiplier == 1:
       return
 
-    for name, value in self._modifier.getIncreases().items():
-      self._modifier.setIncrease(name, self._modifier.getIncrease(name) * (1. + effect) * (effectMultiplier))
-
-    for name, value in self._modifier.getMores().items():
-      self._modifier.setMore(name, self._modifier.getMore(name) * (1. + effect) * (effectMultiplier))
-
-    for name, value in self._modifier.getPenetrations().items():
-      self._modifier.setPenetration(name, self._modifier.getPenetration(name) * (1. + effect) * (effectMultiplier))
-
-    # duration modification handled in base class; furthermore duration should not be scaled by effect
-
-    for name, value in self._modifier.getAttributes().items():
-      warnings.warn('buff.applyModifier(): Effect does not scale attributes from buffs.')
-      pass
-
-    for name in self._modifier.getDurations().keys():
-      for modifier, value in self._modifier.getDurations()[name].items():
-        self._modifier.setDuration(name, modifier, self._modifier.getDuration(name, modifier) * (1. + effect) * (effectMultiplier))
-
-    for name in self._modifier.getTriggers().keys():
-      warnings.warn('buff.applyModifier(): Effect does not trigger chances from buffs.')
-      pass
+    # scale modifier accordingly
+    self._modifier.scaleByFactor(effectMultiplier)
 
     pass
 
-
   def getModifier(self):
-
     return self._modifier
 
 ############################################################################################
@@ -191,20 +166,22 @@ class ResistanceShred(Duration):
   def __init__(self, name_, **kwargs_):
     super(ResistanceShred, self).__init__(name_ = name_, **kwargs_)
 
-    required = ['shredElement_']
+    required = ['element_']
     toolbox.validateInput(self._name, required, **kwargs_)
 
+    self._element = kwargs_['element_']
     self._types.append('resistanceShred')
 
     self._shred = element.ElementContainer()
 
-    self._shred.iassignByElement(kwargs_['shredElement_'], 0.05)
-    pass
+    self._shred._element[self._element] = 0.05
 
   def applyModifier(self, modifier_):
     super(ResistanceShred, self).applyModifier(modifier_)
     # todo: does poison shred scale with poison effect?!?!?!
     # would nee to scale self._shred values accordingly
+    self._shred._element[self._element] *= modifier_.getDurationMultiplier(self._name, 'effect')
+    warnings.warn('ResistanceShred: Does poison\'s inherent resistance reduction stack with poison effect? # Llama says so.')
     pass
 
   def getShred(self):
@@ -239,7 +216,8 @@ class RiveExecution(Buff):
   def __init__(self):
     super(RiveExecution, self).__init__(name_ = 'riveExecution', duration_ = 2., maxStacks_ = -1)
 
-    self._modifier.addIncrease('physical', 0.15)
+    self._modifier.addIncrease(0.15, 'physical')
+
     pass
 
 class AspectOfTheShark(Buff):
@@ -247,8 +225,8 @@ class AspectOfTheShark(Buff):
   def __init__(self):
     super(AspectOfTheShark, self).__init__(name_ = 'aspectOfTheShark', duration_ = 3., maxStacks_ = 1)
 
-    self._modifier.addIncrease('melee', 0.5)
-    self._modifier.addIncrease('meleeAttackSpeed', 0.1)
+    self._modifier.addIncrease(0.5, 'melee')
+    self._modifier.addIncrease(0.1, 'melee', 'speed')
     pass
 
 class AspectOfTheBoar(Buff):
@@ -265,8 +243,8 @@ class AspectOfTheViper(Buff):
   def __init__(self):
     super(AspectOfTheViper, self).__init__(name_ = 'aspectOfTheViper', duration_ = 3., maxStacks_ = 1)
 
-    self._modifier.addIncrease('damageOverTime', 1.)
-    self._modifier.addDuration('poison', 'onHit', 1.)
+    self._modifier.addIncrease(1., 'dot')
+    self._modifier.addDuration('poison', 1., 'onHit')
     pass
 
 # Swipe aspect of the panther stackable part
@@ -306,27 +284,27 @@ class SerpentStrikeChronoStrike(Buff):
 class Bleed(DamagingAilment):
   """docstring for Bleed"""
   def __init__(self):
-    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), scalingTags_ =  ['generic', 'physical', 'physicalOverTime', 'overTime'], maxStacks_ = -1)
+    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), element_ = 'physical', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Ignite(DamagingAilment):
   """docstring for Ignite"""
   def __init__(self):
-    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), scalingTags_ =  ['generic', 'fire', 'fireOverTime', 'overTime'], maxStacks_ = -1)
+    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), element_ = 'fire', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Poison(ResistanceShred, DamagingAilment):
   """docstring for Poison"""
   def __init__(self):
-    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = -1)
+    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Plague(DamagingAilment):
   """docstring for Plague"""
   def __init__(self):
-    super(Plague, self).__init__(name_ = 'plague', duration_ = 4., damage_ = element.ElementContainer(poison = 90.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 1)
+    super(Plague, self).__init__(name_ = 'plague', duration_ = 4., damage_ = element.ElementContainer(poison = 90.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
 
 class BlindingPoison(DamagingAilment):
   """docstring for BlindingPoison"""
   def __init__(self):
-    super(BlindingPoison, self).__init__(name_ = 'blindingPoison', duration_ = 4., damage_ = element.ElementContainer(poison = 30.), scalingTags_ =  ['generic', 'poison', 'poisonOverTime', 'overTime'],  shredElement_ = 'poison', maxStacks_ = 1)
+    super(BlindingPoison, self).__init__(name_ = 'blindingPoison', duration_ = 4., damage_ = element.ElementContainer(poison = 30.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
 
 ############################################################################################
 # Shreds
@@ -335,12 +313,12 @@ class BlindingPoison(DamagingAilment):
 class PhysicalShred(ResistanceShred):
   """docstring for PhysicalShred"""
   def __init__(self):
-    super(PhysicalShred, self).__init__(name_ = 'physicalShred', shredElement_ = 'physical', duration_ = 4, maxStacks_ = 20)
+    super(PhysicalShred, self).__init__(name_ = 'physicalShred', element_ = 'physical', duration_ = 4, maxStacks_ = 20)
 
 class PoisonShred(ResistanceShred):
   """docstring for PhysicalShred"""
   def __init__(self):
-    super(PoisonShred, self).__init__(name_ = 'poisonShred', shredElement_ = 'poison', duration_ = 4, maxStacks_ = 20)
+    super(PoisonShred, self).__init__(name_ = 'poisonShred', element_ = 'poison', duration_ = 4, maxStacks_ = 20)
 
 ############################################################################################
 ############################################################################################

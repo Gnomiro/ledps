@@ -114,7 +114,9 @@ class Default:
       # penetration
       # applied for duration objects seperately
       resistances = element.ElementContainer(default_ = 0.0)
-      penetration = element.ElementContainer(default_ = 0.0, **allModifier.getPenetrations())
+      warnings.warn('Workaround for resistance penetration in skill.py')
+      test = eval(allModifier.getPenetrations().__repr__())
+      penetration = element.ElementContainer(default_ = 0.0, **test)
       shred = element.fromResistanceShred(self._durationContainer)
       resistances -= shred
       resistances.setUpperLimit(0.75)
@@ -150,7 +152,7 @@ class Default:
     return damage
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDuration(name_, 'onHit')
+    chance = modifier_.getDurationMultiplier(name_, 'onHit')
     return chance
 
   def applyOnHit(self, modifier_):
@@ -192,7 +194,7 @@ class Default:
 
   def getAttacktime(self, modifier_):
     self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / (1.0 + modifier_.getIncrease('meleeAttackSpeed')) / modifier_.getMore('meleeAttackSpeed')
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('melee', 'speed')
 
 
 ############################################################################################
@@ -208,11 +210,11 @@ class Melee(Default):
     pass
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onMeleeHit')
+    chance = modifier_.getDurationIncrease(name_, 'onHit', 'melee') * modifier_.getDurationMore(name_, 'onHit', 'melee')
     return chance
 
   def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTrigger(trigger_, 'onHit') + modifier_.getTrigger(trigger_, 'onMeleeHit')
+    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'melee') * modifier_.getTriggerMore(trigger_, 'onHit', 'melee')
     return chance
 
 ############################################################################################
@@ -228,11 +230,11 @@ class Spell(Default):
     pass
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onSpellHit')
+    chance = modifier_.getDurationIncrease(name_, 'onHit', 'spell') * modifier_.getDurationMore(name_, 'onHit', 'spell')
     return chance
 
   def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTrigger(trigger_, 'onHit') + modifier_.getTrigger(trigger_, 'onSpellHit')
+    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'spell') * modifier_.getTriggerMore(trigger_, 'onHit', 'spell')
     return chance
 
 
@@ -245,11 +247,11 @@ class Throw(Default):
     pass
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDuration(name_, 'onHit') + modifier_.getDuration(name_, 'onThrowHit')
+    chance = modifier_.getDurationIncrease(name_, 'onHit', 'throwing') * modifier_.getDurationMore(name_, 'onHit', 'throwing')
     return chance
 
   def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTrigger(trigger_, 'onHit') + modifier_.getTrigger(trigger_, 'onThrowHit')
+    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'throwing') * modifier_.getTriggerMore(trigger_, 'onHit', 'throwing')
     return chance
 
 ############################################################################################
@@ -281,23 +283,23 @@ class Rive(Melee):
 
   def prepareSkill(self):
 
-    self._localSkillModifier[0].addIncrease('meleeAttackSpeed', 0.08 * self._talents['flurry'][0])
-    self._localSkillModifier[1].addIncrease('meleeAttackSpeed', 0.08 * self._talents['flurry'][0])
+    self._localSkillModifier[0].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
+    self._localSkillModifier[1].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
 
-    self._localSkillModifier[0].addDuration('ignite', 'onHit', 0.5 * self._talents['sever'][0])
+    self._localSkillModifier[0].addDuration('ignite', 0.5 * self._talents['sever'][0], 'onHit')
 
-    self._localSkillModifier[1].addDuration('ignite', 'onHit', 0.5 * self._talents['twistingFangs'][0])
+    self._localSkillModifier[1].addDuration('ignite', 0.5 * self._talents['twistingFangs'][0], 'onHit')
 
-    self._localSkillModifier[1].addMore('generic', 1.0 + 0.25 * self._talents['ironReach'][0])
+    self._localSkillModifier[1].addMore(1.0 + 0.25 * self._talents['ironReach'][0])
 
-    self._localSkillModifier[2].addMore('generic', 1.0 + 0.5 * self._talents['tripleThreat'][0])
+    self._localSkillModifier[2].addMore(1.0 + 0.5 * self._talents['tripleThreat'][0])
 
     if self._talents['cadence'][0] == 1:
       self._pattern = [0, 1, 0, 1, 2]
 
-    self._localSkillModifier[0].addTrigger('riveIndomitable', 'onHit', 1.0 * self._talents['indomitable'][0])
+    self._localSkillModifier[0].addTrigger('riveIndomitable', 1.0 * self._talents['indomitable'][0], 'onHit')
 
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     pass
 
   def skillHit(self, modifier_):
@@ -327,8 +329,8 @@ class ManifestStrike(Melee):
     pass
 
   def prepareSkill(self):
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
     pass
 
   def skillHit(self, modifier_):
@@ -353,8 +355,8 @@ class SentinelAxeThrower(Throw):
     pass
 
   def prepareSkill(self):
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
     pass
 
   def skillHit(self, modifier_):
@@ -376,7 +378,7 @@ class RiveIndomitable(Spell):
     pass
 
   def prepareSkill(self):
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     pass
 
   def skillHit(self, modifier_):
@@ -398,7 +400,7 @@ class DivineBolt(Spell):
     pass
 
   def prepareSkill(self):
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('attunement'))
     pass
 
   def skillHit(self, modifier_):
@@ -436,27 +438,27 @@ class SerpentStrike(Melee):
   def prepareSkill(self):
 
     # generic skill specific damage increase provided by attributes
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
-    self._attributeModifier.addIncrease('generic', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
-    self._attributeModifier.addDuration('poison', 'onMeleeHit', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
+    self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'))
+    self._attributeModifier.addDuration('poison', 0.04 * self._collection.getPersistentModifier().getAttribute('dexterity'), 'onHit', 'melee')
 
     # generic 140% increase poison chance and 40% increased duration
-    self._localSkillModifier[0].addDuration('poison', 'onHit', 1.4)
-    self._localSkillModifier[0].addDuration('poison', 'duration', .4)
+    self._localSkillModifier[0].addDuration('poison', 1.4, 'onHit')
+    self._localSkillModifier[0].addDuration('poison', 4., 'duration')
 
     # debilitatingPoison: adds blinding poison chance
-    self._localSkillModifier[0].addDuration('blindingPoison', 'onHit', 0.17 * self._talents['debilitatingPoison'][0])
+    self._localSkillModifier[0].addDuration('blindingPoison', 0.17 * self._talents['debilitatingPoison'][0], 'onHit')
 
     # nagasaVenom: poison chance and duration
-    self._localSkillModifier[0].addDuration('poison', 'onHit', 0.1 * self._talents['chronoStrike'][0])
-    self._localSkillModifier[0].addDuration('poison', 'duration', 0.1 * self._talents['chronoStrike'][0])
+    self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'onHit')
+    self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'duration')
 
     # plaguebearer: plague chance on hit
-    self._localSkillModifier[0].addDuration('plague', 'onHit', 0.25 * self._talents['plaguebearer'][0])
+    self._localSkillModifier[0].addDuration('plague', 0.25 * self._talents['plaguebearer'][0], 'onHit')
 
     # venomousIntent: reduced poison duration and poisonSpit trigger
-    self._localSkillModifier[0].addDuration('poison', 'duration', -0.35 * self._talents['venomousIntent'][0])
-    self._localSkillModifier[0].addTrigger('serpentStrikePoisonSpit', 'onHit', 1. * self._talents['venomousIntent'][0])
+    self._localSkillModifier[0].addDuration('poison', -0.35 * self._talents['venomousIntent'][0], 'duration')
+    self._localSkillModifier[0].addTrigger('serpentStrikePoisonSpit', 1. * self._talents['venomousIntent'][0], 'onHit')
 
     pass
 
@@ -464,9 +466,9 @@ class SerpentStrike(Melee):
 
     # scorpionStrikes and chronoStrike implemented by modifying serpentStrikeOnHit buff
     # scorpionStrikes: global increased poison damage
-    collection_.getDuration('serpentStrikeScorpionStrikes').getModifier().addIncrease('poison', 0.12 * self._talents['scorpionStrikes'][0])
+    collection_.getDuration('serpentStrikeScorpionStrikes').getModifier().addIncrease(0.12 * self._talents['scorpionStrikes'][0], 'poison')
     # chronoStrike: global increased over time damage
-    collection_.getDuration('serpentStrikeChronoStrike').getModifier().addIncrease('overTime', 0.1 * self._talents['chronoStrike'][0])
+    collection_.getDuration('serpentStrikeChronoStrike').getModifier().addIncrease(0.1 * self._talents['chronoStrike'][0], 'dot')
 
     pass
 

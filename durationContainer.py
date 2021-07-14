@@ -2,6 +2,8 @@ import collection, error, duration, element
 
 from itertools import chain
 
+import warnings
+
 verbosity = 0
 
 class DurationContainer():
@@ -84,7 +86,9 @@ class DurationContainer():
         # applied for hits seperately
         resistances = element.ElementContainer(default_ = 0.0)
         allModifier = modifier_ + self._collection.getSkill(skillName).getSkillModifier(skillN)
-        penetration = element.ElementContainer(default_ = 0.0, **allModifier.getPenetrations())
+        test = eval(allModifier.getPenetrations().__repr__())
+        warnings.warn('Workaround for resistance penetration in duration.py')
+        penetration = element.ElementContainer(default_ = 0.0, **test)
         shred = element.fromResistanceShred(self)
         resistances -= shred
         resistances.setUpperLimit(0.75)
@@ -166,6 +170,6 @@ class DurationContainer():
 
   def countActive(self):
     active = {}
-    for a in self.getAll():
+    for a in self.getActive():
       active[a.getName()] = active.get(a.getName(), 0) + 1
     return active

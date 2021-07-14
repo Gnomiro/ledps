@@ -1,6 +1,6 @@
 import error
 
-import copy, itertools
+import copy, itertools, error
 
 from toolbox import More
 
@@ -14,12 +14,13 @@ _multiplierTypes = ['increase', 'more']
 
 _durationModifierTypes = ['onHit', 'effect', 'duration']
 
-_attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality']
+_attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality', 'attunement']
 
 def isSupported(key):
   supported = key in itertools.chain.from_iterable([_attackTypes, _damageTypes, _elementTypes, _multiplierTypes, _durationModifierTypes, _attackTypes, _attributeTypes, _categoryTypes, ['generic', None]])
   if not supported:
     print('Unsupport keyword \'{}\' provided and ignored.'.format(key))
+    raise error
   return supported
 
 def convertToTypes(*args_, default_ = {}, **kwargs_):
@@ -256,6 +257,13 @@ class DurationModifierTypeContainer(TypeContainer):
 
 class ContainerImplementation():
   """docstring for ContainerImplementation"""
+
+  def __getitem__(self, key):
+    return self._container._data[key]
+
+  def keys(self):
+    return self._container.keys()
+
   def get(self, **types_):
     return self._container.get(**types_)
 

@@ -38,20 +38,20 @@
   * Refactor skill-talents like character talents
 * Character
   * Split talents into classpecific files in subfolder
-  * handle amstery differently and allow talent access to all class-trees within a class
+  * handle mastery differently and allow talent access to all class-trees within a class
 * Implement rotation system to incorporate stuff like Holy Symbols and Divine Aura as skills and not hard-coded
-* Refactor modifier to track them differently
-  * Add BuffEffect less/more multiplier
+* Modifier
+  * implement clear routine to reset values default to reduce requirement for deepcopies!!!!
   * Account for flat damage
   * Sort by elements
-  * Seperate by hit, damageOverTime
-  * Generic increases added to both categories
 * Equipment-Manager
-  * DualWielding: Weapon Aps is not a direct more multiplierfor MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
+  * DualWielding: Weapon Aps is not a direct more multiplier for MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
 * ArmourShred
 * Duration
+  * In the end there should probably be two duration tracker; one on the player for buffs and one with debuffs on the enemy
   * Duration changes should check for minimum value -> smalles duration should be 0 because -1 identifies objects with infinite duration
-  * Global modifiers like warpath's 'global more while channeling' should possibly be handled as a buff
+  * Global modifiers like warpath's 'global more while channeling' should possibly be handled as an infinite buff
+    * Skill attack start applies buff; end of skill attack removes buff -> all triggers get the buff but nothing used outside of warpath -> instant spells are a problem
 * Implement enemy class to handle enemy armour and resistances -> tracked by simulator and/or collection
 * Cooldowns
   * Cooldown recovery must be considered

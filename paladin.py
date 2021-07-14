@@ -13,7 +13,7 @@ character_.setTalent(sentinelJuggernaut = 8, sentinelAxeThrower = 1, sentinelBla
 equipment_ = collection_.getEquipment()
 equipment_.setExamplePaladinEquipment()
 
-repeats = 10
+repeats = 1
 endtime = 60
 
 overallDamage = element.ElementContainer()
