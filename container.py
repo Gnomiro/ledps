@@ -1,6 +1,6 @@
 import error
 
-import copy
+import copy, itertools
 
 from toolbox import More
 
@@ -14,6 +14,37 @@ _multiplierTypes = ['increase', 'more']
 _durationModifierTypes = ['onHit', 'effect', 'duration']
 
 _attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality']
+
+def isSupported(key):
+  supported = key in itertools.chain.from_iterable([_attackTypes, _damageTypes, _elementTypes, _multiplierTypes, _durationModifierTypes, _attackTypes, _attributeTypes, ['generic', None]])
+  if not supported:
+    print('Unsupport keyword \'{}\' provided and ignored.'.format(key))
+  return supported
+
+def convertToTypes(*args_, default_ = {}, **kwargs_):
+  parsed = {}
+  for d in default_.keys():
+    if isSupported(default_[d]):
+      parsed[d] = default_[d]
+  for k in args_:
+    if not isSupported(k):
+      continue
+    elif k in _attackTypes:
+      parsed['attackType_'] = k
+    elif k in _damageTypes:
+      parsed['damageType_'] = k
+    elif k in _elementTypes:
+      parsed['elementType_'] = k
+    elif k in _multiplierTypes:
+      parsed['multiplierType_'] = k
+    elif k in _attributeTypes:
+      parsed['attributeType_'] = k
+    elif k in _durationModifierTypes:
+      parsed['durationModifierType_'] = k
+  for d in kwargs_.keys():
+    if isSupported(kwargs_[d]):
+      parsed[d] = kwargs_[d]
+  return parsed
 
 ######################################################################
 ######################################################################
@@ -42,7 +73,8 @@ class TypeContainer():
     return self._defaultValue
 
   def get(self, **types_):
-    k = types_[self._keyName] if self._keyName in types_.keys() else self._defaultKey
+    # todo: if something is not present the default value of the deepest base object could be returned
+    k = types_[self._keyName] if self._keyName in types_.keys() and types_[self._keyName] != None else self._defaultKey
     # if no suitable argument was passed and no defaulKey is available raise an exceptions
     if k == None and k not in self._keys:
       raise error.MissingContainerType(self._name, self._keys, **types_)
@@ -55,7 +87,7 @@ class TypeContainer():
     return result
 
   def set(self, value_, **types_):
-    k = types_[self._keyName] if self._keyName in types_.keys() else self._defaultKey
+    k = types_[self._keyName] if self._keyName in types_.keys() and types_[self._keyName] != None else self._defaultKey
     # fall back if container has no default value
     # must return an error in this case as a set requires a specific slot!
     if k == None:
@@ -63,7 +95,8 @@ class TypeContainer():
     elif k in self._keys:
       self._data.setdefault(k, copy.deepcopy(self.getDefaultValue(k)))
       if not isinstance(self.getDefaultValue(k), TypeContainer):
-        self._data[k] = type(self.getDefaultValue(k))(value_)
+        t = type(self.getDefaultValue(k))
+        self._data[k] = value_ if type(value_) is t else t(value_)
       else:
         self._data[k].set(value_ = value_, **types_)
     pass
@@ -80,8 +113,6 @@ class TypeContainer():
           self._data[i] = copy.deepcopy(self.getDefaultValue(i))
         self._data[i]._add(left_._data.get(i, copy.deepcopy(left_.getDefaultValue(i))), right_._data.get(i, copy.deepcopy(right_.getDefaultValue(i))))
     return self
-
-    # return statement?
 
   def _iadd(self, other_):
 
@@ -165,13 +196,13 @@ class MultiplierTypeContainer(TypeContainer):
     super(MultiplierTypeContainer, self).__init__(keys_ = _multiplierTypes, defaultValue_ = 0.)
     self._name = 'multiplierTypeContainer'
     self._keyName = 'multiplierType_'
-    self._data['more'] = More(1.)
+    # self._data['more'] = More(1.)
     pass
 
   def getDefaultValue(self, key):
     if key != 'more':
       return super().getDefaultValue(key)
-    return More(1.)
+    return More()
 
 ######################################################################
 # DurationModifer type container
@@ -208,10 +239,19 @@ class ContainerImplementation():
 
   def set(self, value_, **types_):
     self._container.set(value_, **types_)
-    pass
+    return self
+
+  def add(self, value_, **types_):
+    new = self._container.get(**types_)
+    if type(new) is not type(value_):
+      new += type(new)(value_)
+    else:
+      new += value_
+    return self._container.set(new, **types_)
 
   def __iadd__(self, other_):
-    return self._container._iadd(other_._container)
+    self._container._iadd(other_._container)
+    return self
 
   # switches around objects to store new values in result
   def __add__(self, other_, result_):

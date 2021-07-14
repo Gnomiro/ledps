@@ -1,4 +1,7 @@
 from numpy import product as prod, sum
+import copy
+
+import container
 
 ############################################################################################
 ############################################################################################
@@ -9,41 +12,28 @@ from numpy import product as prod, sum
 class Modifier():
   """docstring for Modifier"""
 
-    # todo: refactor
-    # notes
-    # more = [generic, hit, spell, ...] x ElementContainer()
-    # increase = [generic, hit, spell, ...] x ElementContainer()
-    # flat = ElementContainer() + adaptive
-
   def __init__(self):
-    self._increase = {}
-    self._more = {}
-    self._penetration = {}
-    self._attribute = {}
+    self._multiplier = container.MultiplierContainer()
+    self._penetration = container.PenetrationContainer()
+    self._attribute = container.AttributeContainer()
     self._duration = {}
     self._trigger = {}
     pass
 
   def __iadd__(self, other_):
-    for name, value in other_._increase.items():
-      self.addIncrease(name, value)
-
-    for name, value in other_._more.items():
-      self.addMore(name, value)
-
-    for name, value in other_._penetration.items():
-      self.addPenetration(name, value)
-
-    for name, value in other_._attribute.items():
-      self.addAttribute(name, value)
+    self._multiplier += other_._multiplier
+    self._penetration += other_._penetration
+    self._attribute += other_._attribute
 
     for name in other_._duration.keys():
-      for modifier, value in other_._duration[name].items():
-        self.addDuration(name, modifier, value)
+      if name not in self._duration.keys():
+        self._duration[name] = container.DurationModifierContainer()
+      self._duration[name] += other_._duration[name]
 
     for name in other_._trigger.keys():
-      for modifier, value in other_._trigger[name].items():
-        self.addTrigger(name, modifier, value)
+      if name not in self._trigger.keys():
+        self._trigger[name] = container.DurationModifierContainer()
+      self._trigger[name] += other_._trigger[name]
 
     return self
 
@@ -59,13 +49,10 @@ class Modifier():
     return self
 
   def __str__(self):
-    return 'increases:\n' + str(self._increase) + '\nmore:\n' + str(self._more) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
+    return 'multiplier:\n' + str(self._multiplier) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
 
-  def getIncreases(self):
-    return self._increase
-
-  def getMores(self):
-    return self._more
+  def getMultipliers(self):
+    return self._multiplier
 
   def getPenetrations(self):
     return self._penetration
@@ -79,74 +66,180 @@ class Modifier():
   def getTriggers(self):
     return self._trigger
 
-  def getIncrease(self, name_):
-    return self._increase.get(name_, 0.0)
+  def getMultiplier(self, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'elementType_': None, 'attackType_': None, 'damageType_': None}, **kwargs_)
+    return (1. + self.getIncrease(**types)) * self.getMore(**types)
 
-  def getMore(self, name_):
-    return self._more.get(name_, 1.0)
+  def getIncrease(self, *args_, **kwargs_):
 
-  def getPenetration(self, name_):
-    return self._penetration.get(name_, 0.0)
+    types = container.convertToTypes(*args_, default_ = {'elementType_' : None, 'attackType_': None, 'damageType_': None}, **kwargs_, multiplierType_ = 'increase')
 
-  def getAttribute(self, name_):
-    return self._attribute.get(name_, 0.0)
+    contributing = []
+    contributing.append(copy.deepcopy(types))
 
-  def getDuration(self, name_, modifier_):
+    k = 1
+    if types['attackType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['attackType_'] = 'generic'
+      k *= 2
+    if types['damageType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['damageType_'] = 'generic'
+      k *= 2
+    if types['elementType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['elementType_'] = 'generic'
+
+    sum = 0
+    for l in contributing:
+      sum += self._multiplier.get(**l)
+
+    return sum
+
+  def getMore(self, *args_, **kwargs_):
+
+    types = container.convertToTypes(*args_, default_ = {'elementType_' : None, 'attackType_': None, 'damageType_': None}, **kwargs_, multiplierType_ = 'more')
+
+    contributing = []
+    contributing.append(copy.deepcopy(types))
+
+    k = 1
+    if types['attackType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['attackType_'] = 'generic'
+      k *= 2
+    if types['damageType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['damageType_'] = 'generic'
+      k *= 2
+    if types['elementType_'] is not None:
+      contributing.extend(copy.deepcopy(contributing))
+      for i in range(k):
+        contributing[i]['elementType_'] = 'generic'
+
+    prod = 1
+    for l in contributing:
+      # More modifier are stored as an Object of type More; _value is the float representation
+      prod *= self._multiplier.get(**l)._value
+
+    return prod
+
+  def getPenetration(self, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    return self._penetration.get(**types)
+
+  def getAttribute(self, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    return self._attribute.get(**types)
+
+  def getDurationMultiplier(self, name_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    return (1. + self.getDurationIncrease(name_ = name_, **types)) * self.getDurationMore(name_ = name_, **types)
+
+  def getDurationIncrease(self, name_, *args_, **kwargs_):
     if name_ not in self._duration.keys():
-      return self._duration.get(name_, 0.0)
-    return self._duration.get(name_).get(modifier_, 0.0)
+      return 0
+    types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'increase')
+    sum = self._duration[name_].get(**types)
+    if types['attackType_'] != None:
+      types['attackType_'] = 'generic'
+      sum += self._duration[name_].get(**types)
+    return sum
 
-  def getTrigger(self, name_, modifier_):
-    if name_ not in self._trigger.keys():
-      return self._trigger.get(name_, 0.0)
-    return self._trigger.get(name_).get(modifier_, 0.0)
-
-  def addIncrease(self, name_, value_):
-    self._increase[name_] = self.getIncrease(name_) + value_
-
-  def addMore(self, name_, value_):
-    self._more[name_] = self.getMore(name_) * value_
-
-  def addPenetration(self, name_, value_):
-    self._penetration[name_] = self.getPenetration(name_) + value_
-
-  def addAttribute(self, name_, value_):
-    self._attribute[name_] = self.getAttribute(name_) + value_
-
-  def addDuration(self, name_, modifier_, value_):
+  def getDurationMore(self, name_, *args_, **kwargs_):
     if name_ not in self._duration.keys():
-      self._duration[name_] = {}
-    self._duration[name_][modifier_] = self.getDuration(name_, modifier_) + value_
+      return 0
+    types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'more')
+    prod = self._duration[name_].get(**types)._value
+    if types['attackType_'] != None:
+      types['attackType_'] = 'generic'
+      prod *= self._duration[name_].get(**types)._value
+    return prod
 
-  def addTrigger(self, name_, modifier_, value_):
+  def getTriggerMultiplier(self, name_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    return (1. + self.getTriggerIncrease(name_ = name_, **types)) * self.getTriggerMore(name_ = name_, **types)
+
+  def getTriggerIncrease(self, name_, *args_, **kwargs_):
     if name_ not in self._trigger.keys():
-      self._trigger[name_] = {}
-    self._trigger[name_][modifier_] = self.getTrigger(name_, modifier_) + value_
+      return 0
+    types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'increase')
+    sum = self._trigger[name_].get(**types)
+    if types['attackType_'] is not None:
+      types['attackType_'] = 'generic'
+      sum += self._trigger[name_].get(**types)
+    return sum
 
-  def setIncrease(self, name_, value_):
-    self._increase[name_] = value_
+  def getTriggerMore(self, name_, *args_, **kwargs_):
+    if name_ not in self._trigger.keys():
+      return 0
+    types = container.convertToTypes(*args_, default_ = {'attackType_': None}, **kwargs_, multiplierType_ = 'more')
+    prod = self._trigger[name_].get(**types)._value
+    if types['attackType_'] is not None:
+      types['attackType_'] = 'generic'
+      prod *= self._trigger[name_].get(**types)._value
+    return prod
 
-  def setMore(self, name_, value_):
-    self._more[name_] = value_
+  def addIncrease(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'increase')
+    self._multiplier.add(value_ = value_, **types)
 
-  def setPenetration(self, name_, value_):
-    self._penetration[name_] = value_
+  def addMore(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'more')
+    self._multiplier.add(value_ = value_, **types)
 
-  def setAttribute(self, name_, value_):
-    self._attribute[name_] = value_
+  def addPenetration(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    self._penetration.add(value_ = value_, **types)
 
-  def setDuration(self, name_, modifier_, value_):
-    self._duration[name_][modifier_] = value_
+  def addAttribute(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    self._attribute.add(value_, **types)
 
-  def setTrigger(self, name_, modifier_, value_):
-    self._trigger[name_][modifier_] = value_
+  def addDuration(self, name_, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'multiplierType_': 'increase'}, **kwargs_)
+    if name_ not in self._duration.keys():
+      self._duration[name_] = container.DurationModifierContainer()
+    self._duration[name_].add(value_ = value_, **types)
 
-  def getIncreaseByTagList(self, tags_):
-    return sum([self.getIncrease(t) for t in tags_])
+  def addTrigger(self, name_, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'multiplierType_': 'increase'}, **kwargs_)
+    if name_ not in self._trigger.keys():
+      self._trigger[name_] = container.DurationModifierContainer()
+    self._trigger[name_].add(value_ = value_, **types)
 
-  def getMoreByTagList(self, tags_):
-    return prod([self.getMore(t) for t in tags_])
+  def setIncrease(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'increase')
+    self._multiplier.set(value_ = value_, **types)
 
+  def setMore(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'more')
+    self._multiplier.set(value_ = value_, **types)
+
+  def setPenetration(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    self._penetration.set(value_ = value_, **types)
+
+  def setAttribute(self, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, **kwargs_)
+    self._attribute.set(value_, **types)
+
+  def setDuration(self, name_, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'multiplierType_': 'increase'}, **kwargs_)
+    if name_ not in self._duration.keys():
+      self._duration[name_] = container.DurationModifierContainer()
+    self._duration[name_].set(value_ = value_, **types)
+
+  def setTrigger(self, name_, value_, *args_, **kwargs_):
+    types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic', 'multiplierType_': 'increase'}, **kwargs_)
+    if name_ not in self._trigger.keys():
+      self._trigger[name_] = container.DurationModifierContainer()
+    self._trigger[name_].set(value_ = value_, **types)
 
 ############################################################################################
 # Additional constructor functions

@@ -12,14 +12,18 @@ def validateInput(name_, required_, **provided_):
 
 class More(object):
   """docstring for More"""
-  def __init__(self, value_ = 1.):
-    self._value = value_
+  def __init__(self, value_ = 0):
+    self._value = 1. + value_
     pass
 
   def __add__(self, other_):
-    result = More(1.)
+    result = More()
     result._value = self._value * other_._value
     return result
+
+  def __iadd__(self, other_):
+    self._value = self._value * other_._value
+    return self
 
   def __eq__(self, other_):
     return self._value == other_._value

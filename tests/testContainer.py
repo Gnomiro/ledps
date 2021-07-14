@@ -17,6 +17,28 @@ class ContainerTestCase(unittest.TestCase):
   def tearDown(self):
     pass
 
+  def test_getSetAdd(self):
+    multiplier = container.MultiplierContainer()
+
+    self.assertEqual(0, multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase') )
+
+    multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 2.)
+    self.assertEqual(2., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase') )
+    multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 2.)
+    self.assertEqual(4., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase') )
+
+    self.assertEqual(More(1.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+
+    multiplier.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 2.)
+    self.assertEqual(More(2.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 2.)
+    self.assertEqual(More(4.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 7.)
+    self.assertEqual(More(28.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 7.)
+    self.assertEqual(More(196.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    pass
+
   def test_addMultiplierContainer(self):
     multiplier1 = container.MultiplierContainer()
     multiplier2 = container.MultiplierContainer()
