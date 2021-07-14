@@ -71,8 +71,6 @@ class ModifierTestCase(unittest.TestCase):
     self.assertEqual(modifier2_.getIncrease('physical') + modifier3_.getIncrease('physical'), modifier_.getIncrease('physical'))
     self.assertEqual(modifier2_.getMore('physical') * modifier3_.getMore('physical'), modifier_.getMore('physical'))
 
-    print(modifier_)
-    # modifier_.addMore(2., 'melee', 'hit')
     modifier3_ = copy.deepcopy(modifier_)
     factor = 0.3
     modifier3_.scaleByFactor(factor)

@@ -27,16 +27,16 @@ class ContainerTestCase(unittest.TestCase):
     multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase', value_ = 2.)
     self.assertEqual(4., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase') )
 
-    self.assertEqual(More(1.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    self.assertEqual(1., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value)
 
     multiplier.set(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 2.)
-    self.assertEqual(More(2.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    self.assertEqual(3., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value )
     multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 2.)
-    self.assertEqual(More(4.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    self.assertEqual(9., multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value )
     multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 7.)
-    self.assertEqual(More(28.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    self.assertEqual(72, multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value )
     multiplier.add(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more', value_ = 7.)
-    self.assertEqual(More(196.), multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more') )
+    self.assertEqual(576, multiplier.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value )
     pass
 
   def test_addMultiplierContainer(self):
@@ -51,11 +51,11 @@ class ContainerTestCase(unittest.TestCase):
 
     multiplier3 = multiplier1 + multiplier2
 
-    self.assertEqual(More(28.), multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more'))
+    self.assertEqual(40, multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value)
     self.assertEqual(5., multiplier3.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     self.assertEqual(1., multiplier3.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase'))
     self.assertEqual(0., multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase'))
-    self.assertEqual(More(1.), multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more'))
+    self.assertEqual(1, multiplier3.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more')._value)
     self.assertEqual(3., multiplier2.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     pass
 
@@ -71,11 +71,11 @@ class ContainerTestCase(unittest.TestCase):
 
     multiplier1 += multiplier2
 
-    self.assertEqual(More(28.), multiplier1.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more'))
+    self.assertEqual(40, multiplier1.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'more')._value)
     self.assertEqual(5., multiplier1.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     self.assertEqual(1., multiplier1.get(attackType_ = 'melee', elementType_ = 'generic', multiplierType_ = 'increase'))
     self.assertEqual(0., multiplier1.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'increase'))
-    self.assertEqual(More(1.), multiplier1.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more'))
+    self.assertEqual(1, multiplier1.get(attackType_ = 'spell', elementType_ = 'generic', multiplierType_ = 'more')._value)
     self.assertEqual(3., multiplier2.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     pass
 
@@ -155,8 +155,8 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(7., durationModifier1.get(durationModifierType_ = 'onHit', attackType_ = 'melee', multiplierType_ = 'increase'))
     self.assertEqual(3., durationModifier3.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'))
     self.assertEqual(3., durationModifier2.get(durationModifierType_ = 'duration', multiplierType_ = 'increase'))
-    self.assertEqual(More(3.), durationModifier3.get(durationModifierType_ = 'duration', multiplierType_ = 'more'))
-    self.assertEqual(More(1.), durationModifier3.get(durationModifierType_ = 'onHit', multiplierType_ = 'more'))
+    self.assertEqual(4., durationModifier3.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value)
+    self.assertEqual(1., durationModifier3.get(durationModifierType_ = 'onHit', multiplierType_ = 'more')._value)
     pass
 
   def test_iaddDurationModifierContainer(self):
@@ -176,8 +176,8 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(3., durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'))
     self.assertEqual(2., durationModifier2.get(durationModifierType_ = 'onHit', multiplierType_ = 'increase'))
     self.assertEqual(3., durationModifier2.get(durationModifierType_ = 'duration', multiplierType_ = 'increase'))
-    self.assertEqual(More(3.), durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more'))
-    self.assertEqual(More(1.), durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'more'))
+    self.assertEqual(4., durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value)
+    self.assertEqual(1., durationModifier1.get(durationModifierType_ = 'onHit', multiplierType_ = 'more')._value)
 
 if __name__ == '__main__':
   unittest.main()
