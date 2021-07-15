@@ -21,6 +21,9 @@ class DurationContainer():
 
   def add(self, name_, modifier_, skillName_ = None, skillN_ = None, number_ = 1):
 
+    if number_ == 0:
+      return
+
     # duration = self._collection.getDurationCopy(name_)
     duration = self._collection.getDurationCopy(name_)
     duration.setStackSize(number_)
@@ -33,16 +36,22 @@ class DurationContainer():
       self._durations[name_] = list([])
 
     if not duration.isApplicable():
-      pass
-    elif duration.hasStackLimit() and self.countActiveByName(name_)[name_] >= duration.getMaxStacks():
-      warnings.warn('Stacksize is not accounted for by limit check; oldest n must be removed')
-      if verbosity >= 1:
-        print('Limit of {} reached; replace oldest'.format(name_))
+      return
+    elif duration.hasStackLimit():
+      overLimit = self.countActiveByName(name_)[name_] - duration.getMaxStacks() + duration.getStackSize()
+      while overLimit > 0:
+        if verbosity >= 1:
+          print('Limit of {} reached; replace oldest'.format(name_))
+        _, idx = min( ( (duration.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
+        oldestStackSize = self._durations[name_][idx].getStackSize()
+        if oldestStackSize > overLimit:
+          overLimit = 0
+          self._durations[name_][idx].setStackSize(oldestStackSize - overLimit)
+        else:
+          overLimit -= oldestStackSize
+          self._durations[name_].pop(idx)
 
-      _, idx = min( ( (duration.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
-      self._durations[name_][idx] = duration
-    else:
-      self._durations[name_].append(duration)
+    self._durations[name_].append(duration)
 
     pass
 
