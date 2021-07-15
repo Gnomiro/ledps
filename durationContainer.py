@@ -39,19 +39,28 @@ class DurationContainer():
       return
     elif duration.hasStackLimit():
       overLimit = self.countActiveByName(name_)[name_] - duration.getMaxStacks() + duration.getStackSize()
-      while overLimit > 0:
-        if verbosity >= 1:
-          print('Limit of {} reached; replace oldest'.format(name_))
-        _, idx = min( ( (duration.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
-        oldestStackSize = self._durations[name_][idx].getStackSize()
-        if oldestStackSize > overLimit:
-          overLimit = 0
-          self._durations[name_][idx].setStackSize(oldestStackSize - overLimit)
-        else:
-          overLimit -= oldestStackSize
-          self._durations[name_].pop(idx)
 
-    self._durations[name_].append(duration)
+      if overLimit <= 0:
+        self._durations[name_].append(duration)
+      else:
+        while overLimit > 0:
+          if verbosity >= 1:
+            print('Limit of {} reached; replace oldest'.format(name_))
+          _, idx = min( ( (duration.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
+          oldestStackSize = self._durations[name_][idx].getStackSize()
+          if oldestStackSize > overLimit:
+            overLimit = 0
+            self._durations[name_][idx].setStackSize(oldestStackSize - overLimit)
+            self._durations[name_].append(duration)
+          elif oldestStackSize == overLimit:
+            overLimit = 0
+            self._durations[name_][idx] = duration
+          else:
+            overLimit -= oldestStackSize
+            self._durations[name_].pop(idx)
+    else:
+      self._durations[name_].append(duration)
+
 
     pass
 
