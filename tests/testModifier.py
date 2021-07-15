@@ -77,7 +77,7 @@ class ModifierTestCase(unittest.TestCase):
 
     modifier3_.copyFrom(modifier_)
     factor = 0.3
-    modifier3_.scaleByFactor(factor)
+    modifier3_.iscaleByFactor(factor)
     self.assertEqual(modifier3_.getIncrease('melee') / factor, modifier_.getIncrease('melee'))
     self.assertEqual((modifier3_.getMore('melee', 'hit') - 1.) / factor + 1., modifier_.getMore('melee', 'hit'))
 

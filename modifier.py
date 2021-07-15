@@ -3,8 +3,7 @@ import copy
 
 import container
 
-from numpy import product
-from itertools import chain
+from itertools import chain, product
 
 import toolbox
 
@@ -155,35 +154,18 @@ class Modifier():
     return self._trigger
 
   def getMultiplier(self, *args_, **kwargs_):
-    types = container.convertToTypes(*args_, default_ = {'elementType_': None, 'attackType_': None, 'damageType_': None}, **kwargs_)
-    return (1. + self.getIncrease(**types)) * self.getMore(**types)
+    # types = container.convertToTypes(*args_, default_ = {'elementType_': None, 'attackType_': None, 'damageType_': None}, **kwargs_)
+    return (1. + self.getIncrease(*args_, **kwargs_)) * self.getMore(*args_, **kwargs_)
 
   def getIncrease(self, *args_, **kwargs_):
 
     types = container.convertToTypes(*args_, default_ = {'elementType_' : None, 'attackType_': None, 'damageType_': None}, **kwargs_, multiplierType_ = 'increase')
 
-    contributing = []
-    contributing.append(copy.deepcopy(types))
-
-    k = 1
-    if types['attackType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['attackType_'] = 'generic'
-      k *= 2
-    if types['damageType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['damageType_'] = 'generic'
-      k *= 2
-    if types['elementType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['elementType_'] = 'generic'
-
     sum = 0
-    for l in contributing:
-      sum += self._multiplier.get(**l)
+    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] is not None else ['generic'], ['generic', types['damageType_']] if types['damageType_'] is not None else ['generic'], ['generic', types['elementType_']] if types['elementType_'] is not None else ['generic']):
+      types['attackType_'], types['damageType_'], types['elementType_'] = i, j, k
+      # print('{} x {} x {}'.format(i,j,k))
+      sum += self._multiplier.get(**types)
 
     return sum
 
@@ -191,29 +173,11 @@ class Modifier():
 
     types = container.convertToTypes(*args_, default_ = {'elementType_' : None, 'attackType_': None, 'damageType_': None}, **kwargs_, multiplierType_ = 'more')
 
-    contributing = []
-    contributing.append(copy.deepcopy(types))
-
-    k = 1
-    if types['attackType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['attackType_'] = 'generic'
-      k *= 2
-    if types['damageType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['damageType_'] = 'generic'
-      k *= 2
-    if types['elementType_'] is not None:
-      contributing.extend(copy.deepcopy(contributing))
-      for i in range(k):
-        contributing[i]['elementType_'] = 'generic'
-
     prod = 1
-    for l in contributing:
-      # More modifier are stored as an Object of type More; _value is the float representation
-      prod *= self._multiplier.get(**l)._value
+    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] is not None else ['generic'], ['generic', types['damageType_']] if types['damageType_'] is not None else ['generic'], ['generic', types['elementType_']] if types['elementType_'] is not None else ['generic']):
+      types['attackType_'], types['damageType_'], types['elementType_'] = i, j, k
+      # print('{} x {} x {}'.format(i,j,k))
+      prod *= self._multiplier.get(**types)._value
 
     return prod
 
@@ -226,8 +190,8 @@ class Modifier():
     return self._attribute.get(**types)
 
   def getDurationMultiplier(self, name_, *args_, **kwargs_):
-    types = container.convertToTypes(*args_, **kwargs_)
-    return (1. + self.getDurationIncrease(name_ = name_, **types)) * self.getDurationMore(name_ = name_, **types)
+    # types = container.convertToTypes(*args_, **kwargs_)
+    return (1. + self.getDurationIncrease(name_, *args_, **kwargs_)) * self.getDurationMore(name_, *args_, **kwargs_)
 
   def getDurationIncrease(self, name_, *args_, **kwargs_):
     if name_ not in self._duration.keys():
@@ -250,8 +214,8 @@ class Modifier():
     return prod
 
   def getTriggerMultiplier(self, name_, *args_, **kwargs_):
-    types = container.convertToTypes(*args_, **kwargs_)
-    return (1. + self.getTriggerIncrease(name_ = name_, **types)) * self.getTriggerMore(name_ = name_, **types)
+    # types = container.convertToTypes(*args_, **kwargs_)
+    return (1. + self.getTriggerIncrease(name_, *args_, **kwargs_)) * self.getTriggerMore(name_, *args_, **kwargs_)
 
   def getTriggerIncrease(self, name_, *args_, **kwargs_):
     if name_ not in self._trigger.keys():
@@ -413,7 +377,7 @@ class ModifierChain():
     return sum([k.getIncrease(*args_, **kwargs_) for k in self._data])
 
   def getMore(self, *args_, **kwargs_):
-    return product([k.getMore(*args_, **kwargs_) for k in self._data])
+    return prod([k.getMore(*args_, **kwargs_) for k in self._data])
 
   def getPenetration(self, *args_, **kwargs_):
     return sum([k.getPenetration(*args_, **kwargs_) for k in self._data])
@@ -428,7 +392,7 @@ class ModifierChain():
     return sum([k.getDurationIncrease(name_, *args_, **kwargs_) for k in self._data])
 
   def getDurationMore(self, name_, *args_, **kwargs_):
-    return product([k.getDurationMore(name_, *args_, **kwargs_) for k in self._data])
+    return prod([k.getDurationMore(name_, *args_, **kwargs_) for k in self._data])
 
   def getTriggerMultiplier(self, name_, *args_, **kwargs_):
     return (1. + self.getTriggerIncrease(name_, *args_, **kwargs_)) * self.getTriggerMore(name_, *args_, **kwargs_)
@@ -437,6 +401,6 @@ class ModifierChain():
     return sum([k.getTriggerIncrease(name_, *args_, **kwargs_) for k in self._data])
 
   def getTriggerMore(self, name_, *args_, **kwargs_):
-    return product([k.getTriggerMore(name_, *args_, **kwargs_) for k in self._data])
+    return prod([k.getTriggerMore(name_, *args_, **kwargs_) for k in self._data])
 
 

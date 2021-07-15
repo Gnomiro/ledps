@@ -16,8 +16,10 @@ _durationModifierTypes = ['onHit', 'effect', 'duration']
 
 _attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality', 'attunement']
 
-def isSupported(key):
-  supported = key in itertools.chain.from_iterable([_attackTypes, _damageTypes, _elementTypes, _multiplierTypes, _durationModifierTypes, _attackTypes, _attributeTypes, _categoryTypes, ['generic', None]])
+_validArguments = [*_attackTypes, *_damageTypes, *_elementTypes, *_multiplierTypes, *_durationModifierTypes, *_attackTypes, *_attributeTypes, *_categoryTypes, *['generic', None]]
+
+def isValidArgument(key):
+  supported = key in _validArguments
   if not supported:
     print('Unsupport keyword \'{}\' provided and ignored.'.format(key))
     raise error
@@ -26,10 +28,10 @@ def isSupported(key):
 def convertToTypes(*args_, default_ = {}, **kwargs_):
   parsed = {}
   for d in default_.keys():
-    if isSupported(default_[d]):
+    if isValidArgument(default_[d]):
       parsed[d] = default_[d]
   for k in args_:
-    if not isSupported(k):
+    if not isValidArgument(k):
       continue
     elif k in _categoryTypes:
       parsed['categoryType_'] = k
@@ -46,7 +48,7 @@ def convertToTypes(*args_, default_ = {}, **kwargs_):
     elif k in _durationModifierTypes:
       parsed['durationModifierType_'] = k
   for d in kwargs_.keys():
-    if isSupported(kwargs_[d]):
+    if isValidArgument(kwargs_[d]):
       parsed[d] = kwargs_[d]
   return parsed
 

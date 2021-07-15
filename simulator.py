@@ -1,6 +1,6 @@
 import collection, duration, durationContainer, enemy, element, modifier, numpy
 
-verbosity = 1
+verbosity = 0
 
 class Simulator:
   """docstring for Simulator"""
