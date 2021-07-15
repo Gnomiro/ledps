@@ -88,10 +88,10 @@ class TypeContainer():
     else:
       if not isinstance(self.getDefaultValue(k), TypeContainer):
         # result = self._data.get(k, self.getDefaultValue(k))
-        result = (self._data[k] if k in self._data.keys() else self.getDefaultValue(k))
+        result = (self._data[k] if k in self._data else self.getDefaultValue(k))
       else:
         # result = self._data.get(k, self.getDefaultValue(k)).get(**types_)
-        result = (self._data[k] if k in self._data.keys() else self.getDefaultValue(k)).get(**types_)
+        result = (self._data[k] if k in self._data else self.getDefaultValue(k)).get(**types_)
 
     return result
 
@@ -114,7 +114,7 @@ class TypeContainer():
   def _add(self, left_, right_):
     for i in set(left_._data.keys()) | set(right_._data.keys()):
       key = {self._keyName: i}
-      if (i in left_._data.keys() and not isinstance(left_._data.get(i), TypeContainer)) or (i in right_._data.keys() and not isinstance(right_._data.get(i), TypeContainer)):
+      if (i in left_._data and not isinstance(left_._data.get(i), TypeContainer)) or (i in right_._data and not isinstance(right_._data.get(i), TypeContainer)):
         self._data[i] = left_.get(**key) + right_.get(**key)
       else:
         if i not in self._data:
@@ -128,25 +128,37 @@ class TypeContainer():
       key = {self._keyName: i}
       if i not in self._data:
         self._data[i] = self.copyDefaultValue(i)
-      if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
+      if (i in self._data and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data and not isinstance(other_._data.get(i), TypeContainer)):
         self._data[i] += other_.get(**key)
       else:
         if i in other_._data:
-          self._data[i]._iadd(other_._data.get(i, other_.getDefaultValue(i)))
+          self._data[i]._iadd(other_._data[i])
     return self
 
-  def scaleByFactor(self, factor_):
-    for i in self._data.keys():
+  def iaddIgnoreDefault(self, other_):
+
+    for i in other_._data.keys():
+      key = {self._keyName: i}
+      if i not in self._data:
+        self._data[i] = self.copyDefaultValue(i)
+      if not isinstance(other_._data[i], TypeContainer):
+        self._data[i] += other_.get(**key)
+      else:
+        self._data[i].iaddIgnoreDefault(other_._data[i])
+    return self
+
+  def iscaleByFactor(self, factor_):
+    for i in self._data:
       key = {self._keyName: i}
       if not isinstance(self._data.get(i), TypeContainer):
         t = type(self.getDefaultValue(i))
         self._data[i] *= factor_ if type(factor_) is t else t(factor_)
       else:
-        self._data[i].scaleByFactor(factor_)
+        self._data[i].iscaleByFactor(factor_)
     pass
 
   def reset(self):
-    for i in self._data.keys():
+    for i in self._data:
       key = {self._keyName: i}
       if not isinstance(self._data.get(i), TypeContainer):
         self._data[i] = self.getDefaultValue(i)
@@ -157,7 +169,7 @@ class TypeContainer():
   def copyFrom(self, other_):
     for i in set(other_._data.keys()) | set(self._data.keys()):
       key = {self._keyName: i}
-      if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
+      if (i in self._data and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data and not isinstance(other_._data.get(i), TypeContainer)):
         if i not in self._data:
           self._data[i] = self.copyDefaultValue(i)
         if i in other_._data:
@@ -312,8 +324,8 @@ class ContainerImplementation():
       new += value_
     return self._container.set(new, **types_)
 
-  def scaleByFactor(self, factor_):
-    self._container.scaleByFactor(factor_)
+  def iscaleByFactor(self, factor_):
+    self._container.iscaleByFactor(factor_)
     return self
 
   def reset(self):
@@ -326,6 +338,10 @@ class ContainerImplementation():
 
   def __iadd__(self, other_):
     self._container._iadd(other_._container)
+    return self
+
+  def iaddIgnoreDefault(self, other_):
+    self._container.iaddIgnoreDefault(other_._container)
     return self
 
   # switches around objects to store new values in result

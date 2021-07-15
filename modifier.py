@@ -42,6 +42,23 @@ class Modifier():
 
     return self
 
+  def iaddIgnoreDefault(self, other_):
+    self._multiplier.iaddIgnoreDefault(other_._multiplier)
+    self._penetration.iaddIgnoreDefault(other_._penetration)
+    self._attribute.iaddIgnoreDefault(other_._attribute)
+
+    for name in other_._duration.keys():
+      if name not in self._duration.keys():
+        self._duration[name] = container.DurationModifierContainer()
+      self._duration[name].iaddIgnoreDefault(other_._duration[name])
+
+    for name in other_._trigger.keys():
+      if name not in self._trigger.keys():
+        self._trigger[name] = container.DurationModifierContainer()
+      self._trigger[name].iaddIgnoreDefault(other_._trigger[name])
+
+    return self
+
   # copies values from other modifier object; values already present in self are set to default
   def copyFrom(self, other_):
     self._multiplier.copyFrom(other_._multiplier)
@@ -82,18 +99,30 @@ class Modifier():
       self += other
     return self
 
-  def scaleByFactor(self, factor_):
-    self._multiplier.scaleByFactor(factor_)
-    self._penetration.scaleByFactor(factor_)
-    self._attribute.scaleByFactor(factor_)
+  def iscaleByFactor(self, factor_):
+    self._multiplier.iscaleByFactor(factor_)
+    self._penetration.iscaleByFactor(factor_)
+    self._attribute.iscaleByFactor(factor_)
 
     for name in self._duration.keys():
-      self._duration[name].scaleByFactor(factor_)
+      self._duration[name].iscaleByFactor(factor_)
 
     for name in self._trigger.keys():
-      self._trigger[name].scaleByFactor(factor_)
+      self._trigger[name].iscaleByFactor(factor_)
 
     return self
+
+  def scaleByFactorIgnoreDefault(self, factor_):
+    result = Modifier()
+    result.iaddIgnoreDefault(self)
+    result.iscaleByFactor(factor_)
+    return result
+
+  def scaleByFactor(self, factor_):
+    result = Modifier()
+    result += self
+    result.iscaleByFactor(factor_)
+    return result
 
   def __str__(self):
     return 'multiplier:\n' + str(self._multiplier) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
@@ -303,7 +332,7 @@ class Modifier():
   def fromBuff(self, durationContainer_):
     self.reset()
     for buff in durationContainer_.getActiveWithType('buff'):
-      self += buff.getModifier()
+      self.iaddIgnoreDefault(buff.getModifier())
 
     return self
 
@@ -311,13 +340,19 @@ class Modifier():
 # Additional constructor functions
 ############################################################################################
 
-def fromBuff(durationContainer_):
-  modifier = Modifier()
-  for buff in durationContainer_.getActiveWithType('buff'):
-    modifier += buff.getModifier()
+# def fromBuff(durationContainer_):
+#   modifier = Modifier()
+#   for buff in durationContainer_.getActiveWithType('buff'):
+#     modifier += buff.getModifier()
 
-  return modifier
+#   return modifier
 
+############################################################################################
+############################################################################################
+# Modifier chain class
+# allows simultaneous access to multiple Modifier classes
+############################################################################################
+############################################################################################
 
 class ModifierChain():
   """docstring for ModifierChain"""

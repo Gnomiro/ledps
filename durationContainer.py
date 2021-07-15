@@ -19,10 +19,11 @@ class DurationContainer():
     self._durations = {}
     pass
 
-  def add(self, name_, modifier_, skillName_ = None, skillN_ = None):
+  def add(self, name_, modifier_, skillName_ = None, skillN_ = None, number_ = 1):
 
     # duration = self._collection.getDurationCopy(name_)
     duration = self._collection.getDurationCopy(name_)
+    duration.setStackSize(number_)
     duration.applyModifier(modifier_)
 
     if skillName_ is not None and skillN_ is not None:
@@ -34,6 +35,7 @@ class DurationContainer():
     if not duration.isApplicable():
       pass
     elif duration.hasStackLimit() and self.countActiveByName(name_)[name_] >= duration.getMaxStacks():
+      warnings.warn('Stacksize is not accounted for by limit check; oldest n must be removed')
       if verbosity >= 1:
         print('Limit of {} reached; replace oldest'.format(name_))
 
@@ -160,7 +162,7 @@ class DurationContainer():
   def countActiveByNames(self, *names_):
     active = dict.fromkeys(names_, 0)
     for a in self.getActiveByNames(*names_):
-      active[a.getName()] = active.get(a.getName(), 0) + 1
+      active[a.getName()] = active.get(a.getName(), 0) + a.getStackSize()
     return active
 
   def countActiveWithType(self, type_):
@@ -169,11 +171,11 @@ class DurationContainer():
   def countActiveWithTypes(self, *types_):
     active = {}
     for a in self.getActiveWithTypes(*types_):
-      active[a.getName()] = active.get(a.getName(), 0) + 1
+      active[a.getName()] = active.get(a.getName(), 0) + a.getStackSize()
     return active
 
   def countActive(self):
     active = {}
     for a in self.getActive():
-      active[a.getName()] = active.get(a.getName(), 0) + 1
+      active[a.getName()] = active.get(a.getName(), 0) + a.getStackSize()
     return active

@@ -32,6 +32,8 @@ class Duration():
     self._duration = self._baseDuration
     self._maxStacks = kwargs_['maxStacks_']
 
+    self._stackSize = None
+
     self._appliedBy = (None, None)
     pass
 
@@ -52,6 +54,12 @@ class Duration():
 
   def getMaxStacks(self):
     return self._maxStacks
+
+  def getStackSize(self):
+    return self._stackSize
+
+  def setStackSize(self, number_):
+    self._stackSize = number_
 
   def setAppliedBy(self, skillName_, skillN_):
     self._appliedBy = (skillName_, skillN_)
@@ -115,15 +123,17 @@ class DamagingAilment(Duration):
     super(DamagingAilment, self).applyModifier(modifier_)
     # duration modification handled in base class
 
-    self._damage.imultiplyByFactor(modifier_.getDurationMultiplier(self._name, 'effect'))
-    self._damage.imultiplyByFactor(modifier_.getMultiplier(self._element, *self._tags))
+    multiplier = modifier_.getDurationMultiplier(self._name, 'effect') * modifier_.getMultiplier(self._element, *self._tags)
+
+    if multiplier != 1:
+      self._damage.imultiplyByFactor(multiplier)
 
     pass
 
   def tick(self, timestep_):
     effectiveTimestep, _ = super(DamagingAilment, self).tick(timestep_)
 
-    return effectiveTimestep, self._damage.multiplyByFactor(timestep_ / self._baseDuration)
+    return effectiveTimestep, self._damage.multiplyByFactor(timestep_ / self._baseDuration * self.getStackSize())
 
   def getCopy(self):
     # other = DamagingAilment(name_ = self._name, damage_ = element.ElementContainer(poison = 20.), element_ = self._element, tags_ = self._tags, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
@@ -142,25 +152,32 @@ class Buff(Duration):
     self._types.append('buff')
 
     self._modifier = modifier.Modifier()
+    self._nModifier = None
+    self._nStacks = None
     pass
 
   def applyModifier(self, modifier_):
     super(Buff, self).applyModifier(modifier_)
     # duration modification handled in base class
 
-    effectMultiplier = modifier_.getDurationMultiplier(self._name, 'effect')
+    multiplier = modifier_.getDurationMultiplier(self._name, 'effect')
 
     # only required if effect modifier is not 0
-    if effectMultiplier == 1:
-      return
-
-    # scale modifier accordingly
-    self._modifier.scaleByFactor(effectMultiplier)
+    if multiplier != 1:
+      # scale modifier accordingly
+      self._modifier.iscaleByFactor(multiplier)
 
     pass
 
   def getModifier(self):
-    return self._modifier
+    if self.getStackSize() == 1:
+      return self._modifier
+
+    if self._nStacks == None or self._nStacks != self.getStackSize():
+      if self._nModifier == None:
+        self._nModifier = modifier.Modifier()
+      self._nModifier.copyFrom(self._modifier).iscaleByFactor(self.getStackSize())
+    return self._nModifier
 
   def getCopy(self):
     # other = Buff(name_ = self._name, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
@@ -183,6 +200,8 @@ class ResistanceShred(Duration):
     self._types.append('resistanceShred')
 
     self._shred = element.ElementContainer()
+    self._nShred = None
+    self._nStacks = None
 
     self._shred._element[self._element] = 0.05
 
@@ -196,7 +215,13 @@ class ResistanceShred(Duration):
 
   def getShred(self):
 
-    return self._shred
+    #return self._shred.multiplyByFactor(self.getStackSize())
+    if self.getStackSize() == 1:
+      return self._shred
+
+    if self._nStacks == None or self._nStacks != self.getStackSize():
+      self._nShred = self._shred.multiplyByFactor(self.getStackSize())
+    return self._nShred
 
   def getCopy(self):
     # other = ResistanceShred(name_ = self._name, element_ = self._element, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
@@ -211,6 +236,8 @@ class Cooldown(Duration):
   """docstring for Cooldown"""
   def __init__(self, name_, duration_):
     super(Cooldown, self).__init__(name_ = name_, duration_ = duration_, maxStacks_ = 1)
+
+    self._stackSize = 1
 
     self._types.append('cooldown')
     pass
