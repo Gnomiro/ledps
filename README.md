@@ -15,7 +15,6 @@
 
 ## Open questions
 * Can Trigger trigger?
-* Does buff effect scale buff stats like onHit as from aspectOfTheViper?
 * Buff (e.g., Aspect of the Shark) every 3 seconds?
   * Trigger with 100% chance
   * Create buff-skill with 0% trigger/onHit chance and 3s cooldown which applies aspect of the shark
@@ -42,8 +41,6 @@
 * Implement rotation system to incorporate stuff like Holy Symbols and Divine Aura as skills and not hard-coded
 * Modifier
   * Account for flat damage
-* Buffs
-  * Implement ways to avoid deepcopy
 * Equipment-Manager
   * DualWielding: Weapon Aps is not a direct more multiplier for MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
 * ArmourShred
