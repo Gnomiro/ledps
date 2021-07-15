@@ -6,6 +6,8 @@ import container
 from numpy import product
 from itertools import chain
 
+import toolbox
+
 ############################################################################################
 ############################################################################################
 # Modifier collection class
@@ -95,6 +97,18 @@ class Modifier():
 
   def __str__(self):
     return 'multiplier:\n' + str(self._multiplier) + '\npenetration:\n' + str(self._penetration) + '\nattribute:\n' + str(self._attribute) + '\nduration:\n' + str(self._duration) + '\ntrigger:\n' + str(self._trigger)
+
+  def show(self):
+    print('multiplier:')
+    print(toolbox.prettifyModifier(self._multiplier))
+    print('penetration:')
+    print(toolbox.prettifyModifier(self._penetration))
+    print('attribute:')
+    print(toolbox.prettifyModifier(self._attribute))
+    print('duration:')
+    print(toolbox.prettifyModifier(self._duration))
+    print('trigger:')
+    print(toolbox.prettifyModifier(self._trigger))
 
   def getMultipliers(self):
     return self._multiplier

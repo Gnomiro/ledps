@@ -81,7 +81,7 @@ class Simulator:
 
     if verbosity >= 1:
       print('\nActive modifiers at end of fight:')
-      print(allModifier.merge())
+      allModifier.merge().show()
 
     return overallDamage
 

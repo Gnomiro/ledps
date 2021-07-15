@@ -6,6 +6,25 @@ def validateInput(name_, required_, **provided_):
   if not all([r in provided_.keys() for r in required_]):
     raise error.MissingDurationArgument(name_, required_, **provided_) from None
 
+def prettifyModifier(modifier):
+  s = str(modifier)
+  result = ''
+  tab = ' ' * 4
+  nt = 1
+  p = 0
+  for i, k in enumerate(s):
+    if s[i:i+3] == ': {':
+      result += s[p:i+1] + '\n' + tab*nt
+      p = i + 1
+      nt += 1
+    if k == '}':
+      nt -= 1
+    if k == ',':
+      result += s[p:i+1] + '\n' + tab*(nt-1)
+      p = i + 1
+  result += s[p:]
+  return result
+
 ######################################################################
 # More class which overrides addition to multiplication for mergin more multipliers
 ######################################################################
