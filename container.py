@@ -87,9 +87,11 @@ class TypeContainer():
       raise error.MissingContainerType(self._name, self._keys, **types_)
     else:
       if not isinstance(self.getDefaultValue(k), TypeContainer):
-        result = self._data.get(k, self.getDefaultValue(k))
+        # result = self._data.get(k, self.getDefaultValue(k))
+        result = (self._data[k] if k in self._data.keys() else self.getDefaultValue(k))
       else:
-        result = self._data.get(k, self.getDefaultValue(k)).get(**types_)
+        # result = self._data.get(k, self.getDefaultValue(k)).get(**types_)
+        result = (self._data[k] if k in self._data.keys() else self.getDefaultValue(k)).get(**types_)
 
     return result
 

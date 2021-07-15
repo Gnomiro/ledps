@@ -191,7 +191,7 @@ class ResistanceShred(Duration):
     # todo: does poison shred scale with poison effect?!?!?!
     # would nee to scale self._shred values accordingly
     self._shred._element[self._element] *= modifier_.getDurationMultiplier(self._name, 'effect')
-    warnings.warn('ResistanceShred: Does poison\'s inherent resistance reduction stack with poison effect? # Llama says so.')
+    warnings.warn('ResistanceShred: Does poison\'s inherent resistance reduction stack with poison effect? -> Llama says so.')
     pass
 
   def getShred(self):

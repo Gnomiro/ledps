@@ -131,23 +131,18 @@ class Default:
       # todo: armour mitigation and armour shred
 
       self.skillEffect(allModifier)
-      # allModifier = modifier.fromBuff(self._durationContainer)
-      #self._allModifier.fromBuff(self._durationContainer)
-      #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
-      allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      warnings.warn('Skill-attack may require a new ModifierChain instead of only updating a member of the chain. Is the object inside modified? Should be as it is mutable.')
+      self._buffModifier.fromBuff(self._durationContainer)
+      # allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
       self.applyOnHit(allModifier)
-      # allModifier = modifier.fromBuff(self._durationContainer)
-      #self._allModifier.fromBuff(self._durationContainer)
-      #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
-      allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      self._buffModifier.fromBuff(self._durationContainer)
+      # allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
       if (canTriggerOverride_ if canTriggerOverride_ is not None else self._canTrigger):
         triggerDamage = self.onHitTrigger(allModifier)
-        # allModifier = modifier.fromBuff(self._durationContainer)
-        #self._allModifier.fromBuff(self._durationContainer)
-        #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
-        allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+        self._buffModifier.fromBuff(self._durationContainer)
+        # allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
         damage += triggerDamage # penetration already applied in skill's own attack routine
 
       self._n = next(self._patternCycle)

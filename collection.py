@@ -2,7 +2,7 @@ import duration, skill, character, equipment, error
 
 import modifier
 
-import copy
+import copy, warnings
 
 class Collection():
   """docstring for Collection"""
@@ -15,6 +15,9 @@ class Collection():
     self._durationCollection = {}
 
     self._prepared = False
+
+    self._persistentModifier = None
+
     pass
 
   def prepare(self):
@@ -60,7 +63,10 @@ class Collection():
     return self.getEquipment().getModifier()
 
   def getPersistentModifier(self):
-    return modifier.ModifierChain(self.getEquipmentModifier(), self.getCharacterModifier())
+    if self._persistentModifier == None:
+      self._persistentModifier = self.getEquipmentModifier() + self.getCharacterModifier()
+    warnings.warn('Collection getPersistentModifier() does not account for gear/talent changes.')
+    return self._persistentModifier
 
   def getDuration(self, name_):
     if name_ not in self._durationCollection:

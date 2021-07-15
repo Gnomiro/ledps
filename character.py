@@ -55,7 +55,7 @@ class CharacterInterface(object):
 
   def getModifier(self):
     self.prepare()
-    return modifier.ModifierChain(self._classModifier, self._talentModifier)
+    return self._classModifier + self._talentModifier
 
   def applyModification(self, collection_):
     self.prepare()
