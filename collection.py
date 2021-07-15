@@ -1,5 +1,7 @@
 import duration, skill, character, equipment, error
 
+import modifier
+
 import copy
 
 class Collection():
@@ -58,7 +60,7 @@ class Collection():
     return self.getEquipment().getModifier()
 
   def getPersistentModifier(self):
-    return self.getEquipmentModifier() + self.getCharacterModifier()
+    return modifier.ModifierChain(self.getEquipmentModifier(), self.getCharacterModifier())
 
   def getDuration(self, name_):
     if name_ not in self._durationCollection:
@@ -68,7 +70,8 @@ class Collection():
   def getDurationCopy(self, name_):
     if name_ not in self._durationCollection:
       self._durationCollection[name_] = duration.getDefaultObjectByName(name_)
-    return copy.deepcopy(self._durationCollection[name_]) # todo: implement a simple copy routine which creates a copy with copies of only relevant objects
+    # return copy.deepcopy(self._durationCollection[name_]) # todo: implement a simple copy routine which creates a copy with copies of only relevant objects
+    return self._durationCollection[name_].getCopy()
 
   def getSkill(self, name_):
     if name_ not in self._skillCollection:

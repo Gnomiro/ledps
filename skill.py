@@ -49,6 +49,9 @@ class Default:
     self._canTrigger = True
 
     self._prepared = False
+
+    self._buffModifier = modifier.Modifier()
+
     pass
 
   def setCollection(self, collection_):
@@ -101,8 +104,9 @@ class Default:
 
     warnings.warn('Skill hit damage is not yet accounted for.')
 
-    allModifier = modifier.fromBuff(self._durationContainer)
-    allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+    #self._allModifier.fromBuff(self._durationContainer)
+    #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+    allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
     damage = element.ElementContainer()
 
@@ -115,8 +119,9 @@ class Default:
       # applied for duration objects seperately
       resistances = element.ElementContainer(default_ = 0.0)
       warnings.warn('Workaround for resistance penetration in skill.py')
-      test = eval(allModifier.getPenetrations().__repr__())
-      penetration = element.ElementContainer(default_ = 0.0, **test)
+      penetration = element.ElementContainer(default_ = 0.0)
+      for k in ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']:
+        penetration._element[k] = allModifier.getPenetration(k)
       shred = element.fromResistanceShred(self._durationContainer)
       resistances -= shred
       resistances.setUpperLimit(0.75)
@@ -126,17 +131,23 @@ class Default:
       # todo: armour mitigation and armour shred
 
       self.skillEffect(allModifier)
-      allModifier = modifier.fromBuff(self._durationContainer)
-      allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      # allModifier = modifier.fromBuff(self._durationContainer)
+      #self._allModifier.fromBuff(self._durationContainer)
+      #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
       self.applyOnHit(allModifier)
-      allModifier = modifier.fromBuff(self._durationContainer)
-      allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      # allModifier = modifier.fromBuff(self._durationContainer)
+      #self._allModifier.fromBuff(self._durationContainer)
+      #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+      allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
       if (canTriggerOverride_ if canTriggerOverride_ is not None else self._canTrigger):
         triggerDamage = self.onHitTrigger(allModifier)
-        allModifier = modifier.fromBuff(self._durationContainer)
-        allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+        # allModifier = modifier.fromBuff(self._durationContainer)
+        #self._allModifier.fromBuff(self._durationContainer)
+        #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
+        allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
         damage += triggerDamage # penetration already applied in skill's own attack routine
 
       self._n = next(self._patternCycle)
@@ -152,11 +163,11 @@ class Default:
     return damage
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationMultiplier(name_, 'onHit')
+    chance = modifier_.getDurationIncrease(name_, 'onHit') * modifier_.getDurationMore(name_, 'onHit')
     return chance
 
   def applyOnHit(self, modifier_):
-    for name, info in modifier_.getDurations().items():
+    for name in modifier_.getDurationKeys():
       chance = self.getOnHitChance(name, modifier_)
       if chance != 0:
         applications = floor(chance)
@@ -176,7 +187,7 @@ class Default:
 
   def onHitTrigger(self, modifier_):
     damage = element.ElementContainer()
-    for trigger, info in modifier_.getTriggers().items():
+    for trigger in modifier_.getTriggerKeys():
       chance = self.getTriggerChance(trigger, modifier_)
       if chance != 0:
         applications = floor(chance)

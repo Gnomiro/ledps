@@ -76,6 +76,9 @@ class TypeContainer():
   def getDefaultValue(self, key):
     return self._defaultValue
 
+  def copyDefaultValue(self, key):
+    return copy.deepcopy(self.getDefaultValue(key))
+
   def get(self, **types_):
     # todo: if something is not present the default value of the deepest base object could be returned
     k = types_[self._keyName] if self._keyName in types_.keys() and types_[self._keyName] != None else self._defaultKey
@@ -97,7 +100,7 @@ class TypeContainer():
     if k == None:
       raise error.MissingContainerType(self._name, self._keys, **types_)
     elif k in self._keys:
-      self._data.setdefault(k, copy.deepcopy(self.getDefaultValue(k)))
+      self._data.setdefault(k, self.copyDefaultValue(k))
       if not isinstance(self.getDefaultValue(k), TypeContainer):
         t = type(self.getDefaultValue(k))
         self._data[k] = value_ if type(value_) is t else t(value_)
@@ -113,21 +116,21 @@ class TypeContainer():
         self._data[i] = left_.get(**key) + right_.get(**key)
       else:
         if i not in self._data:
-          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
-        self._data[i]._add(left_._data.get(i, copy.deepcopy(left_.getDefaultValue(i))), right_._data.get(i, copy.deepcopy(right_.getDefaultValue(i))))
+          self._data[i] = self.copyDefaultValue(i)
+        self._data[i]._add(left_._data.get(i, (left_.getDefaultValue(i))), right_._data.get(i, (right_.getDefaultValue(i))))
     return self
 
   def _iadd(self, other_):
+
     for i in set(other_._data.keys()) | set(self._data.keys()):
       key = {self._keyName: i}
+      if i not in self._data:
+        self._data[i] = self.copyDefaultValue(i)
       if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
-        if i not in self._data:
-          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
         self._data[i] += other_.get(**key)
       else:
-        if i not in self._data:
-          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
-        self._data[i]._iadd(other_._data.get(i, other_.getDefaultValue(i)))
+        if i in other_._data:
+          self._data[i]._iadd(other_._data.get(i, other_.getDefaultValue(i)))
     return self
 
   def scaleByFactor(self, factor_):
@@ -154,14 +157,14 @@ class TypeContainer():
       key = {self._keyName: i}
       if (i in self._data.keys() and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data.keys() and not isinstance(other_._data.get(i), TypeContainer)):
         if i not in self._data:
-          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+          self._data[i] = self.copyDefaultValue(i)
         if i in other_._data:
           self._data[i] = other_.get(**key)
         else:
           self._data[i] = self.getDefaultValue(i)
       else:
         if i not in self._data:
-          self._data[i] = copy.deepcopy(self.getDefaultValue(i))
+          self._data[i] = self.copyDefaultValue(i)
         self._data[i].copyFrom(other_._data.get(i, other_.getDefaultValue(i)))
     return self
 
@@ -232,6 +235,9 @@ class CategoryTypeContainer(TypeContainer):
     self._name = 'categoryTypeContainer'
     self._keyName = 'categoryType_'
     pass
+
+  def copy(self):
+    print('xxxxxxxxxxxx')
 
 ######################################################################
 # Multiplier type container

@@ -3,6 +3,9 @@ import copy
 
 import container
 
+from numpy import product
+from itertools import chain
+
 ############################################################################################
 ############################################################################################
 # Modifier collection class
@@ -37,7 +40,7 @@ class Modifier():
 
     return self
 
-  # copies values from other modifier object; values already present in self are setted to default
+  # copies values from other modifier object; values already present in self are set to default
   def copyFrom(self, other_):
     self._multiplier.copyFrom(other_._multiplier)
     self._penetration.copyFrom(other_._penetration)
@@ -54,6 +57,17 @@ class Modifier():
       self._trigger[name].copyFrom(other_._trigger[name])
 
     return self
+
+  def reset(self):
+    self._multiplier.reset()
+    self._penetration.reset()
+    self._attribute.reset()
+
+    for name in self._duration.keys():
+      self._duration[name].reset()
+
+    for name in self._trigger.keys():
+      self._trigger[name].reset()
 
   def __add__(self, other_):
     total = Modifier()
@@ -272,6 +286,13 @@ class Modifier():
       self._trigger[name_] = container.DurationModifierContainer()
     self._trigger[name_].set(value_ = value_, **types)
 
+  def fromBuff(self, durationContainer_):
+    self.reset()
+    for buff in durationContainer_.getActiveWithType('buff'):
+      self += buff.getModifier()
+
+    return self
+
 ############################################################################################
 # Additional constructor functions
 ############################################################################################
@@ -282,3 +303,91 @@ def fromBuff(durationContainer_):
     modifier += buff.getModifier()
 
   return modifier
+
+
+class ModifierChain():
+  """docstring for ModifierChain"""
+  def __init__(self, *args_):
+    self._data = []
+    for k in args_:
+      if isinstance(k, ModifierChain):
+        # print('chain')
+        self._data.extend(k._data)
+      else:
+        # print('no chain')
+        self._data.append(k)
+    pass
+
+  # def __iadd__(self, other_):
+  #   self._data.append(other_)
+  #   return self
+
+  # def __add__(self, other_):
+  #   new = ModifierChain()
+  #   print(type(self))
+  #   print(type(other_))
+  #   new._data = self._data
+  #   new._data.append(other_)
+  #   return new
+
+  def merge(self):
+    modifier = Modifier()
+    for k in self._data:
+      modifier += k
+    return modifier
+
+  def getMultipliers(self):
+    return self._multiplier
+
+  def getPenetrations(self):
+    return self._penetration
+
+  def getAttributes(self):
+    return self._attribute
+
+  def getDurationKeys(self):
+    keys = set()
+    for k in self._data:
+      keys =  keys | set(k.getDurations().keys())
+    return keys
+
+  def getTriggerKeys(self):
+    keys = set()
+    for k in self._data:
+      keys =  keys | set(k.getTriggers().keys())
+    return keys
+
+  def getMultiplier(self, *args_, **kwargs_):
+    return (1. + self.getIncrease(*args_, **kwargs_)) * self.getMore(*args_, **kwargs_)
+
+  def getIncrease(self, *args_, **kwargs_):
+    return sum([k.getIncrease(*args_, **kwargs_) for k in self._data])
+
+  def getMore(self, *args_, **kwargs_):
+    return product([k.getMore(*args_, **kwargs_) for k in self._data])
+
+  def getPenetration(self, *args_, **kwargs_):
+    return sum([k.getPenetration(*args_, **kwargs_) for k in self._data])
+
+  def getAttribute(self, *args_, **kwargs_):
+    return sum([k.getAttribute(*args_, **kwargs_) for k in self._data])
+
+  def getDurationMultiplier(self, name_, *args_, **kwargs_):
+    return (1. + self.getDurationIncrease(name_, *args_, **kwargs_)) * self.getDurationMore(name_, *args_, **kwargs_)
+
+  def getDurationIncrease(self, name_, *args_, **kwargs_):
+    return sum([k.getDurationIncrease(name_, *args_, **kwargs_) for k in self._data])
+
+  def getDurationMore(self, name_, *args_, **kwargs_):
+    return product([k.getDurationMore(name_, *args_, **kwargs_) for k in self._data])
+
+  def getTriggerMultiplier(self, name_, *args_, **kwargs_):
+    return (1. + self.getTriggerIncrease(name_, *args_, **kwargs_)) * self.getTriggerMore(name_, *args_, **kwargs_)
+
+  def getTriggerIncrease(self, name_, *args_, **kwargs_):
+    return sum([k.getTriggerIncrease(name_, *args_, **kwargs_) for k in self._data])
+
+  def getTriggerMore(self, name_, *args_, **kwargs_):
+    return product([k.getTriggerMore(name_, *args_, **kwargs_) for k in self._data])
+
+

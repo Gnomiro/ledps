@@ -37,13 +37,16 @@ class Simulator:
     overallDamage = element.ElementContainer()
     tickDamage = element.ElementContainer()
 
+    buffModifier = modifier.Modifier()
+
     while t <= endtime_:
 
       dd = element.ElementContainer()
       sd = element.ElementContainer()
 
-      allModifier = modifier.fromBuff(self._durationContainer)
-      allModifier += self._collection.getPersistentModifier()
+      # allModifier = modifier.fromBuff(self._durationContainer)
+      # allModifier += self._collection.getPersistentModifier()
+      allModifier = modifier.ModifierChain(buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier())
 
       dd = self._durationContainer.tick(self._frametime, allModifier)
 
@@ -76,7 +79,9 @@ class Simulator:
       print('\nActive durations at end of fight:')
       print(self._durationContainer.countActive())
 
-    print(allModifier)
+    if verbosity >= 1:
+      print('\nActive modifiers at end of fight:')
+      print(allModifier.merge())
 
     return overallDamage
 

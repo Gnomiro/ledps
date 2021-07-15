@@ -41,9 +41,9 @@
   * handle mastery differently and allow talent access to all class-trees within a class
 * Implement rotation system to incorporate stuff like Holy Symbols and Divine Aura as skills and not hard-coded
 * Modifier
-  * implement clear routine to reset values default to reduce requirement for deepcopies!!!!
   * Account for flat damage
-  * Sort by elements
+* Buffs
+  * Implement ways to avoid deepcopy
 * Equipment-Manager
   * DualWielding: Weapon Aps is not a direct more multiplier for MeleeAttackSpeed. DualWielding averages both weapon ApS and applies the average as more multiplier
 * ArmourShred

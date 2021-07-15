@@ -125,6 +125,11 @@ class DamagingAilment(Duration):
 
     return effectiveTimestep, self._damage.multiplyByFactor(timestep_ / self._baseDuration)
 
+  def getCopy(self):
+    # other = DamagingAilment(name_ = self._name, damage_ = element.ElementContainer(poison = 20.), element_ = self._element, tags_ = self._tags, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
+    # other._damage = copy.deepcopy(self._damage)
+    return copy.deepcopy(self)
+
 ############################################################################################
 # Buff base
 ############################################################################################
@@ -157,6 +162,11 @@ class Buff(Duration):
   def getModifier(self):
     return self._modifier
 
+  def getCopy(self):
+    # other = Buff(name_ = self._name, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
+    # other._modifier = copy.deepcopy(self._modifier)
+    return copy.deepcopy(self)
+
 ############################################################################################
 # ResistanceShred base
 ############################################################################################
@@ -188,6 +198,10 @@ class ResistanceShred(Duration):
 
     return self._shred
 
+  def getCopy(self):
+    # other = ResistanceShred(name_ = self._name, element_ = self._element, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
+    # other._shred = copy.deepcopy(self._shred)
+    return copy.deepcopy(self)
 
 ############################################################################################
 # Cooldown base

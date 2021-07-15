@@ -1,4 +1,4 @@
-import collection, error, duration, element
+import collection, error, duration, element, modifier
 
 from itertools import chain
 
@@ -21,6 +21,7 @@ class DurationContainer():
 
   def add(self, name_, modifier_, skillName_ = None, skillN_ = None):
 
+    # duration = self._collection.getDurationCopy(name_)
     duration = self._collection.getDurationCopy(name_)
     duration.applyModifier(modifier_)
 
@@ -85,10 +86,13 @@ class DurationContainer():
         # penetration
         # applied for hits seperately
         resistances = element.ElementContainer(default_ = 0.0)
-        allModifier = modifier_ + self._collection.getSkill(skillName).getSkillModifier(skillN)
-        test = eval(allModifier.getPenetrations().__repr__())
+        allModifier = modifier.ModifierChain(modifier_, self._collection.getSkill(skillName).getSkillModifier(skillN))
+        # test = eval(allModifier.getPenetrations().__repr__())
+        # penetration = element.ElementContainer(default_ = 0.0, **test)
+        penetration = element.ElementContainer(default_ = 0.0)
+        for k in ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']:
+          penetration._element[k] = allModifier.getPenetration(k)
         warnings.warn('Workaround for resistance penetration in duration.py')
-        penetration = element.ElementContainer(default_ = 0.0, **test)
         shred = element.fromResistanceShred(self)
         resistances -= shred
         resistances.setUpperLimit(0.75)
