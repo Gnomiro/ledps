@@ -1,8 +1,15 @@
-import characterTalent, modifier
+import characterTalent, modifier, error
 
 import warnings
 
 verbosity = 0
+
+
+##########################################################################
+##########################################################################
+# Basic class interface
+##########################################################################
+##########################################################################
 
 class ClassInterface():
   """docstring for ClassInterface"""
@@ -14,7 +21,7 @@ class ClassInterface():
     self._talents = {}
     # list of associated talent objects of active talents
     self._activeTalents = {}
-    self._classModifier = modifier.Modifier()
+    self._modifier = modifier.Modifier()
     self._talentModifier = modifier.Modifier()
     self._prepared = True
 
@@ -23,7 +30,7 @@ class ClassInterface():
     # self._masteries is set in class implementations
     for mastery in (self._masteries if self._masteries else []):
       m = mastery[0].upper() + mastery[1:]
-      eval(m).getLowerTalents(self._talents)
+      eval(m)().getLowerTalents(self._talents)
     pass
 
   def getClass(self):
@@ -33,12 +40,24 @@ class ClassInterface():
     return self._mastery
 
   def setMastery(self, mastery_):
-    mastery_ = mastery_[0].upper() + mastery_[1:]
-    eval(mastery_).getMasteryTalents(self._talents, self._classModifier)
+    if self._mastery == None:
+      mL = mastery_[0].lower() + mastery_[1:]
+      mU = mastery_[0].upper() + mastery_[1:]
+      if mL in self._masteries:
+        self._mastery = mL
+        eval(mU)().getMasteryTalents(self._talents)
+        eval(mU)().getMasteryModifer(self._modifier)
+      else:
+        raise error.InvalidMastery(self._name, mU)
+    else:
+      warnings.warn('Mastery change not supported yet.') 
     pass
 
   def getTalents(self):
     return self._talents
+
+  def getClassTalents(self):
+    return self._classTalents
 
   def setTalent(self, **talents_):
     for name, value in talents_.items():
@@ -71,7 +90,7 @@ class ClassInterface():
 
   def getModifier(self):
     self.prepare()
-    return self._classModifier + self._talentModifier
+    return self._modifier + self._talentModifier
 
   def applyModification(self, collection_):
     self.prepare()
@@ -82,6 +101,15 @@ class ClassInterface():
 
     pass
 
+##########################################################################
+##########################################################################
+# Class implementations
+##########################################################################
+##########################################################################
+
+##########################################################################
+# Sentinel class
+##########################################################################
 
 class Sentinel(ClassInterface):
   """docstring for Sentinel"""
@@ -91,10 +119,12 @@ class Sentinel(ClassInterface):
     self._masteries = ['paladin']
     super(Sentinel, self).__init__(name_)
 
+    self._classModifier = modifier.Modifier()
+
     self._classModifier.addAttribute(2., 'strength')
     self._classModifier.addAttribute(1., 'vitality')
 
-    self._talents.update({'sentinelOverwhelm': [0, 5],
+    self._classTalents =({'sentinelOverwhelm': [0, 5],
                           'sentinelJuggernaut': [0, 8],
                           'sentinelFearless': [0, 8],
                           'sentinelCounterAttack': [0, 5],
@@ -110,130 +140,25 @@ class Sentinel(ClassInterface):
                           'sentinelBlademaster': [0, 5],
                           'sentinelMailCrusher': [0, 10],
                           })
-
-
-class MasteryInterface():
-  """docstring for MasteryInterface"""
-
-  def __init__(self):
-    self._lowerTalents = {}
-    self._upperTalents = {}
-    self._masteryModifier = modifier.Modifier()
-
-  def getLowerTalents(talents_):
-    talents_.update(self._lowerTalents)
+    self._talents.update(self._classTalents)
+    self._modifier += self._classModifier
     pass
 
-  def getMasteryModifer(classModifier_):
-    classModifier_ += self._masteryModifier
-    pass
-
-  def getMasteryTalents(talents_):
-    talents_.update(self._upperTalents)
-    pass
-
-
-class Paladin(Sentinel):
-  """docstring for Paladin"""
-
-
-  def getLowerTalents(talents_):
-    # lower half
-    talents_.update({'paladinConviction':[0, 8],
-                          'paladinDefiance': [0, 8],
-                          'paladinHonour': [0, 5],
-                          'paladinMajasaFirebrand': [0, 10],
-                          'paladinDivineBolt': [0, 1],
-                          'paladinValor': [0, 8],
-                          'paladinHolySymbol': [0, 6],
-                          'paladinFlashOfBrilliance': [0, 10],
-                          'paladinRahyehsStrength': [0, 8],
-                          'paladinSharedDivinity': [0, 5],
-                          'paladinHolySymbol2': [0, 6],
-                          'paladinHolyNove': [0, 1],
-                          'paladinPrayer': [0, 10],
-                          'paladinPiety': [0, 1],
-                          'paladinInnerFlame': [0, 8],
-                          })
-    pass
-
-  def getMasteryTalents(talents_, classModifier_):
-
-    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
-    classModifier_.addIncrease(1., 'physical')
-    classModifier_.addIncrease(1., 'fire')
-
-    # upper half
-    talents_.update({'paladinStaunchDefender': [0, 10],
-                          'paladinFaithArmour': [0, 8],
-                          'paladinAlignment': [0, 8],
-                          'paladinShieldWall': [0, 1],
-                          'paladinHolyPrecision': [0, 10],
-                          'paladinPenance': [0, 10],
-                          'paladinRighteousFirebrand': [0, 7],
-                          'paladinPrayerAegis': [0, 10],
-                          'paladinDivineEssence': [0, 5],
-                          'paladinReverenceOfDuality': [0, 12],
-                          'paladinRedemption': [0, 7],
-                          'paladinSwordOfRahyeh': [0, 7],
-                          'paladinLightOfRahyeh': [0, 12],
-                          'paladinDivineIntervention': [0, 1],
-                          })
-
-
-
-  def __init__(self):
-    super(Paladin, self).__init__('Paladin')
-
-    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
-    self._classModifier.addIncrease(1., 'physical')
-    self._classModifier.addIncrease(1., 'fire')
-
-    # lower half
-    self._talents.update({'paladinConviction':[0, 8],
-                          'paladinDefiance': [0, 8],
-                          'paladinHonour': [0, 5],
-                          'paladinMajasaFirebrand': [0, 10],
-                          'paladinDivineBolt': [0, 1],
-                          'paladinValor': [0, 8],
-                          'paladinHolySymbol': [0, 6],
-                          'paladinFlashOfBrilliance': [0, 10],
-                          'paladinRahyehsStrength': [0, 8],
-                          'paladinSharedDivinity': [0, 5],
-                          'paladinHolySymbol2': [0, 6],
-                          'paladinHolyNove': [0, 1],
-                          'paladinPrayer': [0, 10],
-                          'paladinPiety': [0, 1],
-                          'paladinInnerFlame': [0, 8],
-                          })
-
-    # upper half
-    self._talents.update({'paladinStaunchDefender': [0, 10],
-                          'paladinFaithArmour': [0, 8],
-                          'paladinAlignment': [0, 8],
-                          'paladinShieldWall': [0, 1],
-                          'paladinHolyPrecision': [0, 10],
-                          'paladinPenance': [0, 10],
-                          'paladinRighteousFirebrand': [0, 7],
-                          'paladinPrayerAegis': [0, 10],
-                          'paladinDivineEssence': [0, 5],
-                          'paladinReverenceOfDuality': [0, 12],
-                          'paladinRedemption': [0, 7],
-                          'paladinSwordOfRahyeh': [0, 7],
-                          'paladinLightOfRahyeh': [0, 12],
-                          'paladinDivineIntervention': [0, 1],
-                          })
+##########################################################################
+# Primalist class
+##########################################################################
 
 class Primalist(ClassInterface):
   """docstring for Primalist"""
 
   def __init__(self, name_ = 'Primalist'):
-    self._masteries = []
+    self._masteries = ['beastmaster']
     super(Primalist, self).__init__(name_)
 
-    print('Warning: Primalist attributes not implemented yet.')
+    print('Warning: Primalist base attributes not implemented yet.')
+    self._classModifier = modifier.Modifier()
 
-    self._talents.update({'primalistGiftOfTheWilderness':[0, 6],
+    self._classTalents = ({'primalistGiftOfTheWilderness':[0, 6],
                           'primalistNaturalAttunement': [0, 8],
                           'primalistPrimalStrength': [0, 8],
                           'primalistPrimalMedicine': [0, 6],
@@ -249,48 +174,175 @@ class Primalist(ClassInterface):
                           'primalistRotbane': [0, 5],
                           'primalistAncestralWeaponry': [0, 10],
                           })
+    self._talents.update(self._classTalents)
+    self._modifier += self._classModifier
+    pass
 
 
-class Beastmaster(Primalist):
+##########################################################################
+##########################################################################
+# Mastery interface class
+##########################################################################
+##########################################################################
+
+class MasteryInterface():
+  """docstring for MasteryInterface"""
+
+  def __init__(self):
+    self._lowerTalents = {}
+    self._upperTalents = {}
+    self._masteryModifier = modifier.Modifier()
+    pass
+
+  def getLowerTalents(self, talents_):
+    talents_.update(self._lowerTalents)
+    pass
+
+  def getMasteryModifer(self, classModifier_):
+    classModifier_ += self._masteryModifier
+    pass
+
+  def getMasteryTalents(self, talents_):
+    talents_.update(self._upperTalents)
+    pass
+
+##########################################################################
+##########################################################################
+# Mastery implementations
+##########################################################################
+##########################################################################
+
+##########################################################################
+# Paladin mastery
+##########################################################################
+
+class Paladin(MasteryInterface):
+  """docstring for Paladin"""
+
+  def __init__(self):
+    super(Paladin, self).__init__()
+
+    self._lowerTalents =  ({'paladinConviction':[0, 8],
+                            'paladinDefiance': [0, 8],
+                            'paladinHonour': [0, 5],
+                            'paladinMajasaFirebrand': [0, 10],
+                            'paladinDivineBolt': [0, 1],
+                            'paladinValor': [0, 8],
+                            'paladinHolySymbol': [0, 6],
+                            'paladinFlashOfBrilliance': [0, 10],
+                            'paladinRahyehsStrength': [0, 8],
+                            'paladinSharedDivinity': [0, 5],
+                            'paladinHolySymbol2': [0, 6],
+                            'paladinHolyNove': [0, 1],
+                            'paladinPrayer': [0, 10],
+                            'paladinPiety': [0, 1],
+                            'paladinInnerFlame': [0, 8],
+                            })
+
+    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
+    self._masteryModifier.addIncrease(1., 'physical')
+    self._masteryModifier.addIncrease(1., 'fire')
+
+    # upper half
+    self._upperTalents =  ({'paladinStaunchDefender': [0, 10],
+                            'paladinFaithArmour': [0, 8],
+                            'paladinAlignment': [0, 8],
+                            'paladinShieldWall': [0, 1],
+                            'paladinHolyPrecision': [0, 10],
+                            'paladinPenance': [0, 10],
+                            'paladinRighteousFirebrand': [0, 7],
+                            'paladinPrayerAegis': [0, 10],
+                            'paladinDivineEssence': [0, 5],
+                            'paladinReverenceOfDuality': [0, 12],
+                            'paladinRedemption': [0, 7],
+                            'paladinSwordOfRahyeh': [0, 7],
+                            'paladinLightOfRahyeh': [0, 12],
+                            'paladinDivineIntervention': [0, 1],
+                            })
+    pass
+
+##########################################################################
+# Beastmaser mastery
+##########################################################################
+
+class Beastmaster(MasteryInterface):
   """docstring for Beastmaster"""
 
   def __init__(self):
-    self._masteries = []
-    super(Beastmaster, self).__init__('Beastmaster')
+    super(Beastmaster, self).__init__()
 
-    print('Warning: Bestmaster mastery modifier not implemented yet.')
+    print('Bestmaster mastery only implements meleed damage increase.')
+    self._masteryModifier.addIncrease(.5, 'melee')
 
-    self._talents.update({'beastmasterUrsineStrength':[0, 8],
-                          'beastmasterFelineBond': [0, 8],
-                          'beastmasterSavagery': [0, 8],
-                          'beastmasterBoarHeart': [0, 5],
-                          'beastmasterArtorsLoyality': [0, 1],
-                          'beastmasterAmbush': [0, 8],
-                          'beastmasterTuskWarrior': [0, 8],
-                          'beastmasterCallOfThePack': [0, 5],
-                          'beastmasterLampreyTeeth': [0, 6],
-                          'beastmasterPorcineConstitution': [0, 5],
-                          'beastmasterTheChase': [0, 8],
-                          'beastmasterRendingMaw': [0, 5],
-                          'beastmasterDeepWounds': [0, 8],
-                          'beastmasterPrimalStrength': [0, 5],
-                          'beastmasterAxeAndClaw': [0, 5],
-                          'beastmasterHunterOfTheDeep': [0, 4],
-                          'beastmasterEnvenom': [0, 5],
-                          'beastmasterHawkWings': [0, 10],
-                          'beastmasterLifeInTheWilderness': [0, 8],
-                          'beastmasterTheCircleOfLife': [0, 5],
-                          'beastmasterViperFangs': [0, 10],
-                          'beastmasterAvianShelter': [0, 10],
-                          'beastmasterCryOfTheLynx': [0, 8],
-                          'beastmasterDragonSlayer': [0, 1],
-                          'beastmasterForceOfNature': [0, 1],
-                          'beastmasterNaturalBond': [0, 1],
-                          'beastmasterOceanMaw': [0, 8],
-                          'beastmasterRattlesnakeRattlesnake': [0, 10],
-                          'beastmasterSerratedClaws': [0, 6],
-                          'beastmasterAncientMight': [0, 10],
-                          'beastmasterCriticalBight': [0, 5],
-                          'beastmasterPrimalAspects': [0, 10],
-                          'beastmasterFeedingFrenzy': [0, 1],
-                          })
+
+    self._lowerTalents =  ({'beastmasterUrsineStrength':[0, 8],
+                            'beastmasterFelineBond': [0, 8],
+                            'beastmasterSavagery': [0, 8],
+                            'beastmasterBoarHeart': [0, 5],
+                            'beastmasterArtorsLoyality': [0, 1],
+                            'beastmasterAmbush': [0, 8],
+                            'beastmasterTuskWarrior': [0, 8],
+                            'beastmasterCallOfThePack': [0, 5],
+                            'beastmasterLampreyTeeth': [0, 6],
+                            'beastmasterPorcineConstitution': [0, 5],
+                            'beastmasterTheChase': [0, 8],
+                            'beastmasterRendingMaw': [0, 5],
+                            'beastmasterDeepWounds': [0, 8],
+                            'beastmasterPrimalStrength': [0, 5],
+                            'beastmasterAxeAndClaw': [0, 5],
+                            'beastmasterHunterOfTheDeep': [0, 4],
+                           })
+
+    self._upperTalents =  ({'beastmasterEnvenom': [0, 5],
+                            'beastmasterHawkWings': [0, 10],
+                            'beastmasterLifeInTheWilderness': [0, 8],
+                            'beastmasterTheCircleOfLife': [0, 5],
+                            'beastmasterViperFangs': [0, 10],
+                            'beastmasterAvianShelter': [0, 10],
+                            'beastmasterCryOfTheLynx': [0, 8],
+                            'beastmasterDragonSlayer': [0, 1],
+                            'beastmasterForceOfNature': [0, 1],
+                            'beastmasterNaturalBond': [0, 1],
+                            'beastmasterOceanMaw': [0, 8],
+                            'beastmasterRattlesnakeRattlesnake': [0, 10],
+                            'beastmasterSerratedClaws': [0, 6],
+                            'beastmasterAncientMight': [0, 10],
+                            'beastmasterCriticalBight': [0, 5],
+                            'beastmasterPrimalAspects': [0, 10],
+                            'beastmasterFeedingFrenzy': [0, 1],
+                            })
+    pass
+
+  ############################################################################################
+############################################################################################
+# Skill implementation information
+############################################################################################
+############################################################################################
+
+import sys, inspect
+
+# base classes
+baseClasses = ['classInterface', 'masteryInterface']
+
+# collect all durations and to de-capitalize them
+allClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__]
+characterClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__ if str(inspect.getmro(obj)[1]).find('ClassInterface') != -1]
+masteryClasses = [name[0].lower() + name[1:] for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass) if obj.__module__ is __name__ if str(inspect.getmro(obj)[1]).find('MasteryInterface') != -1]
+
+# implemented class; allClasses.remove(baseClasses)
+implementedClasses = [name for name in allClasses if name not in baseClasses]
+
+def getBaseClasses():
+  return baseClasses
+
+def getAllClasses():
+  return allClasses
+
+def getImplementedClasses():
+  return implementedClasses
+
+def getCharacterClasses():
+  return characterClasses
+
+def getMasteryClasses():
+  return masteryClasses

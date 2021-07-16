@@ -40,6 +40,13 @@ class UnsupportedClass(Exception):
     super().__init__(self.message)
     pass
 
+class InvalidMastery(Exception):
+
+  def __init__(self, class_, mastery_):
+    self.message = 'Error: \'{}\' is an invalid mastery for class \'{}\'.'.format(mastery_, class_)
+    super().__init__(self.message)
+    pass
+
 class MissingContainerType(Exception):
 
   def __init__(self, name_, keys_, **types_):

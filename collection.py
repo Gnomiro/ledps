@@ -35,17 +35,17 @@ class Collection():
     self._prepared = False
     pass
 
-  def setCharacter(self, name_):
+  def setCharacter(self, class_, mastery_ = None):
     if self._character is not None:
       print('Warning: Previously selected class is replaced!')
     # todo: make this more smart; get available classes like available duration/skills
-    if name_ in ['paladin', 'beastmaster']:
-      if name_ == 'paladin':
-        self._character = character.Sentinel()
-        self._character.setMastery('paladin')
-      else:
-        characterClass = name_[0].upper() + name_[1:]
-        self._character = eval('character.' + characterClass)()
+    c = class_[0].lower() + class_[1:]
+    if c in character.getCharacterClasses():
+      c = class_[0].upper() + class_[1:]
+      self._character = eval('character.' + c)()
+      if mastery_ != None:
+        m = mastery_[0].lower() + mastery_[1:]
+        self._character.setMastery(m)
     else:
       raise error.UnsupportedClass(name_)
     return self._character
