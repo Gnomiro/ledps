@@ -115,8 +115,8 @@ class TypeContainer():
   # positions are switched here. self is the empty object wich receives the sum from left_ and right_
   def _add(self, left_, right_):
     for i in set(left_._data.keys()) | set(right_._data.keys()):
-      key = {self._keyName: i}
       if (i in left_._data and not isinstance(left_._data.get(i), TypeContainer)) or (i in right_._data and not isinstance(right_._data.get(i), TypeContainer)):
+        key = {self._keyName: i}
         self._data[i] = left_.get(**key) + right_.get(**key)
       else:
         if i not in self._data:
@@ -127,11 +127,10 @@ class TypeContainer():
   def _iadd(self, other_):
 
     for i in set(other_._data.keys()) | set(self._data.keys()):
-      key = {self._keyName: i}
       if i not in self._data:
         self._data[i] = self.copyDefaultValue(i)
       if (i in self._data and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data and not isinstance(other_._data.get(i), TypeContainer)):
-        self._data[i] += other_.get(**key)
+        self._data[i] += other_.get(**{self._keyName: i})
       else:
         if i in other_._data:
           self._data[i]._iadd(other_._data[i])
@@ -140,18 +139,16 @@ class TypeContainer():
   def iaddIgnoreDefault(self, other_):
 
     for i in other_._data.keys():
-      key = {self._keyName: i}
       if i not in self._data:
         self._data[i] = self.copyDefaultValue(i)
       if not isinstance(other_._data[i], TypeContainer):
-        self._data[i] += other_.get(**key)
+        self._data[i] += other_.get(**{self._keyName: i})
       else:
         self._data[i].iaddIgnoreDefault(other_._data[i])
     return self
 
   def iscaleByFactor(self, factor_):
     for i in self._data:
-      key = {self._keyName: i}
       if not isinstance(self._data.get(i), TypeContainer):
         t = type(self.getDefaultValue(i))
         self._data[i] *= factor_ if type(factor_) is t else t(factor_)
@@ -161,7 +158,6 @@ class TypeContainer():
 
   def reset(self):
     for i in self._data:
-      key = {self._keyName: i}
       if not isinstance(self._data.get(i), TypeContainer):
         self._data[i] = self.getDefaultValue(i)
       else:
@@ -170,12 +166,11 @@ class TypeContainer():
 
   def copyFrom(self, other_):
     for i in set(other_._data.keys()) | set(self._data.keys()):
-      key = {self._keyName: i}
       if (i in self._data and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data and not isinstance(other_._data.get(i), TypeContainer)):
         if i not in self._data:
           self._data[i] = self.copyDefaultValue(i)
         if i in other_._data:
-          self._data[i] = other_.get(**key)
+          self._data[i] = other_.get(**{self._keyName: i})
         else:
           self._data[i] = self.getDefaultValue(i)
       else:

@@ -317,7 +317,7 @@ class Rive(Melee):
       nIgnites = self._durationContainer.countActiveByNames('ignite')['ignite']
       self._durationContainer._durations['ignite'] = list([])
       # for i in range(nIgnites):
-      self._durationContainer.add('riveExecution', modifier_, number_ = nIgnites)
+      self._durationContainer.add('riveExecution', modifier_, skillName_= self._skillName , skillN_ = self._n, number_ = nIgnites)
     pass
 
 ############################################################################################
@@ -486,10 +486,10 @@ class SerpentStrike(Melee):
   def skillEffect(self, modifier_):
 
     if self._talents['scorpionStrikes'][0] != 0:
-      self._durationContainer.add('serpentStrikeScorpionStrikes', modifier_)
+      self._durationContainer.add('serpentStrikeScorpionStrikes', modifier_, skillName_= self._skillName , skillN_ = self._n,)
 
     if self._talents['chronoStrike'][0] != 0:
-      self._durationContainer.add('serpentStrikeChronoStrike', modifier_)
+      self._durationContainer.add('serpentStrikeChronoStrike', modifier_, skillName_= self._skillName , skillN_ = self._n,)
 
     pass
 
