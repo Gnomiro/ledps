@@ -46,3 +46,10 @@ class MissingContainerType(Exception):
     self.message = 'Error: \'{}\' requires a key from {} but only got {}.'.format(name_, keys_, types_.keys())
     super().__init__(self.message)
     pass
+
+class InvalidContainerKey(Exception):
+
+  def __init__(self, name_, key_, *keys_):
+    self.message = 'Error: \'{}\' does not support key \'{}\' but only \'{}\'.'.format(name_, key_, keys_)
+    super().__init__(self.message)
+    pass

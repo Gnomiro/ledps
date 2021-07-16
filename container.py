@@ -9,7 +9,7 @@ from print_dict import pd
 _categoryTypes = ['damage', 'speed']
 _attackTypes = ['melee', 'spell', 'throwing', 'bow']
 _damageTypes = ['curse', 'dot', 'hit']
-_elementTypes = ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']
+_elementTypes = ['physical', 'fire', 'cold', 'lightning', 'void', 'necrotic', 'poison']
 _multiplierTypes = ['increase', 'more']
 
 _durationModifierTypes = ['onHit', 'effect', 'duration']
@@ -18,11 +18,10 @@ _attributeTypes = ['strength', 'dexterity', 'intelligence', 'vitality', 'attunem
 
 _validArguments = [*_attackTypes, *_damageTypes, *_elementTypes, *_multiplierTypes, *_durationModifierTypes, *_attackTypes, *_attributeTypes, *_categoryTypes, *['generic', None]]
 
-def isValidArgument(key):
-  supported = key in _validArguments
+def isValidArgument(key, validArguments_ = _validArguments):
+  supported = key in validArguments_
   if not supported:
     print('Unsupport keyword \'{}\' provided and ignored.'.format(key))
-    raise error
   return supported
 
 def convertToTypes(*args_, default_ = {}, **kwargs_):
@@ -64,7 +63,7 @@ def convertToTypes(*args_, default_ = {}, **kwargs_):
 
 class TypeContainer():
   """docstring for TypeContainer"""
-  def __init__(self, keys_, defaultValue_, extrakeys_ = [], defaultKey_ = None):
+  def __init__(self, keys_, defaultValue_, extrakeys_ = [], defaultKey_ = None, **kwargs_):
     self._name = 'typeContainer'
 
     self._data = {}
@@ -73,6 +72,9 @@ class TypeContainer():
     self._defaultValue = defaultValue_
     self._defaultKey = defaultKey_
 
+    for e, v in kwargs_.items():
+      if isValidArgument(e, self._keys):
+          self._data[e] = v
     pass
 
   def getDefaultValue(self, key):
@@ -198,8 +200,8 @@ class TypeContainer():
 
 class AttackTypeContainer(TypeContainer):
   """docstring for AttackTypeContainer"""
-  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
-    super(AttackTypeContainer, self).__init__(keys_ = _attackTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None, **kwargs_):
+    super(AttackTypeContainer, self).__init__(keys_ = _attackTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_, **kwargs_)
     self._name = 'attackTypeContainer'
     self._keyName = 'attackType_'
     pass
@@ -210,8 +212,8 @@ class AttackTypeContainer(TypeContainer):
 
 class ElementTypeContainer(TypeContainer):
   """docstring for ElementTypeContainer"""
-  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
-    super(ElementTypeContainer, self).__init__(keys_ = _elementTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None, **kwargs_):
+    super(ElementTypeContainer, self).__init__(keys_ = _elementTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_, **kwargs_)
     self._name = 'elementTypeContainer'
     self._keyName = 'elementType_'
     pass
@@ -222,8 +224,8 @@ class ElementTypeContainer(TypeContainer):
 
 class DamageTypeContainer(TypeContainer):
   """docstring for DamageTypeContainer"""
-  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
-    super(DamageTypeContainer, self).__init__(keys_ = _damageTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None, **kwargs_):
+    super(DamageTypeContainer, self).__init__(keys_ = _damageTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_, **kwargs_)
     self._name = 'damageTypeContainer'
     self._keyName = 'damageType_'
     pass
@@ -234,8 +236,8 @@ class DamageTypeContainer(TypeContainer):
 
 class AttributeTypeContainer(TypeContainer):
   """docstring for AttributeTypeContainer"""
-  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
-    super(AttributeTypeContainer, self).__init__(keys_ = _attributeTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None, **kwargs_):
+    super(AttributeTypeContainer, self).__init__(keys_ = _attributeTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_, **kwargs_)
     self._name = 'attributeTypeContainer'
     self._keyName = 'attributeType_'
     pass
@@ -246,8 +248,8 @@ class AttributeTypeContainer(TypeContainer):
 
 class CategoryTypeContainer(TypeContainer):
   """docstring for CategoryTypeContainer"""
-  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None,):
-    super(CategoryTypeContainer, self).__init__(keys_ = _categoryTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_)
+  def __init__(self, defaultValue_ = 0., extrakeys_ = [], defaultKey_ = None, **kwargs_):
+    super(CategoryTypeContainer, self).__init__(keys_ = _categoryTypes, defaultValue_ = defaultValue_, extrakeys_ = extrakeys_, defaultKey_ = defaultKey_, **kwargs_)
     self._name = 'categoryTypeContainer'
     self._keyName = 'categoryType_'
     pass
@@ -305,11 +307,20 @@ class DurationModifierTypeContainer(TypeContainer):
 class ContainerImplementation():
   """docstring for ContainerImplementation"""
 
-  def __getitem__(self, key):
-    return self._container._data[key]
-
   def keys(self):
-    return self._container.keys()
+    return self._container._keys
+
+  def __getitem__(self, key):
+    if key not in self.keys():
+      raise error.InvalidContainerKey(self._container._name, key, *self.keys())
+    return self._container.get(**{self._container._keyName : key})
+
+  def __iter__(self):
+    for k in self._container._keys:
+      yield k
+
+  def __len__(self):
+    return len(self._container._keys)
 
   def get(self, **types_):
     return self._container.get(**types_)
@@ -402,8 +413,8 @@ class ResistanceContainer(ContainerImplementation):
 
 class DamageContainer(ContainerImplementation):
   """docstring for DamageContainer"""
-  def __init__(self, defaultValue_ = 0.):
-    self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
+  def __init__(self, defaultValue_ = 0., **kwargs_):
+    self._container = ElementTypeContainer(defaultValue_ = defaultValue_, **kwargs_)
     pass
 
   def __iadd__(self, other_):
@@ -424,6 +435,7 @@ class PenetrationContainer(ContainerImplementation):
   """docstring for PenetrationContainer"""
   def __init__(self, defaultValue_ = 0.):
     self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
+    pass
 
   def __iadd__(self, other_):
     super().__iadd__(other_)
