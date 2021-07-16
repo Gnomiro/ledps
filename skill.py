@@ -289,21 +289,27 @@ class Rive(Melee):
 
   def prepareSkill(self):
 
-    self._localSkillModifier[0].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
-    self._localSkillModifier[1].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
+    if self._talents['flurry'][0] != 0:
+      self._localSkillModifier[0].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
+      self._localSkillModifier[1].addIncrease(0.08 * self._talents['flurry'][0], 'melee', 'speed')
 
-    self._localSkillModifier[0].addDuration('ignite', 0.5 * self._talents['sever'][0], 'onHit')
+    if self._talents['sever'][0] != 0:
+      self._localSkillModifier[0].addDuration('ignite', 0.5 * self._talents['sever'][0], 'onHit')
 
-    self._localSkillModifier[1].addDuration('ignite', 0.5 * self._talents['twistingFangs'][0], 'onHit')
+    if self._talents['twistingFangs'][0] != 0:
+      self._localSkillModifier[1].addDuration('ignite', 0.5 * self._talents['twistingFangs'][0], 'onHit')
 
-    self._localSkillModifier[1].addMore(1.0 + 0.25 * self._talents['ironReach'][0])
+    if self._talents['ironReach'][0] != 0:
+      self._localSkillModifier[1].addMore(1.0 + 0.25 * self._talents['ironReach'][0])
 
-    self._localSkillModifier[2].addMore(1.0 + 0.5 * self._talents['tripleThreat'][0])
+    if self._talents['tripleThreat'][0] != 0:
+      self._localSkillModifier[2].addMore(1.0 + 0.5 * self._talents['tripleThreat'][0])
 
     if self._talents['cadence'][0] == 1:
       self._pattern = [0, 1, 0, 1, 2]
 
-    self._localSkillModifier[0].addTrigger('riveIndomitable', 1.0 * self._talents['indomitable'][0], 'onHit')
+    if self._talents['indomitable'][0] != 0:
+      self._localSkillModifier[0].addTrigger('riveIndomitable', 1.0 * self._talents['indomitable'][0], 'onHit')
 
     self._attributeModifier.addIncrease(0.04 * self._collection.getPersistentModifier().getAttribute('strength'))
     pass
@@ -313,7 +319,7 @@ class Rive(Melee):
     return damage
 
   def skillEffect(self, modifier_):
-    if self._talents['execution'][0] == 1 and self._n == 2:
+    if self._talents['execution'][0] != 0 and self._n == 2:
       nIgnites = self._durationContainer.countActiveByNames('ignite')['ignite']
       self._durationContainer._durations['ignite'] = list([])
       # for i in range(nIgnites):
@@ -453,18 +459,28 @@ class SerpentStrike(Melee):
     self._localSkillModifier[0].addDuration('poison', 4., 'duration')
 
     # debilitatingPoison: adds blinding poison chance
-    self._localSkillModifier[0].addDuration('blindingPoison', 0.17 * self._talents['debilitatingPoison'][0], 'onHit')
+    if self._talents['debilitatingPoison'][0] != 0:
+      self._localSkillModifier[0].addDuration('blindingPoison', 0.17 * self._talents['debilitatingPoison'][0], 'onHit')
 
     # nagasaVenom: poison chance and duration
-    self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'onHit')
-    self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'duration')
+    if self._talents['chronoStrike'][0] != 0:
+      self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'onHit')
+      self._localSkillModifier[0].addDuration('poison', 0.1 * self._talents['chronoStrike'][0], 'duration')
 
     # plaguebearer: plague chance on hit
-    self._localSkillModifier[0].addDuration('plague', 0.25 * self._talents['plaguebearer'][0], 'onHit')
+    if self._talents['plaguebearer'][0] != 0:
+      self._localSkillModifier[0].addDuration('plague', 0.25 * self._talents['plaguebearer'][0], 'onHit')
 
     # venomousIntent: reduced poison duration and poisonSpit trigger
-    self._localSkillModifier[0].addDuration('poison', -0.35 * self._talents['venomousIntent'][0], 'duration')
-    self._localSkillModifier[0].addTrigger('serpentStrikePoisonSpit', 1. * self._talents['venomousIntent'][0], 'onHit')
+    if self._talents['venomousIntent'][0] != 0:
+      self._localSkillModifier[0].addDuration('poison', -0.35 * self._talents['venomousIntent'][0], 'duration')
+      self._localSkillModifier[0].addTrigger('serpentStrikePoisonSpit', 1. * self._talents['venomousIntent'][0], 'onHit')
+
+    if self._talents['scorpionStrikes'][0] != 0:
+      self._localSkillModifier[0].addDuration('serpentStrikeScorpionStrikes', 1., 'onHit')
+
+    if self._talents['chronoStrike'][0] != 0:
+      self._localSkillModifier[0].addDuration('serpentStrikeChronoStrike', 1., 'onHit')
 
     pass
 
@@ -472,9 +488,11 @@ class SerpentStrike(Melee):
 
     # scorpionStrikes and chronoStrike implemented by modifying serpentStrikeOnHit buff
     # scorpionStrikes: global increased poison damage
-    collection_.getDuration('serpentStrikeScorpionStrikes').getModifier().addIncrease(0.12 * self._talents['scorpionStrikes'][0], 'poison')
+    if self._talents['scorpionStrikes'][0] != 0:
+      collection_.getDuration('serpentStrikeScorpionStrikes').getModifier().addIncrease(0.12 * self._talents['scorpionStrikes'][0], 'poison')
     # chronoStrike: global increased over time damage
-    collection_.getDuration('serpentStrikeChronoStrike').getModifier().addIncrease(0.1 * self._talents['chronoStrike'][0], 'dot')
+    if self._talents['chronoStrike'][0] != 0:
+      collection_.getDuration('serpentStrikeChronoStrike').getModifier().addIncrease(0.1 * self._talents['chronoStrike'][0], 'dot')
 
     pass
 
@@ -482,16 +500,6 @@ class SerpentStrike(Melee):
     damage = element.ElementContainer()
 
     return damage
-
-  def skillEffect(self, modifier_):
-
-    if self._talents['scorpionStrikes'][0] != 0:
-      self._durationContainer.add('serpentStrikeScorpionStrikes', modifier_, skillName_= self._skillName , skillN_ = self._n,)
-
-    if self._talents['chronoStrike'][0] != 0:
-      self._durationContainer.add('serpentStrikeChronoStrike', modifier_, skillName_= self._skillName , skillN_ = self._n,)
-
-    pass
 
 ############################################################################################
 # SerpentStrikePoisonSpit (trigger)
