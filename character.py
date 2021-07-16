@@ -4,8 +4,8 @@ import warnings
 
 verbosity = 0
 
-class CharacterInterface(object):
-  """docstring for CharacterInterface"""
+class ClassInterface():
+  """docstring for ClassInterface"""
 
   def __init__(self, name_):
 
@@ -18,8 +18,24 @@ class CharacterInterface(object):
     self._talentModifier = modifier.Modifier()
     self._prepared = True
 
-  def getName(self):
+    self._mastery = None
+
+    # self._masteries is set in class implementations
+    for mastery in (self._masteries if self._masteries else []):
+      m = mastery[0].upper() + mastery[1:]
+      eval(m).getLowerTalents(self._talents)
+    pass
+
+  def getClass(self):
     return self._name
+
+  def getMastery(self):
+    return self._mastery
+
+  def setMastery(self, mastery_):
+    mastery_ = mastery_[0].upper() + mastery_[1:]
+    eval(mastery_).getMasteryTalents(self._talents, self._classModifier)
+    pass
 
   def getTalents(self):
     return self._talents
@@ -67,10 +83,12 @@ class CharacterInterface(object):
     pass
 
 
-class Sentinel(CharacterInterface):
+class Sentinel(ClassInterface):
   """docstring for Sentinel"""
 
   def __init__(self, name_ = 'Sentinel'):
+    # self._masteries = ['voidKnight', 'paladin', 'forgeGuard']
+    self._masteries = ['paladin']
     super(Sentinel, self).__init__(name_)
 
     self._classModifier.addAttribute(2., 'strength')
@@ -94,17 +112,34 @@ class Sentinel(CharacterInterface):
                           })
 
 
+class MasteryInterface():
+  """docstring for MasteryInterface"""
+
+  def __init__(self):
+    self._lowerTalents = {}
+    self._upperTalents = {}
+    self._masteryModifier = modifier.Modifier()
+
+  def getLowerTalents(talents_):
+    talents_.update(self._lowerTalents)
+    pass
+
+  def getMasteryModifer(classModifier_):
+    classModifier_ += self._masteryModifier
+    pass
+
+  def getMasteryTalents(talents_):
+    talents_.update(self._upperTalents)
+    pass
+
+
 class Paladin(Sentinel):
   """docstring for Paladin"""
 
-  def __init__(self):
-    super(Paladin, self).__init__('Paladin')
 
-    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
-    self._classModifier.addIncrease(1., 'physical')
-    self._classModifier.addIncrease(1., 'fire')
-
-    self._talents.update({'paladinConviction':[0, 8],
+  def getLowerTalents(talents_):
+    # lower half
+    talents_.update({'paladinConviction':[0, 8],
                           'paladinDefiance': [0, 8],
                           'paladinHonour': [0, 5],
                           'paladinMajasaFirebrand': [0, 10],
@@ -119,7 +154,17 @@ class Paladin(Sentinel):
                           'paladinPrayer': [0, 10],
                           'paladinPiety': [0, 1],
                           'paladinInnerFlame': [0, 8],
-                          'paladinStaunchDefender': [0, 10],
+                          })
+    pass
+
+  def getMasteryTalents(talents_, classModifier_):
+
+    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
+    classModifier_.addIncrease(1., 'physical')
+    classModifier_.addIncrease(1., 'fire')
+
+    # upper half
+    talents_.update({'paladinStaunchDefender': [0, 10],
                           'paladinFaithArmour': [0, 8],
                           'paladinAlignment': [0, 8],
                           'paladinShieldWall': [0, 1],
@@ -135,10 +180,55 @@ class Paladin(Sentinel):
                           'paladinDivineIntervention': [0, 1],
                           })
 
-class Primalist(CharacterInterface):
+
+
+  def __init__(self):
+    super(Paladin, self).__init__('Paladin')
+
+    warnings.warn('Paladin mastery conditional modifier always active at maximum value.')
+    self._classModifier.addIncrease(1., 'physical')
+    self._classModifier.addIncrease(1., 'fire')
+
+    # lower half
+    self._talents.update({'paladinConviction':[0, 8],
+                          'paladinDefiance': [0, 8],
+                          'paladinHonour': [0, 5],
+                          'paladinMajasaFirebrand': [0, 10],
+                          'paladinDivineBolt': [0, 1],
+                          'paladinValor': [0, 8],
+                          'paladinHolySymbol': [0, 6],
+                          'paladinFlashOfBrilliance': [0, 10],
+                          'paladinRahyehsStrength': [0, 8],
+                          'paladinSharedDivinity': [0, 5],
+                          'paladinHolySymbol2': [0, 6],
+                          'paladinHolyNove': [0, 1],
+                          'paladinPrayer': [0, 10],
+                          'paladinPiety': [0, 1],
+                          'paladinInnerFlame': [0, 8],
+                          })
+
+    # upper half
+    self._talents.update({'paladinStaunchDefender': [0, 10],
+                          'paladinFaithArmour': [0, 8],
+                          'paladinAlignment': [0, 8],
+                          'paladinShieldWall': [0, 1],
+                          'paladinHolyPrecision': [0, 10],
+                          'paladinPenance': [0, 10],
+                          'paladinRighteousFirebrand': [0, 7],
+                          'paladinPrayerAegis': [0, 10],
+                          'paladinDivineEssence': [0, 5],
+                          'paladinReverenceOfDuality': [0, 12],
+                          'paladinRedemption': [0, 7],
+                          'paladinSwordOfRahyeh': [0, 7],
+                          'paladinLightOfRahyeh': [0, 12],
+                          'paladinDivineIntervention': [0, 1],
+                          })
+
+class Primalist(ClassInterface):
   """docstring for Primalist"""
 
   def __init__(self, name_ = 'Primalist'):
+    self._masteries = []
     super(Primalist, self).__init__(name_)
 
     print('Warning: Primalist attributes not implemented yet.')
@@ -165,6 +255,7 @@ class Beastmaster(Primalist):
   """docstring for Beastmaster"""
 
   def __init__(self):
+    self._masteries = []
     super(Beastmaster, self).__init__('Beastmaster')
 
     print('Warning: Bestmaster mastery modifier not implemented yet.')

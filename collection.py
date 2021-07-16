@@ -40,8 +40,12 @@ class Collection():
       print('Warning: Previously selected class is replaced!')
     # todo: make this more smart; get available classes like available duration/skills
     if name_ in ['paladin', 'beastmaster']:
-      characterClass = name_[0].upper() + name_[1:]
-      self._character = eval('character.' + characterClass)()
+      if name_ == 'paladin':
+        self._character = character.Sentinel()
+        self._character.setMastery('paladin')
+      else:
+        characterClass = name_[0].upper() + name_[1:]
+        self._character = eval('character.' + characterClass)()
     else:
       raise error.UnsupportedClass(name_)
     return self._character
