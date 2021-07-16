@@ -4,8 +4,6 @@ import copy, itertools, error
 
 from toolbox import More
 
-from print_dict import pd
-
 _categoryTypes = ['damage', 'speed']
 _attackTypes = ['melee', 'spell', 'throwing', 'bow']
 _damageTypes = ['curse', 'dot', 'hit']

@@ -46,7 +46,7 @@ class DurationContainer():
         while overLimit > 0:
           if verbosity >= 1:
             print('Limit of {} reached; replace oldest'.format(name_))
-          _, idx = min( ( (duration.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
+          _, idx = min( ( (d.getRemainingDuration(), idx) for (idx, d) in enumerate(self._durations[name_]) ) )
           oldestStackSize = self._durations[name_][idx].getStackSize()
           if oldestStackSize > overLimit:
             overLimit = 0

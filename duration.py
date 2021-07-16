@@ -52,6 +52,9 @@ class Duration():
   def hasStackLimit(self):
     return self._maxStacks != -1
 
+  def stacksInfinite(self):
+    return self._maxStacks == -1
+
   def getMaxStacks(self):
     return self._maxStacks
 
