@@ -203,6 +203,39 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(durationModifier1.get(durationModifierType_ = 'duration', multiplierType_ = 'more')._value, 4.)
     pass
 
+  def test_initContainerKwargs(self):
+
+    element = container.DamageContainer(fire = 4., defaultValue_ = 3)
+
+    element2 = container.DamageContainer(fire = 4., physical = 3)
+
+    result1 = container.DamageContainer()
+    result2 = container.DamageContainer()
+
+    result1.iaddIgnoreDefault(element)
+    result2.iaddIgnoreDefault(element2)
+
+    self.assertEqual(0, result1.get(elementType_ = 'physical'))
+    self.assertEqual(3, result2.get(elementType_ = 'physical'))
+
+    element2.iaddIgnoreDefault(element)
+    self.assertEqual(3, element2.get(elementType_ = 'physical'))
+
+    element2 += element
+    self.assertEqual(6, element2.get(elementType_ = 'physical'))
+
+    element3 = container.DamageContainer(**element2)
+    self.assertEqual(element3['fire'], element2['fire'])
+    self.assertEqual(element3['lightning'], element2['lightning'])
+    self.assertEqual(element3['cold'], element2['cold'])
+    self.assertEqual(element3['void'], element2['void'])
+    self.assertEqual(element3['poison'], element2['poison'])
+    self.assertEqual(element3['physical'], element2['physical'])
+    self.assertEqual(element3['necrotic'], element2['necrotic'])
+
+    # element4 = container.DamageContainer(*element2)
+    pass
+
 
 if __name__ == '__main__':
   unittest.main()
