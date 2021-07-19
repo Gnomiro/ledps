@@ -1,4 +1,4 @@
-import collection, duration, durationContainer, enemy, element, modifier, numpy
+import collection, duration, durationContainer, enemy, container, modifier, numpy
 
 verbosity = 0
 
@@ -34,15 +34,17 @@ class Simulator:
     nextattack = 0.0
     attacktime = 0
 
-    overallDamage = element.ElementContainer()
-    tickDamage = element.ElementContainer()
+    overallDamage = container.ElementContainer()
+    tickDamage = container.ElementContainer()
 
     buffModifier = modifier.Modifier()
 
+    dd, sd, tickDamage = container.ElementContainer(), container.ElementContainer(), container.ElementContainer()
+
     while t <= endtime_:
 
-      dd = element.ElementContainer()
-      sd = element.ElementContainer()
+      dd.reset()
+      sd.reset()
 
       # allModifier = modifier.fromBuff(self._durationContainer)
       # allModifier += self._collection.getPersistentModifier()
@@ -65,7 +67,7 @@ class Simulator:
           print(self._durationContainer.countActive())
 
         overallDamage += tickDamage
-        tickDamage = element.ElementContainer()
+        tickDamage.reset()
 
       t += self._frametime
 
@@ -92,8 +94,8 @@ class Simulator:
     attacktime = 0
     while not self._durationContainer.numberOfActiveDurations() != 0:
       if t == 0:
-        dd = element.ElementContainer()
-        sd = element.ElementContainer()
+        dd = container.ElementContainer()
+        sd = container.ElementContainer()
         allModifier = modifier.fromBuff(self._durationContainer)
         allModifier += self._collection.getPersistentModifier()
         if t != 0:

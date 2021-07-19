@@ -1,4 +1,4 @@
-import collection, simulator, element
+import collection, simulator, container
 
 collection_ = collection.Collection()
 skill_ =  collection_.getSkill('rive')
@@ -18,13 +18,13 @@ equipment_.setExamplePaladinEquipment()
 repeats = 1
 endtime = 60
 
-overallDamage = element.ElementContainer()
+overallDamage = container.ElementContainer()
 
 sim = simulator.Simulator(collection_, mainAttack_ = 'rive')
 
 for i in range(repeats):
   damage = sim.simulate(endtime_ = endtime)
-  print("\nDamage:\n{}\nDPS:\n{}\n".format(damage, damage.multiplyByFactor(1. / endtime)))
+  print("\nDamage:\n{}\nDPS:\n{}\n".format(damage, damage.scaleByFactor(1. / endtime)))
   overallDamage += damage
 
-print("Average Damage:\n{}\nAverage DPS:\n{}".format(overallDamage.multiplyByFactor(1. / repeats), overallDamage.multiplyByFactor(1. / endtime / repeats)))
+print("Average Damage:\n{}\nAverage DPS:\n{}".format(overallDamage.scaleByFactor(1. / repeats), overallDamage.scaleByFactor(1. / endtime / repeats)))

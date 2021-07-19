@@ -1,4 +1,4 @@
-import toolbox, error, element, modifier
+import toolbox, error, container, modifier
 
 import copy
 
@@ -129,18 +129,16 @@ class DamagingAilment(Duration):
     multiplier = modifier_.getDurationMultiplier(self._name, 'effect') * modifier_.getMultiplier(self._element, *self._tags)
 
     if multiplier != 1:
-      self._damage.imultiplyByFactor(multiplier)
+      self._damage.iscaleByFactor(multiplier)
 
     pass
 
   def tick(self, timestep_):
     effectiveTimestep, _ = super(DamagingAilment, self).tick(timestep_)
 
-    return effectiveTimestep, self._damage.multiplyByFactor(timestep_ / self._baseDuration * self.getStackSize())
+    return effectiveTimestep, self._damage.scaleByFactor(timestep_ / self._baseDuration * self.getStackSize())
 
   def getCopy(self):
-    # other = DamagingAilment(name_ = self._name, damage_ = element.ElementContainer(poison = 20.), element_ = self._element, tags_ = self._tags, duration_ = self._baseDuration, maxStacks_ = self._maxStacks)
-    # other._damage = copy.deepcopy(self._damage)
     return copy.deepcopy(self)
 
 ############################################################################################
@@ -202,17 +200,15 @@ class ResistanceShred(Duration):
     self._element = kwargs_['element_']
     self._types.append('resistanceShred')
 
-    self._shred = element.ElementContainer()
+    self._shred = container.ElementContainer(**{self._element : 0.05})
     self._nShred = None
     self._nStacks = None
-
-    self._shred._element[self._element] = 0.05
 
   def applyModifier(self, modifier_):
     super(ResistanceShred, self).applyModifier(modifier_)
     # todo: does poison shred scale with poison effect?!?!?!
     # would nee to scale self._shred values accordingly
-    self._shred._element[self._element] *= modifier_.getDurationMultiplier(self._name, 'effect')
+    self._shred.iscaleByFactor(modifier_.getDurationMultiplier(self._name, 'effect'))
     warnings.warn('ResistanceShred: Does poison\'s inherent resistance reduction stack with poison effect? -> Llama says so.')
     pass
 
@@ -223,7 +219,7 @@ class ResistanceShred(Duration):
       return self._shred
 
     if self._nStacks == None or self._nStacks != self.getStackSize():
-      self._nShred = self._shred.multiplyByFactor(self.getStackSize())
+      self._nShred = self._shred.scaleByFactor(self.getStackSize())
     return self._nShred
 
   def getCopy(self):
@@ -328,27 +324,27 @@ class SerpentStrikeChronoStrike(Buff):
 class Bleed(DamagingAilment):
   """docstring for Bleed"""
   def __init__(self):
-    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = element.ElementContainer(physical = 53.), element_ = 'physical', tags_ =  ['dot'], maxStacks_ = -1)
+    super(Bleed, self).__init__(name_ = 'bleed', duration_ = 4., damage_ = container.ElementContainer(physical = 53.), element_ = 'physical', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Ignite(DamagingAilment):
   """docstring for Ignite"""
   def __init__(self):
-    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = element.ElementContainer(fire = 33.), element_ = 'fire', tags_ =  ['dot'], maxStacks_ = -1)
+    super(Ignite, self).__init__(name_ = 'ignite', duration_ = 3., damage_ = container.ElementContainer(fire = 33.), element_ = 'fire', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Poison(ResistanceShred, DamagingAilment):
   """docstring for Poison"""
   def __init__(self):
-    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = element.ElementContainer(poison = 20.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = -1)
+    super(Poison, self).__init__(name_ = 'poison', duration_ = 3., damage_ = container.ElementContainer(poison = 20.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = -1)
 
 class Plague(DamagingAilment):
   """docstring for Plague"""
   def __init__(self):
-    super(Plague, self).__init__(name_ = 'plague', duration_ = 4., damage_ = element.ElementContainer(poison = 90.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
+    super(Plague, self).__init__(name_ = 'plague', duration_ = 4., damage_ = container.ElementContainer(poison = 90.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
 
 class BlindingPoison(DamagingAilment):
   """docstring for BlindingPoison"""
   def __init__(self):
-    super(BlindingPoison, self).__init__(name_ = 'blindingPoison', duration_ = 4., damage_ = element.ElementContainer(poison = 30.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
+    super(BlindingPoison, self).__init__(name_ = 'blindingPoison', duration_ = 4., damage_ = container.ElementContainer(poison = 30.), element_ = 'poison', tags_ =  ['dot'], maxStacks_ = 1)
 
 ############################################################################################
 # Shreds

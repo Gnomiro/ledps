@@ -77,10 +77,9 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(3., multiplier2.get(attackType_ = 'melee', elementType_ = 'fire', multiplierType_ = 'increase'))
     pass
 
-  def test_addPenetrationContainer(self):
-    # ResistanceContainer is the same
-    penetration1 = container.PenetrationContainer(defaultValue_ = 10.)
-    penetration2 = container.PenetrationContainer(defaultValue_ = 20.)
+  def test_addElementContainer(self):
+    penetration1 = container.ElementContainer(defaultValue_ = 10.)
+    penetration2 = container.ElementContainer(defaultValue_ = 20.)
 
     penetration2.set(elementType_ = 'fire', value_ = 30.)
 
@@ -91,10 +90,9 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(30., penetration3.get(elementType_ = 'physical'))
     pass
 
-  def test_iaddPenetrationContainer(self):
-    # ResistanceContainer is the same
-    penetration1 = container.PenetrationContainer(defaultValue_ = 10.)
-    penetration2 = container.PenetrationContainer(defaultValue_ = 20.)
+  def test_iaddElementContainer(self):
+    penetration1 = container.ElementContainer(defaultValue_ = 10.)
+    penetration2 = container.ElementContainer(defaultValue_ = 20.)
 
     penetration2.set(elementType_ = 'fire', value_ = 30.)
 
@@ -205,12 +203,12 @@ class ContainerTestCase(unittest.TestCase):
 
   def test_initContainerKwargs(self):
 
-    element = container.DamageContainer(fire = 4., defaultValue_ = 3)
+    element = container.ElementContainer(fire = 4., defaultValue_ = 3)
 
-    element2 = container.DamageContainer(fire = 4., physical = 3)
+    element2 = container.ElementContainer(fire = 4., physical = 3)
 
-    result1 = container.DamageContainer()
-    result2 = container.DamageContainer()
+    result1 = container.ElementContainer()
+    result2 = container.ElementContainer()
 
     result1.iaddIgnoreDefault(element)
     result2.iaddIgnoreDefault(element2)
@@ -224,7 +222,7 @@ class ContainerTestCase(unittest.TestCase):
     element2 += element
     self.assertEqual(6, element2.get(elementType_ = 'physical'))
 
-    element3 = container.DamageContainer(**element2)
+    element3 = container.ElementContainer(**element2)
     self.assertEqual(element3['fire'], element2['fire'])
     self.assertEqual(element3['lightning'], element2['lightning'])
     self.assertEqual(element3['cold'], element2['cold'])
@@ -233,7 +231,7 @@ class ContainerTestCase(unittest.TestCase):
     self.assertEqual(element3['physical'], element2['physical'])
     self.assertEqual(element3['necrotic'], element2['necrotic'])
 
-    # element4 = container.DamageContainer(*element2)
+    # element4 = container.ElementContainer(*element2)
     pass
 
 

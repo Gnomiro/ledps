@@ -4,7 +4,7 @@ random.seed()
 from itertools import cycle
 from math import floor
 
-import element, modifier, durationContainer, collection, character, error
+import container, modifier, durationContainer, collection, character, error
 
 import warnings
 
@@ -108,7 +108,7 @@ class Default:
     #self._allModifier.iaddMultiple(self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
     allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
 
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
 
     if self._durationContainer.addCooldown(self._skillName, self._skillCooldown):
 
@@ -117,16 +117,13 @@ class Default:
 
       # penetration
       # applied for duration objects seperately
-      resistances = element.ElementContainer(default_ = 0.0)
-      warnings.warn('Workaround for resistance penetration in skill.py')
-      penetration = element.ElementContainer(default_ = 0.0)
-      for k in ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']:
-        penetration._element[k] = allModifier.getPenetration(k)
-      shred = element.fromResistanceShred(self._durationContainer)
-      resistances -= shred
-      resistances.setUpperLimit(0.75)
-      penetration -= resistances
-      damage.imultiply(penetration, shift_ = 1.0)
+      resistances = container.ElementContainer()
+      penetration = container.ElementContainer(**allModifier.getPenetrations())
+      shred = container.fromResistanceShred(self._durationContainer)
+      resistances.isubIgnoreDefault(shred)
+      resistances.truncAbove(0.75)
+      penetration.isubIgnoreDefault(resistances)
+      damage.imultiplyIgnoreDefault(penetration, shift_ = 1.0)
 
       # todo: armour mitigation and armour shred
 
@@ -154,7 +151,7 @@ class Default:
     return (damage, self.getAttacktime(allModifier))
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
   def getOnHitChance(self, name_, modifier_):
@@ -181,7 +178,7 @@ class Default:
     return chance
 
   def onHitTrigger(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     for trigger in modifier_.getTriggerKeys():
       chance = self.getTriggerChance(trigger, modifier_)
       if chance != 0:
@@ -315,7 +312,7 @@ class Rive(Melee):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
   def skillEffect(self, modifier_):
@@ -346,7 +343,7 @@ class ManifestStrike(Melee):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
 
     return damage
 
@@ -372,7 +369,7 @@ class SentinelAxeThrower(Throw):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
 ############################################################################################
@@ -394,7 +391,7 @@ class RiveIndomitable(Spell):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
 ############################################################################################
@@ -416,7 +413,7 @@ class DivineBolt(Spell):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
 ############################################################################################
@@ -497,7 +494,7 @@ class SerpentStrike(Melee):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
 
     return damage
 
@@ -520,7 +517,7 @@ class SerpentStrikePoisonSpit(Spell):
     pass
 
   def skillHit(self, modifier_):
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
     return damage
 
 ############################################################################################

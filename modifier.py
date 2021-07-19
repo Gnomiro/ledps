@@ -18,7 +18,7 @@ class Modifier():
 
   def __init__(self):
     self._multiplier = container.MultiplierContainer()
-    self._penetration = container.PenetrationContainer()
+    self._penetration = container.ElementContainer()
     self._attribute = container.AttributeContainer()
     self._duration = {}
     self._trigger = {}
@@ -349,14 +349,17 @@ class ModifierChain():
       modifier += k
     return modifier
 
-  def getMultipliers(self):
-    return self._multiplier
+  # def getMultipliers(self):
+  #   return self._multiplier
 
   def getPenetrations(self):
-    return self._penetration
+    result = container.ElementContainer()
+    for k in self._data:
+      result += k.getPenetrations()
+    return result
 
-  def getAttributes(self):
-    return self._attribute
+  # def getAttributes(self):
+  #   return self._attribute
 
   def getDurationKeys(self):
     keys = set()

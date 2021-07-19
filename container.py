@@ -1,6 +1,6 @@
 import error
 
-import copy, itertools, error
+import copy, itertools, error, numpy
 
 from toolbox import More
 
@@ -147,6 +147,29 @@ class TypeContainer():
         self._data[i].iaddIgnoreDefault(other_._data[i])
     return self
 
+  def _isub(self, other_):
+
+    for i in set(other_._data.keys()) | set(self._data.keys()):
+      if i not in self._data:
+        self._data[i] = self.copyDefaultValue(i)
+      if (i in self._data and not isinstance(self._data.get(i), TypeContainer)) or (i in other_._data and not isinstance(other_._data.get(i), TypeContainer)):
+        self._data[i] -= other_.get(**{self._keyName: i})
+      else:
+        if i in other_._data:
+          self._data[i]._isub(other_._data[i])
+    return self
+
+  def isubIgnoreDefault(self, other_):
+
+    for i in other_._data.keys():
+      if i not in self._data:
+        self._data[i] = self.copyDefaultValue(i)
+      if not isinstance(other_._data[i], TypeContainer):
+        self._data[i] -= other_.get(**{self._keyName: i})
+      else:
+        self._data[i].isubIgnoreDefault(other_._data[i])
+    return self
+
   def iscaleByFactor(self, factor_):
     for i in self._data:
       if not isinstance(self._data.get(i), TypeContainer):
@@ -155,6 +178,14 @@ class TypeContainer():
       else:
         self._data[i].iscaleByFactor(factor_)
     pass
+
+  def truncAbove(self, limit_):
+    for i in self._data:
+      if not isinstance(self._data.get(i), TypeContainer):
+        t = type(self.getDefaultValue(i))
+        self._data[i] = numpy.minimum(limit_, self._data[i])
+      else:
+        self._data[i].truncAbove(limit_)
 
   def reset(self):
     for i in self._data:
@@ -350,6 +381,14 @@ class ContainerImplementation():
     self._container.iaddIgnoreDefault(other_._container)
     return self
 
+  def __isub__(self, other_):
+    self._container._isub(other_._container)
+    return self
+
+  def isubIgnoreDefault(self, other_):
+    self._container.isubIgnoreDefault(other_._container)
+    return self
+
   # switches around objects to store new values in result
   def __add__(self, other_, result_):
     return result_._container._add(self._container, other_._container)
@@ -384,61 +423,42 @@ class AttributeContainer(ContainerImplementation):
 # Resistance container class
 ######################################################################
 
-class ResistanceContainer(ContainerImplementation):
-  """docstring for ResistanceContainer"""
-  def __init__(self, defaultValue_ = 0.):
-    self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
-    pass
-
-  def __iadd__(self, other_):
-    super().__iadd__(other_)
-    self._container._defaultValue += other_._container._defaultValue
-    return self
-
-  def __add__(self, other_):
-    result = ResistanceContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
-    super().__add__(other_, result)
-    return result
-
-######################################################################
-# Resistance container class; same as ResistanceContainer
-######################################################################
-
-class DamageContainer(ContainerImplementation):
-  """docstring for DamageContainer"""
+class ElementContainer(ContainerImplementation):
+  """docstring for ElementContainer"""
   def __init__(self, defaultValue_ = 0., **kwargs_):
     self._container = ElementTypeContainer(defaultValue_ = defaultValue_, **kwargs_)
     pass
 
+  def scaleByFactor(self, factor_):
+    result  = ElementContainer(defaultValue_ = self._container._defaultValue * factor_, **self._container._data)
+    result.iscaleByFactor(factor_)
+    return result
+
+  def truncAbove(self, limit_):
+    self._container.truncAbove(limit_)
+    return self
+
+  def imultiplyIgnoreDefault(self, other_, shift_ = 0):
+    for element in self._container._data.keys():
+      key = {self._container._keyName : element}
+      self.set(self.get(**key) * (other_.get(**key) + shift_), **key)
+    return self
+
   def __iadd__(self, other_):
     super().__iadd__(other_)
     self._container._defaultValue += other_._container._defaultValue
     return self
 
   def __add__(self, other_):
-    result = DamageContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
+    result = ElementContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
     super().__add__(other_, result)
     return result
 
-######################################################################
-# Penetration container class; same as ResistanceContainer
-######################################################################
-
-class PenetrationContainer(ContainerImplementation):
-  """docstring for PenetrationContainer"""
-  def __init__(self, defaultValue_ = 0.):
-    self._container = ElementTypeContainer(defaultValue_ = defaultValue_)
-    pass
-
-  def __iadd__(self, other_):
-    super().__iadd__(other_)
-    self._container._defaultValue += other_._container._defaultValue
-    return self
-
-  def __add__(self, other_):
-    result = PenetrationContainer(defaultValue_ = self._container._defaultValue + other_._container._defaultValue)
-    super().__add__(other_, result)
-    return result
+def fromResistanceShred(durationContainer_):
+  shred = ElementContainer()
+  for s in durationContainer_.getActiveWithType('resistanceShred'):
+    shred += s.getShred()
+  return shred
 
 ######################################################################
 # DurationModifer container class

@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 
-import collection, duration, element
+import collection, duration, container
 
 import unittest
 
@@ -25,7 +25,7 @@ class CollectionTestCase(unittest.TestCase):
 
     b = self._collection.getDuration('bleed')
 
-    b._damage.imultiplyByFactor(5)
+    b._damage.iscaleByFactor(5)
 
     b2 = self._collection.getDuration('bleed')
 
@@ -55,15 +55,16 @@ class CollectionTestCase(unittest.TestCase):
   def copyDamagingAilment(self, name_):
     b = self._collection.getDurationCopy(name_)
 
+    b.setStackSize(1)
     b.tick(8.)
 
-    b._baseDamage = element.ElementContainer(default_ = 1.)
+    b._baseDamage = container.ElementContainer(defaultValue_ = 1.)
 
     b2 = self._collection.getDurationCopy(name_)
 
-    self.assertEqual(b._damage.getSum(), b2._damage.getSum())
+    self.assertEqual(b._damage['fire'], b2._damage['fire'])
     self.assertNotEqual(b.isActive(), b2.isActive())
-    self.assertNotEqual(b._baseDamage.getSum(), b2._baseDamage.getSum())
+    self.assertNotEqual(b._baseDamage['fire'], b2._baseDamage['fire'])
 
     pass
 

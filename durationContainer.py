@@ -1,4 +1,4 @@
-import collection, error, duration, element, modifier
+import collection, error, duration, container, modifier
 
 from itertools import chain
 
@@ -80,7 +80,7 @@ class DurationContainer():
 
   def tick(self, timestep_, modifier_):
 
-    damage = element.ElementContainer()
+    damage = container.ElementContainer()
 
     damageBySkill = {}
 
@@ -96,7 +96,7 @@ class DurationContainer():
           damageBySkill[skillName] = {}
 
         if skillN not in damageBySkill[skillName].keys():
-          damageBySkill[skillName][skillN] = element.ElementContainer()
+          damageBySkill[skillName][skillN] = container.ElementContainer()
 
         damageBySkill[skillName][skillN] += dmg
 
@@ -105,19 +105,14 @@ class DurationContainer():
 
         # penetration
         # applied for hits seperately
-        resistances = element.ElementContainer(default_ = 0.0)
+        resistances = container.ElementContainer()
         allModifier = modifier.ModifierChain(modifier_, self._collection.getSkill(skillName).getSkillModifier(skillN))
-        # test = eval(allModifier.getPenetrations().__repr__())
-        # penetration = element.ElementContainer(default_ = 0.0, **test)
-        penetration = element.ElementContainer(default_ = 0.0)
-        for k in ['physical', 'fire', 'poison', 'cold', 'lightning', 'void']:
-          penetration._element[k] = allModifier.getPenetration(k)
-        warnings.warn('Workaround for resistance penetration in duration.py')
-        shred = element.fromResistanceShred(self)
-        resistances -= shred
-        resistances.setUpperLimit(0.75)
-        penetration -= resistances
-        skillDamage.imultiply(penetration, shift_ = 1.0)
+        penetration = container.ElementContainer(**modifier_.getPenetrations())
+        shred = container.fromResistanceShred(self)
+        resistances.isubIgnoreDefault(shred)
+        resistances.truncAbove(0.75)
+        penetration.isubIgnoreDefault(resistances)
+        skillDamage.imultiplyIgnoreDefault(penetration, shift_ = 1.0)
 
         # sum up damage
         damage += skillDamage

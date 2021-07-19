@@ -25,6 +25,7 @@ class DurationTestCase(unittest.TestCase):
 
   def test_isActive(self):
     b = duration.Bleed()
+    b.setStackSize(1)
 
     b.tick(timestep_ = 0.1)
     self.assertEqual(b.isActive(), True)
