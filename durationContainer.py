@@ -98,7 +98,7 @@ class DurationContainer():
         if skillN not in damageBySkill[skillName].keys():
           damageBySkill[skillName][skillN] = container.ElementContainer()
 
-        damageBySkill[skillName][skillN] += dmg
+        damageBySkill[skillName][skillN].iaddIgnoreDefault(dmg)
 
     for skillName, skill in damageBySkill.items():
       for skillN, skillDamage in skill.items():
@@ -115,7 +115,7 @@ class DurationContainer():
         skillDamage.imultiplyIgnoreDefault(penetration, shift_ = 1.0)
 
         # sum up damage
-        damage += skillDamage
+        damage.iaddIgnoreDefault(skillDamage)
 
     self.removeInactive()
 

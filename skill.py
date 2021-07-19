@@ -113,7 +113,7 @@ class Default:
     if self._durationContainer.addCooldown(self._skillName, self._skillCooldown):
 
       skillDamage = self.skillHit(allModifier)
-      damage += skillDamage
+      damage.iaddIgnoreDefault(skillDamage)
 
       # penetration
       # applied for duration objects seperately
@@ -140,7 +140,7 @@ class Default:
         triggerDamage = self.onHitTrigger(allModifier)
         self._buffModifier.fromBuff(self._durationContainer)
         # allModifier = modifier.ModifierChain(self._buffModifier.fromBuff(self._durationContainer), self._collection.getPersistentModifier(), self._localSkillModifier[self._n], self._attributeModifier)
-        damage += triggerDamage # penetration already applied in skill's own attack routine
+        damage.iaddIgnoreDefault(triggerDamage) # penetration already applied in skill's own attack routine
 
       self._n = next(self._patternCycle)
 
@@ -188,7 +188,7 @@ class Default:
             applications += 1
         for i in range(applications):
           triggerDamage, _ = self._collection.getSkillOnTheFly(trigger, self._durationContainer).attack(canTriggerOverride_ = False)
-          damage += triggerDamage
+          damage.iaddIgnoreDefault(triggerDamage)
     return damage
 
   def getSkillModifier(self, n_=0):
@@ -197,7 +197,7 @@ class Default:
 
   def getAttacktime(self, modifier_):
     self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('melee', 'speed')
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('speed')
 
 
 ############################################################################################
@@ -220,6 +220,10 @@ class Melee(Default):
     chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'melee') * modifier_.getTriggerMore(trigger_, 'onHit', 'melee')
     return chance
 
+  def getAttacktime(self, modifier_):
+    self.prepare()
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('melee', 'speed')
+
 ############################################################################################
 # Spell attack
 ############################################################################################
@@ -240,13 +244,17 @@ class Spell(Default):
     chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'spell') * modifier_.getTriggerMore(trigger_, 'onHit', 'spell')
     return chance
 
+  def getAttacktime(self, modifier_):
+    self.prepare()
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('spell', 'speed')
 
-class Throw(Default):
+
+class Throwing(Default):
 
   def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
     super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
 
-    self._skillName = 'throw'
+    self._skillName = 'throwing'
     pass
 
   def getOnHitChance(self, name_, modifier_):
@@ -256,6 +264,30 @@ class Throw(Default):
   def getTriggerChance(self, trigger_, modifier_):
     chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'throwing') * modifier_.getTriggerMore(trigger_, 'onHit', 'throwing')
     return chance
+
+  def getAttacktime(self, modifier_):
+    self.prepare()
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('throwing', 'speed')
+
+class Throwing(Default):
+
+  def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
+    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
+
+    self._skillName = 'bow'
+    pass
+
+  def getOnHitChance(self, name_, modifier_):
+    chance = modifier_.getDurationIncrease(name_, 'onHit', 'bow') * modifier_.getDurationMore(name_, 'onHit', 'bow')
+    return chance
+
+  def getTriggerChance(self, trigger_, modifier_):
+    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'bow') * modifier_.getTriggerMore(trigger_, 'onHit', 'bow')
+    return chance
+
+  def getAttacktime(self, modifier_):
+    self.prepare()
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('bow', 'speed')
 
 ############################################################################################
 ############################################################################################
@@ -351,7 +383,7 @@ class ManifestStrike(Melee):
 # Sentinel axe thrower (trigger)
 ############################################################################################
 
-class SentinelAxeThrower(Throw):
+class SentinelAxeThrower(Throwing):
 
   def __init__(self):
     super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
