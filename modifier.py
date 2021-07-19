@@ -162,7 +162,7 @@ class Modifier():
     types = container.convertToTypes(*args_, default_ = {'elementType_' : 'generic', 'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'increase')
 
     sum = 0
-    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] is not 'generic' else ['generic'], ['generic', types['damageType_']] if types['damageType_'] is not 'generic' else ['generic'], ['generic', types['elementType_']] if types['elementType_'] is not 'generic' else ['generic']):
+    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] != 'generic' else ['generic'], ['generic', types['damageType_']] if types['damageType_'] != 'generic' else ['generic'], ['generic', types['elementType_']] if types['elementType_'] != 'generic' else ['generic']):
       types['attackType_'], types['damageType_'], types['elementType_'] = i, j, k
       # print('{} x {} x {}'.format(i,j,k))
       sum += self._multiplier.get(**types)
@@ -174,7 +174,7 @@ class Modifier():
     types = container.convertToTypes(*args_, default_ = {'elementType_' : 'generic', 'attackType_': 'generic', 'damageType_': 'generic'}, **kwargs_, multiplierType_ = 'more')
 
     prod = 1
-    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] is not 'generic' else ['generic'], ['generic', types['damageType_']] if types['damageType_'] is not 'generic' else ['generic'], ['generic', types['elementType_']] if types['elementType_'] is not 'generic' else ['generic']):
+    for i, j, k in product(['generic', types['attackType_']] if types['attackType_'] != 'generic' else ['generic'], ['generic', types['damageType_']] if types['damageType_'] != 'generic' else ['generic'], ['generic', types['elementType_']] if types['elementType_'] != 'generic' else ['generic']):
       types['attackType_'], types['damageType_'], types['elementType_'] = i, j, k
       # print('{} x {} x {}'.format(i,j,k))
       prod *= self._multiplier.get(**types)._value
@@ -222,7 +222,7 @@ class Modifier():
       return 0
     types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic'}, **kwargs_, multiplierType_ = 'increase')
     sum = self._trigger[name_].get(**types)
-    if types['attackType_'] is not 'generic':
+    if types['attackType_'] != 'generic':
       types['attackType_'] = 'generic'
       sum += self._trigger[name_].get(**types)
     return sum
@@ -232,7 +232,7 @@ class Modifier():
       return 1
     types = container.convertToTypes(*args_, default_ = {'attackType_': 'generic'}, **kwargs_, multiplierType_ = 'more')
     prod = self._trigger[name_].get(**types)._value
-    if types['attackType_'] is not 'generic':
+    if types['attackType_'] != 'generic':
       types['attackType_'] = 'generic'
       prod *= self._trigger[name_].get(**types)._value
     return prod
