@@ -20,10 +20,14 @@ verbosity = 0
 # Default attack implementing most general routines
 ############################################################################################
 
-class Default:
+class Attack:
 
-  def __init__(self, attacktimes_= None, attackdelays_ = None, pattern_ = None):
-    self._skillName = 'default'
+  def __init__(self, attackType_ = None, attacktimes_= None, attackdelays_ = None, pattern_ = None):
+    self._skillName = 'attack'
+    if attackType_ == None:
+      self._attackType = 'generic'
+    else:
+      self._attackType = attackType_
 
     if attacktimes_ == None:
       self._attacktimes = list([0.68182])
@@ -155,7 +159,7 @@ class Default:
     return damage
 
   def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationIncrease(name_, 'onHit') * modifier_.getDurationMore(name_, 'onHit')
+    chance = modifier_.getDurationIncrease(name_, 'onHit', self._attackType) * modifier_.getDurationMore(name_, 'onHit', self._attackType)
     return chance
 
   def applyOnHit(self, modifier_):
@@ -174,7 +178,7 @@ class Default:
     pass
 
   def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTrigger(trigger_, 'onHit')
+    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', self._attackType) * modifier_.getTriggerMore(trigger_, 'onHit', self._attackType)
     return chance
 
   def onHitTrigger(self, modifier_):
@@ -197,97 +201,7 @@ class Default:
 
   def getAttacktime(self, modifier_):
     self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('speed')
-
-
-############################################################################################
-# Melee attack
-############################################################################################
-
-class Melee(Default):
-
-  def __init__(self, attacktimes_= [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
-
-    self._skillName = 'melee'
-    pass
-
-  def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationIncrease(name_, 'onHit', 'melee') * modifier_.getDurationMore(name_, 'onHit', 'melee')
-    return chance
-
-  def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'melee') * modifier_.getTriggerMore(trigger_, 'onHit', 'melee')
-    return chance
-
-  def getAttacktime(self, modifier_):
-    self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('melee', 'speed')
-
-############################################################################################
-# Spell attack
-############################################################################################
-
-class Spell(Default):
-
-  def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
-
-    self._skillName = 'spell'
-    pass
-
-  def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationIncrease(name_, 'onHit', 'spell') * modifier_.getDurationMore(name_, 'onHit', 'spell')
-    return chance
-
-  def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'spell') * modifier_.getTriggerMore(trigger_, 'onHit', 'spell')
-    return chance
-
-  def getAttacktime(self, modifier_):
-    self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('spell', 'speed')
-
-
-class Throwing(Default):
-
-  def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
-
-    self._skillName = 'throwing'
-    pass
-
-  def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationIncrease(name_, 'onHit', 'throwing') * modifier_.getDurationMore(name_, 'onHit', 'throwing')
-    return chance
-
-  def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'throwing') * modifier_.getTriggerMore(trigger_, 'onHit', 'throwing')
-    return chance
-
-  def getAttacktime(self, modifier_):
-    self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('throwing', 'speed')
-
-class Throwing(Default):
-
-  def __init__(self, attacktimes_ = [0.68182], attackdelays_ = [0], pattern_ = None):
-    super().__init__(attacktimes_ = attacktimes_, attackdelays_ = attackdelays_, pattern_ = pattern_)
-
-    self._skillName = 'bow'
-    pass
-
-  def getOnHitChance(self, name_, modifier_):
-    chance = modifier_.getDurationIncrease(name_, 'onHit', 'bow') * modifier_.getDurationMore(name_, 'onHit', 'bow')
-    return chance
-
-  def getTriggerChance(self, trigger_, modifier_):
-    chance = modifier_.getTriggerIncrease(trigger_, 'onHit', 'bow') * modifier_.getTriggerMore(trigger_, 'onHit', 'bow')
-    return chance
-
-  def getAttacktime(self, modifier_):
-    self.prepare()
-    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('bow', 'speed')
+    return self._attackdelays[self._n] + self._attacktimes[self._n] / modifier_.getMultiplier('speed', self._attackType)
 
 ############################################################################################
 ############################################################################################
@@ -299,10 +213,10 @@ class Throwing(Default):
 # Rive
 ############################################################################################
 
-class Rive(Melee):
+class Rive(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0.511365, 0.511365, 0.477274], attackdelays_ = [0.02, 0.02, 0.005], pattern_ = [0, 1, 2])
+    super().__init__(attackType_ = 'melee', attacktimes_ = [0.511365, 0.511365, 0.477274], attackdelays_ = [0.02, 0.02, 0.005], pattern_ = [0, 1, 2])
 
     self._skillName = 'rive'
 
@@ -359,10 +273,10 @@ class Rive(Melee):
 # ManifestStrike (trigger)
 ############################################################################################
 
-class ManifestStrike(Melee):
+class ManifestStrike(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    super().__init__(attackType_ = 'melee', attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'manifestStrike'
 
     # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
@@ -383,10 +297,10 @@ class ManifestStrike(Melee):
 # Sentinel axe thrower (trigger)
 ############################################################################################
 
-class SentinelAxeThrower(Throwing):
+class SentinelAxeThrower(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    super().__init__(attackType_ = 'throwing', attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'sentinelAxeThrower'
 
     self._skillCooldown = 1
@@ -408,10 +322,10 @@ class SentinelAxeThrower(Throwing):
 # Rive indomitable (trigger)
 ############################################################################################
 
-class RiveIndomitable(Spell):
+class RiveIndomitable(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    super().__init__(attackType_ = 'spell', attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'riveIndomitable'
 
     # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
@@ -430,10 +344,10 @@ class RiveIndomitable(Spell):
 # Divine bolt (trigger)
 ############################################################################################
 
-class DivineBolt(Spell):
+class DivineBolt(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    super().__init__(attackType_ = 'spell', attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'divineBolt'
 
     # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
@@ -458,10 +372,10 @@ class DivineBolt(Spell):
 # SerpentStrike
 ############################################################################################
 
-class SerpentStrike(Melee):
+class SerpentStrike(Attack):
   """docstring for SerpentStrike"""
   def __init__(self):
-    super(SerpentStrike, self).__init__(attacktimes_ = [0.68182 * 0.75], attackdelays_ = [0.022], pattern_ = None)
+    super(SerpentStrike, self).__init__(attackType_ = 'spell', attacktimes_ = [0.68182 * 0.75], attackdelays_ = [0.022], pattern_ = None)
 
     self._skillName = 'serpentStrike'
 
@@ -535,10 +449,10 @@ class SerpentStrike(Melee):
 # todo: spell? attribute scaling?
 ############################################################################################
 
-class SerpentStrikePoisonSpit(Spell):
+class SerpentStrikePoisonSpit(Attack):
 
   def __init__(self):
-    super().__init__(attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
+    super().__init__(attackType_ = 'spell', attacktimes_ = [0], attackdelays_ = [0], pattern_ = None)
     self._skillName = 'serpentStrikePoisonSpit'
 
     # generally this skill can trigger, if triggered this tag is overriden in base class to disable chaining triggers
