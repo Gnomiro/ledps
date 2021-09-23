@@ -40,6 +40,11 @@ So it only applies an additional poison on hit and procs no other on Hit effects
 [00:46] Mike W: Every application of poison reduces the target's poison resistance. So it does have a multiplicative damage increase with your other poison applications.
 [00:47] Oeller: Yes. But it has inherent duration reduction of 0.35; considering DR  of penetration for a lot of stacks it is probably not the best. Poison/ailment Duration could provide a better scaling
 
+* Mike W: Each skill has a use delay, use duration, orb walk ratio and speed scaling modifier. They are individually set for each skill. I'm not sure what smite has for any of those numbers off the top of my head sorry.
+
+[21:35] LE_Builds: So for ailments like Doom that have only 4 stacks, if you hit 4 stacks and apply another stack, does it keep the highest damaging stacks or? How does that function
+[21:36] Mike W: It keeps the longest remaining duration. Which generally means the most recent.
+
 ## EQ and Aftershock
 * [16:31] Oeller: What are the damage effectiveness and attributes for Earthquake Aftershock? 300% like the initial hit? The skilltree does nowhere provide the skill when pressing alt. Already opened a bugreport.
 [17:09] Mike W: The initial hit is 350%

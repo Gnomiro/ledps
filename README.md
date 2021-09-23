@@ -32,6 +32,7 @@
 * Function definitions should end either with return or pass
 
 ## ToDo-shortlist
+* For limited ailments the one with shortest remainign duration is removed not the oldest!
 * Add more comments
 * Skills
   * Refactor skill-talents like character talents
