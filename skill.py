@@ -375,7 +375,7 @@ class DivineBolt(Attack):
 class SerpentStrike(Attack):
   """docstring for SerpentStrike"""
   def __init__(self):
-    super(SerpentStrike, self).__init__(attackType_ = 'spell', attacktimes_ = [0.68182 * 0.75], attackdelays_ = [0.022], pattern_ = None)
+    super(SerpentStrike, self).__init__(attackType_ = 'melee', attacktimes_ = [0.68182 * 0.75], attackdelays_ = [0.022], pattern_ = None)
 
     self._skillName = 'serpentStrike'
 
